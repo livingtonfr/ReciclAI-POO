@@ -1,0 +1,71 @@
+from enum import Enum
+
+
+class CategoriaMaterial(Enum):
+    PLASTICO = "PLASTICO"
+    PAPEL = "PAPEL"
+    VIDRO = "VIDRO"
+    METAL = "METAL"
+    ORGANICO = "ORGANICO"
+    ELETRONICO = "ELETRONICO"
+    PERIGOSO = "PERIGOSO"
+    REJEITO = "REJEITO"
+
+
+class CondicaoMaterial(Enum):
+    LIMPO = "LIMPO"
+    SUJO = "SUJO"
+    CONTAMINADO = "CONTAMINADO"
+    DANIFICADO = "DANIFICADO"
+    NAO_INFORMADO = "NAO_INFORMADO"
+
+
+class StatusMaterial(Enum):
+    REGISTRADO = "REGISTRADO"
+    DISPONIVEL = "DISPONIVEL"
+    EM_LOTE = "EM_LOTE"
+    DESTINADO = "DESTINADO"
+
+
+class StatusLote(Enum):
+    EM_FORMACAO = "EM_FORMACAO"
+    DISPONIVEL = "DISPONIVEL"
+    NEGOCIADO = "NEGOCIADO"
+    CANCELADO = "CANCELADO"
+
+
+class StatusTransacao(Enum):
+    PENDENTE = "PENDENTE"
+    CONCLUIDA = "CONCLUIDA"
+    CANCELADA = "CANCELADA"
+
+
+class StatusValidacao(Enum):
+    PENDENTE = "PENDENTE"
+    APROVADA = "APROVADA"
+    REJEITADA = "REJEITADA"
+    SUSPENSA = "SUSPENSA"
+
+
+class TipoEventoRastreio(Enum):
+    REGISTRO = "REGISTRO"
+    AGRUPAMENTO_LOTE = "AGRUPAMENTO_LOTE"
+    TRANSFERENCIA = "TRANSFERENCIA"
+    DESTINACAO = "DESTINACAO"
+
+
+class TipoPontoColeta(Enum):
+    COOPERATIVA = "COOPERATIVA"
+    PONTO_ENTREGA_VOLUNTARIA = "PONTO_ENTREGA_VOLUNTARIA"
+    ECOPONTO = "ECOPONTO"
+    OUTRO = "OUTRO"
+
+
+class DiaSemana(Enum):
+    SEGUNDA = "SEGUNDA"
+    TERCA = "TERCA"
+    QUARTA = "QUARTA"
+    QUINTA = "QUINTA"
+    SEXTA = "SEXTA"
+    SABADO = "SABADO"
+    DOMINGO = "DOMINGO"
