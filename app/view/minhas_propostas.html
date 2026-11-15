@@ -1,0 +1,35 @@
+{% extends 'base.html' %}
+
+{% block title %}Recicl.AI - Minhas propostas{% endblock %}
+
+{% block content %}
+<div class="tela-dashboard">
+    <div class="faixa"></div>
+    <div class="cabecalho-dashboard">
+        <p class="saudacao">Minhas propostas</p>
+    </div>
+
+    {% for proposta in propostas %}
+    <div class="bloco-detalhe">
+        <p><strong>{{ proposta.lote.materiais[0].tipoMaterial.nome }}</strong> - {{ proposta.lote.calcularPesoTotal() }} kg</p>
+        <p>Vendedor: {{ proposta.vendedor.nome }}</p>
+        <p>Valor proposto: R$ {{ '%.2f'|format(proposta.valorTotal) }}</p>
+        <p>Status: <span class="selo-perfil">{{ proposta.status.value }}</span></p>
+
+        {% if proposta.status.value == 'CONCLUIDA' and proposta.certificado %}
+        <a class="link-verde" href="{{ url_for('certificado_detalhe', certificado_id=proposta.certificado.id) }}">
+            Ver certificado
+        </a>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="bloco-detalhe">
+        <p>Você ainda não propôs nenhuma compra.</p>
+    </div>
+    {% endfor %}
+
+    <p class="rodape-link">
+        <a class="link-verde" href="{{ url_for('mercado') }}">&larr; Voltar ao mercado</a>
+    </p>
+</div>
+{% endblock %}

@@ -1,9 +1,9 @@
-from flask import jsonify, request
+from flask import jsonify, request, abort
 
 from app import app
-from app.controller.auth import login_obrigatorio
-from app.controller.materiais import buscar_material_do_usuario
+from app.controller.auth import login_obrigatorio, usuario_atual
 from app.dao.repositorio import Repositorio
+from app.model.enums import StatusTransacao
 
 
 def ponto_para_json(ponto):
@@ -26,6 +26,21 @@ def ponto_para_json(ponto):
     }
 
 
+def usuario_pode_ver_historico(usuario, material):
+    if material.responsavelAtual is usuario:
+        return True
+
+    for transacao in Repositorio().transacoes:
+        if transacao.status != StatusTransacao.CONCLUIDA:
+            continue
+        if material not in transacao.lote.materiais:
+            continue
+        if usuario is transacao.vendedor or usuario is transacao.comprador:
+            return True
+
+    return False
+
+
 @app.route('/api/pontos')
 def api_pontos():
     tipo_id = request.args.get('tipo', '').strip()
@@ -42,7 +57,14 @@ def api_pontos():
 @app.route('/api/materiais/<material_id>/historico')
 @login_obrigatorio
 def api_materiais_historico(material_id):
-    material = buscar_material_do_usuario(material_id)
+    usuario = usuario_atual()
+    material = Repositorio().buscarMaterialPorId(material_id)
+
+    if material is None:
+        abort(404)
+
+    if not usuario_pode_ver_historico(usuario, material):
+        abort(403)
 
     return jsonify([
         {

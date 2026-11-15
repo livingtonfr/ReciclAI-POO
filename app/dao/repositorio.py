@@ -167,6 +167,12 @@ class Repositorio:
                 return usuario
         return None
 
+    def buscarMaterialPorId(self, material_id):
+        for material in self.materiais:
+            if str(material.id) == str(material_id):
+                return material
+        return None
+
     def resetar(self):
         """Recria o repositório do zero (usado pelo endpoint de demo /admin/reset)."""
         type(self).__instancia = None

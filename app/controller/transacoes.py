@@ -7,7 +7,7 @@ from app import app
 from app.controller.auth import usuario_atual, login_obrigatorio
 from app.controller.materiais import requer_perfil_material as requer_vendedor
 from app.dao.repositorio import Repositorio
-from app.model.enums import StatusLote
+from app.model.enums import StatusLote, StatusTransacao
 from app.model.usuario import Cooperativa, EmpresaCompradora, IndustriaTransformadora
 from app.model.comercial import Transacao, Certificado
 
@@ -72,8 +72,21 @@ def lotes_propor(lote_id):
     usuario = usuario_atual()
     lote = buscar_lote(lote_id)
 
+    ja_tem_proposta_pendente = any(
+        t.comprador is usuario and t.status == StatusTransacao.PENDENTE
+        for t in lote.transacoes
+    )
+    if ja_tem_proposta_pendente:
+        flash('Você já tem uma proposta pendente para este lote.', 'error')
+        return redirect(url_for('mercado'))
+
     try:
         valor_total = float(request.form.get('valorTotal', '0').replace(',', '.'))
+    except ValueError:
+        flash('Informe um valor válido.', 'error')
+        return redirect(url_for('mercado'))
+
+    try:
         transacao = Transacao(lote, lote.criador, usuario, valor_total)
         Repositorio().transacoes.append(transacao)
         flash('Proposta de compra enviada.', 'success')
@@ -81,6 +94,15 @@ def lotes_propor(lote_id):
         flash(str(erro), 'error')
 
     return redirect(url_for('mercado'))
+
+
+@app.route('/minhas-propostas')
+@login_obrigatorio
+@requer_comprador
+def minhas_propostas():
+    usuario = usuario_atual()
+    propostas = [t for t in Repositorio().transacoes if t.comprador is usuario]
+    return render_template('minhas_propostas.html', propostas=propostas)
 
 
 @app.route('/transacoes')
@@ -146,12 +168,18 @@ def transacoes_certificado(transacao_id):
 @app.route('/certificados/<certificado_id>')
 @login_obrigatorio
 def certificado_detalhe(certificado_id):
+    usuario = usuario_atual()
+
     for certificado in Repositorio().certificados:
         if str(certificado.id) == str(certificado_id):
             transacao = next(
                 (t for t in Repositorio().transacoes if t.certificado is certificado),
                 None,
             )
+
+            if transacao is None or usuario not in (transacao.vendedor, transacao.comprador):
+                abort(403)
+
             return render_template(
                 'certificado_detalhe.html',
                 certificado=certificado,

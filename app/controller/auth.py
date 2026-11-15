@@ -51,6 +51,7 @@ MENU_POR_PERFIL = [
         {'rotulo': 'Meus materiais', 'endpoint': 'materiais', 'fase': None},
         {'rotulo': 'Meus lotes', 'endpoint': 'lotes', 'fase': None},
         {'rotulo': 'Mercado (comprar)', 'endpoint': 'mercado', 'fase': None},
+        {'rotulo': 'Minhas propostas (compra)', 'endpoint': 'minhas_propostas', 'fase': None},
         {'rotulo': 'Minhas transações (venda)', 'endpoint': 'transacoes', 'fase': None},
         {'rotulo': 'Pontos de coleta', 'endpoint': 'pontos', 'fase': None},
     ]),
@@ -58,11 +59,14 @@ MENU_POR_PERFIL = [
         {'rotulo': 'Meus materiais', 'endpoint': 'materiais', 'fase': None},
         {'rotulo': 'Meus lotes', 'endpoint': 'lotes', 'fase': None},
         {'rotulo': 'Mercado (comprar)', 'endpoint': 'mercado', 'fase': None},
+        {'rotulo': 'Minhas propostas (compra)', 'endpoint': 'minhas_propostas', 'fase': None},
         {'rotulo': 'Minhas transações (venda)', 'endpoint': 'transacoes', 'fase': None},
         {'rotulo': 'Pontos de coleta', 'endpoint': 'pontos', 'fase': None},
     ]),
     (IndustriaTransformadora, [
         {'rotulo': 'Mercado (como compradora)', 'endpoint': 'mercado', 'fase': None},
+        {'rotulo': 'Minhas propostas (compra)', 'endpoint': 'minhas_propostas', 'fase': None},
+        {'rotulo': 'Materiais recebidos', 'endpoint': 'materiais', 'fase': None},
         {'rotulo': 'Pontos de coleta', 'endpoint': 'pontos', 'fase': None},
     ]),
 ]

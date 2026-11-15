@@ -139,6 +139,11 @@ def lotes_pesagem(lote_id):
 
     try:
         peso = float(request.form.get('peso', '0').replace(',', '.'))
+    except ValueError:
+        flash('Informe um número válido.', 'error')
+        return redirect(url_for('lotes_detalhe', lote_id=lote.id))
+
+    try:
         lote.registrarPesagem(peso)
         flash('Pesagem registrada.', 'success')
     except ValueError as erro:
@@ -186,6 +191,11 @@ def lotes_cotar(lote_id):
 
     try:
         horizonte_dias = int(request.form.get('horizonteDias', '15'))
+    except ValueError:
+        flash('Informe um número válido de dias.', 'error')
+        return redirect(url_for('lotes_detalhe', lote_id=lote.id))
+
+    try:
         cotacao = usuario.solicitarPrecificacaoLote(
             lote,
             horizonte_dias,

@@ -6,15 +6,31 @@ from app import app
 from app.controller.auth import usuario_atual, login_obrigatorio
 from app.dao.repositorio import Repositorio
 from app.model.enums import CondicaoMaterial
-from app.model.usuario import Catador, Cooperativa, EmpresaCompradora
+from app.model.usuario import Catador, Cooperativa, EmpresaCompradora, IndustriaTransformadora
 
+# Quem opera materiais (registra, disponibiliza, avalia, cota): só quem tem
+# esses métodos no UML. A Indústria NÃO tem solicitarPrecificacaoMaterial,
+# por isso fica de fora daqui (ela só recebe material por compra).
 PERFIS_MATERIAL = (Catador, Cooperativa, EmpresaCompradora)
+
+# Quem pode ver a lista/detalhe de materiais que possui, incluindo a
+# Indústria (ela só visualiza o que comprou, sem nenhuma ação).
+PERFIS_TITULARES_MATERIAL = PERFIS_MATERIAL + (IndustriaTransformadora,)
 
 
 def requer_perfil_material(view):
     @wraps(view)
     def decorado(*args, **kwargs):
         if not isinstance(usuario_atual(), PERFIS_MATERIAL):
+            abort(403)
+        return view(*args, **kwargs)
+    return decorado
+
+
+def requer_titular_material(view):
+    @wraps(view)
+    def decorado(*args, **kwargs):
+        if not isinstance(usuario_atual(), PERFIS_TITULARES_MATERIAL):
             abort(403)
         return view(*args, **kwargs)
     return decorado
@@ -50,7 +66,7 @@ def buscar_tipo(tipo_id):
 
 @app.route('/materiais')
 @login_obrigatorio
-@requer_perfil_material
+@requer_titular_material
 def materiais():
     usuario = usuario_atual()
     meus_materiais = [
@@ -82,10 +98,20 @@ def materiais_novo():
 
         try:
             peso_kg = float(request.form.get('pesoKg', '0').replace(',', '.'))
+        except ValueError:
+            flash('Informe um peso válido.', 'error')
+            return render_template('materiais_novo.html', tipos=tipos, condicoes=condicoes)
+
+        try:
             condicao = CondicaoMaterial[request.form.get('condicaoDeclarada')]
+        except KeyError:
+            flash('Selecione uma condição válida.', 'error')
+            return render_template('materiais_novo.html', tipos=tipos, condicoes=condicoes)
+
+        try:
             material = usuario.registrarMaterial(tipo, peso_kg, condicao, observacoes)
-        except (ValueError, KeyError) as erro:
-            flash(f'Não foi possível registrar o material: {erro}', 'error')
+        except ValueError as erro:
+            flash(str(erro), 'error')
             return render_template('materiais_novo.html', tipos=tipos, condicoes=condicoes)
 
         Repositorio().materiais.append(material)
@@ -97,14 +123,16 @@ def materiais_novo():
 
 @app.route('/materiais/<material_id>')
 @login_obrigatorio
-@requer_perfil_material
+@requer_titular_material
 def materiais_detalhe(material_id):
+    usuario = usuario_atual()
     material = buscar_material_do_usuario(material_id)
     return render_template(
         'materiais_detalhe.html',
         material=material,
         historico=material.obterHistorico(),
         avaliacoes=material.obterAvaliacoes(),
+        pode_operar=isinstance(usuario, PERFIS_MATERIAL),
     )
 
 
@@ -149,6 +177,11 @@ def materiais_cotar(material_id):
 
     try:
         horizonte_dias = int(request.form.get('horizonteDias', '15'))
+    except ValueError:
+        flash('Informe um número válido de dias.', 'error')
+        return redirect(url_for('materiais_detalhe', material_id=material.id))
+
+    try:
         cotacao = usuario.solicitarPrecificacaoMaterial(
             material,
             horizonte_dias,

@@ -31,3 +31,13 @@ def erro_405(erro):
         titulo='Operação não permitida',
         mensagem='Essa ação não pode ser feita por aqui.',
     ), 405
+
+
+@app.errorhandler(500)
+def erro_500(erro):
+    return render_template(
+        'erro.html',
+        codigo=500,
+        titulo='Erro inesperado',
+        mensagem='Algo deu errado por aqui. Tente novamente ou volte ao início.',
+    ), 500

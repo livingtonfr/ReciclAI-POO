@@ -44,6 +44,13 @@ python mainFlask.py
 
 Acesse `http://127.0.0.1:5000`.
 
+> O servidor roda com `debug=True` (páginas de erro detalhadas e o botão
+> "Resetar demo", que só funciona em modo debug) mas com
+> `use_reloader=False` — se fosse `True`, o Flask reiniciaria o processo a
+> cada arquivo salvo e isso zeraria o `Repositorio` em memória no meio de
+> uma demonstração. Se for editar código com o servidor rodando, reinicie-o
+> manualmente depois de salvar.
+
 Para rodar o cenário de integração do model (sem subir o servidor):
 
 ```bash
@@ -67,7 +74,8 @@ Tipos de material cadastrados: PET, Vidro, Papel, Metal.
 PEV Setor Marista, Ecoponto Campinas).
 
 Para voltar tudo a esse estado inicial a qualquer momento, use o link
-**"Resetar demo"** no rodapé de qualquer página (ou `POST /admin/reset`).
+**"Resetar demo"** no rodapé de qualquer página (ou `POST /admin/reset`,
+que exige login e só funciona com `app.debug` ligado).
 
 ## Roteiro de demonstração (≈ 8 min)
 
@@ -82,10 +90,14 @@ Para voltar tudo a esse estado inicial a qualquer momento, use o link
    Cooperativa é cancelada automaticamente; emite o certificado (página
    imprimível).
 5. **Empresa** — cria um novo lote com o material recebido e o disponibiliza;
-   a **Indústria** propõe e a Empresa conclui. O material fica `DESTINADO`
-   e o histórico de rastreio mostra todos os eventos (registro → lote →
-   transferência → lote → transferência → destinação).
-6. **Erro proposital** — tentar colocar um material de tipo diferente
+   a **Indústria** propõe (em "Mercado") e a Empresa conclui. O material
+   fica `DESTINADO` e o histórico de rastreio mostra todos os eventos
+   (registro → lote → transferência → lote → transferência → destinação).
+6. **Indústria** — em "Materiais recebidos" (mesma tela `/materiais`, sem
+   botões de ação), abre o material comprado e mostra esse histórico
+   completo — esse é o clímax da demo: provar que o rastreio sobrevive a
+   duas vendas.
+7. **Erro proposital** — tentar colocar um material de tipo diferente
    (ex.: Vidro) num lote de PET já existente, para mostrar a mensagem de
    erro do model na tela.
 
@@ -93,16 +105,22 @@ Para voltar tudo a esse estado inicial a qualquer momento, use o link
 
 | Perfil | Rotas |
 |---|---|
-| Público | `GET /`, `GET/POST /login`, `GET /cadastro`, `GET/POST /cadastro/<perfil>`, `GET /logout` |
-| Todos (logado) | `GET /dashboard`, `GET/POST /perfil`, `GET /pontos` |
+| Público | `GET /`, `GET/POST /login`, `GET /cadastro`, `GET/POST /cadastro/<perfil>` |
+| Todos (logado) | `GET /dashboard`, `GET/POST /perfil`, `GET /pontos`, `GET /logout` |
 | Comum | `GET/POST /ia/identificar` |
-| Catador, Cooperativa, Empresa | `GET /materiais`, `GET /materiais/<id>`, `POST /materiais/<id>/disponibilizar`, `/avaliar`, `/cotar`; `GET /lotes`, `POST /lotes/novo`, `GET /lotes/<id>`, `POST /lotes/<id>/adicionar`, `/remover`, `/pesagem`, `/disponibilizar`, `/cancelar`, `/cotar` |
+| Catador, Cooperativa, Empresa, Indústria | `GET /materiais`, `GET /materiais/<id>` (a Indústria só vê o que comprou, sem botões de ação) |
+| Catador, Cooperativa, Empresa | `POST /materiais/<id>/disponibilizar`, `/avaliar`, `/cotar`; `GET /lotes`, `POST /lotes/novo`, `GET /lotes/<id>`, `POST /lotes/<id>/adicionar`, `/remover`, `/pesagem`, `/disponibilizar`, `/cancelar`, `/cotar` |
 | Catador (apenas) | `GET/POST /materiais/novo` (só o Catador registra material no UML) |
-| Comprador (Cooperativa, Empresa, Indústria) | `GET /mercado`, `POST /lotes/<id>/propor` |
+| Comprador (Cooperativa, Empresa, Indústria) | `GET /mercado`, `POST /lotes/<id>/propor`, `GET /minhas-propostas` |
 | Vendedor (Catador, Cooperativa, Empresa) | `GET /transacoes`, `POST /transacoes/<id>/concluir`, `/cancelar`, `/certificado` |
-| Qualquer (logado) | `GET /certificados/<id>` |
-| Demo | `POST /admin/reset` |
-| API (JSON) | `GET /api/pontos` (público, aceita `?tipo=<id>`), `GET /api/materiais/<id>/historico` (logado, só o dono do material) |
+| Vendedor ou comprador da transação (logado) | `GET /certificados/<id>` |
+| Demo (logado, só com `app.debug` ligado) | `POST /admin/reset` |
+| API (JSON) | `GET /api/pontos` (público, aceita `?tipo=<id>`); `GET /api/materiais/<id>/historico` (logado — dono atual, ou vendedor/comprador de uma transação `CONCLUIDA` daquele material) |
+
+**Nota para a arguição:** `GET /logout` é tecnicamente uma ação com efeito
+colateral (destrói a sessão) numa rota `GET`, o que não é estritamente
+RESTful — aceitável para o escopo da disciplina, mas vale citar se
+perguntarem. `POST /admin/reset` já segue o padrão correto.
 
 ## Estado do projeto
 

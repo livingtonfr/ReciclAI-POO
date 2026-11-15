@@ -34,6 +34,7 @@
         {% endfor %}
     </div>
 
+    {% if pode_operar %}
     <div class="acoes-detalhe">
         {% if material.status.value == 'REGISTRADO' %}
         <form method="POST" action="{{ url_for('materiais_disponibilizar', material_id=material.id) }}">
@@ -54,6 +55,7 @@
             <button class="botao botao-secundario" type="submit">Cotar preço</button>
         </form>
     </div>
+    {% endif %}
 
     <p class="rodape-link">
         <a class="link-verde" href="{{ url_for('materiais') }}">&larr; Voltar aos meus materiais</a>
