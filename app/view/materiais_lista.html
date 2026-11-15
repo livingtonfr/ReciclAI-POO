@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Recicl.AI - Meus materiais{% endblock %}
+
+{% block content %}
+<div class="tela-dashboard">
+    <div class="faixa"></div>
+    <div class="cabecalho-dashboard">
+        <p class="saudacao">Meus materiais</p>
+        <a class="link-verde" href="{{ url_for('materiais_novo') }}">+ Novo</a>
+    </div>
+
+    <ul class="menu-dashboard">
+        {% for material in materiais %}
+        <li class="item-menu">
+            <a class="item-rotulo item-rotulo-link" href="{{ url_for('materiais_detalhe', material_id=material.id) }}">
+                {{ material.tipoMaterial.nome }} - {{ material.pesoKg }} kg
+            </a>
+            <span class="item-fase">{{ material.status.value }}</span>
+        </li>
+        {% else %}
+        <li class="item-menu item-menu-vazio">Nenhum material registrado ainda.</li>
+        {% endfor %}
+    </ul>
+
+    <p class="rodape-link">
+        <a class="link-verde" href="{{ url_for('dashboard') }}">&larr; Voltar ao dashboard</a>
+    </p>
+</div>
+{% endblock %}

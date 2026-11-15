@@ -37,30 +37,30 @@ PERFIS = [
 PERFIS_POR_CHAVE = {p['chave']: p for p in PERFIS}
 
 # Menu do /dashboard por perfil (isinstance = polimorfismo na escolha do menu).
-# As rotas ainda não existem (entram nas Fases 5 a 8); por isso os itens não
-# são links ainda, só o rótulo e em que fase a função é ativada.
+# Itens sem "endpoint" ainda não têm rota (entram nas próximas fases) e
+# aparecem só com o rótulo e a fase em que a função é ativada.
 MENU_POR_PERFIL = [
     (UsuarioComum, [
-        ('Consultar pontos de coleta', 'Fase 8'),
-        ('Identificar resíduo por IA', 'Fase 5'),
+        {'rotulo': 'Consultar pontos de coleta', 'endpoint': None, 'fase': 'Fase 8'},
+        {'rotulo': 'Identificar resíduo por IA', 'endpoint': 'ia_identificar', 'fase': None},
     ]),
     (Catador, [
-        ('Meus materiais', 'Fase 5'),
-        ('Meus lotes', 'Fase 6'),
-        ('Mercado e transações', 'Fase 7'),
+        {'rotulo': 'Meus materiais', 'endpoint': 'materiais', 'fase': None},
+        {'rotulo': 'Meus lotes', 'endpoint': None, 'fase': 'Fase 6'},
+        {'rotulo': 'Mercado e transações', 'endpoint': None, 'fase': 'Fase 7'},
     ]),
     (Cooperativa, [
-        ('Meus materiais', 'Fase 5'),
-        ('Meus lotes', 'Fase 6'),
-        ('Mercado e transações', 'Fase 7'),
+        {'rotulo': 'Meus materiais', 'endpoint': 'materiais', 'fase': None},
+        {'rotulo': 'Meus lotes', 'endpoint': None, 'fase': 'Fase 6'},
+        {'rotulo': 'Mercado e transações', 'endpoint': None, 'fase': 'Fase 7'},
     ]),
     (EmpresaCompradora, [
-        ('Meus materiais', 'Fase 5'),
-        ('Meus lotes', 'Fase 6'),
-        ('Mercado e transações', 'Fase 7'),
+        {'rotulo': 'Meus materiais', 'endpoint': 'materiais', 'fase': None},
+        {'rotulo': 'Meus lotes', 'endpoint': None, 'fase': 'Fase 6'},
+        {'rotulo': 'Mercado e transações', 'endpoint': None, 'fase': 'Fase 7'},
     ]),
     (IndustriaTransformadora, [
-        ('Mercado (como compradora)', 'Fase 7'),
+        {'rotulo': 'Mercado (como compradora)', 'endpoint': None, 'fase': 'Fase 7'},
     ]),
 ]
 

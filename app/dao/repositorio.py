@@ -2,7 +2,7 @@ from datetime import time
 
 from werkzeug.security import generate_password_hash
 
-from app.model.enums import CategoriaMaterial, DiaSemana, TipoPontoColeta
+from app.model.enums import CategoriaMaterial, CondicaoMaterial, DiaSemana, TipoPontoColeta
 from app.model.usuario import (
     Catador,
     Cooperativa,
@@ -12,6 +12,7 @@ from app.model.usuario import (
 )
 from app.model.material import TipoMaterial
 from app.model.coleta import HorarioFuncionamento, PontoColeta
+from app.model.servicos_ia import VisaoComputacionalIA, PrecificacaoIA
 
 SENHA_DEMO = "123456"
 
@@ -35,6 +36,8 @@ class Repositorio:
         self.transacoes = []
         self.pontos = []
         self.certificados = []
+        self.servico_visao = None
+        self.servico_precificacao = None
 
         self.__seed()
 
@@ -99,6 +102,16 @@ class Repositorio:
         tipo_metal = TipoMaterial("Metal", "Latas e sucata metálica", CategoriaMaterial.METAL)
 
         self.tipos.extend([tipo_pet, tipo_vidro, tipo_papel, tipo_metal])
+
+        # Serviços de IA simulados (Bloco 7 do notebook): a "visão computacional"
+        # devolve sempre o mesmo resultado canônico, como no notebook de origem.
+        self.servico_visao = VisaoComputacionalIA(
+            tipo_pet,
+            0.82,
+            CondicaoMaterial.SUJO,
+            0.90,
+        )
+        self.servico_precificacao = PrecificacaoIA(2.75)
 
         horario_comercial = HorarioFuncionamento(DiaSemana.SEGUNDA, time(8, 0), time(18, 0))
         horario_sabado = HorarioFuncionamento(DiaSemana.SABADO, time(8, 0), time(12, 0))

@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Recicl.AI - {{ material.tipoMaterial.nome }}{% endblock %}
+
+{% block content %}
+<div class="tela-dashboard">
+    <div class="faixa"></div>
+    <div class="cabecalho-dashboard">
+        <p class="saudacao">{{ material.tipoMaterial.nome }} - {{ material.pesoKg }} kg</p>
+        <span class="selo-perfil">{{ material.status.value }}</span>
+    </div>
+
+    <div class="bloco-detalhe">
+        <p><strong>Condição declarada (usuário):</strong> {{ material.condicaoDeclarada.value }}</p>
+        {% if material.observacoesDeclaradas %}
+        <p><strong>Observações:</strong> {{ material.observacoesDeclaradas }}</p>
+        {% endif %}
+        <p><strong>Responsável atual:</strong> {{ material.responsavelAtual.nome }}</p>
+    </div>
+
+    {% if avaliacoes %}
+    <div class="bloco-detalhe">
+        <p class="titulo-bloco">Avaliações da IA (não substituem a condição declarada)</p>
+        {% for avaliacao in avaliacoes %}
+        <p>- {{ avaliacao.condicaoDetectada.value }} (confiança {{ '%.0f'|format(avaliacao.confianca * 100) }}%)</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="bloco-detalhe">
+        <p class="titulo-bloco">Histórico de rastreio</p>
+        {% for evento in historico %}
+        <p>- {{ evento.tipo.value }}: {{ evento.descricao }}</p>
+        {% endfor %}
+    </div>
+
+    <div class="acoes-detalhe">
+        {% if material.status.value == 'REGISTRADO' %}
+        <form method="POST" action="{{ url_for('materiais_disponibilizar', material_id=material.id) }}">
+            <button class="botao" type="submit">Disponibilizar</button>
+        </form>
+        {% endif %}
+
+        <form method="POST" action="{{ url_for('materiais_avaliar', material_id=material.id) }}">
+            <input type="hidden" name="foto" value="foto_simulada.jpg">
+            <button class="botao botao-secundario" type="submit">Avaliar por foto (IA)</button>
+        </form>
+
+        <form method="POST" action="{{ url_for('materiais_cotar', material_id=material.id) }}">
+            <div class="campo">
+                <label for="horizonteDias">Cotar para quantos dias?</label>
+                <input id="horizonteDias" name="horizonteDias" type="number" min="1" value="15">
+            </div>
+            <button class="botao botao-secundario" type="submit">Cotar preço</button>
+        </form>
+    </div>
+
+    <p class="rodape-link">
+        <a class="link-verde" href="{{ url_for('materiais') }}">&larr; Voltar aos meus materiais</a>
+    </p>
+</div>
+{% endblock %}

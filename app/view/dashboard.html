@@ -11,10 +11,14 @@
     </div>
 
     <ul class="menu-dashboard">
-        {% for rotulo, fase in menu %}
+        {% for item in menu %}
         <li class="item-menu">
-            <span class="item-rotulo">{{ rotulo }}</span>
-            <span class="item-fase">{{ fase }}</span>
+            {% if item.endpoint %}
+            <a class="item-rotulo item-rotulo-link" href="{{ url_for(item.endpoint) }}">{{ item.rotulo }}</a>
+            {% else %}
+            <span class="item-rotulo">{{ item.rotulo }}</span>
+            <span class="item-fase">{{ item.fase }}</span>
+            {% endif %}
         </li>
         {% else %}
         <li class="item-menu item-menu-vazio">Nenhuma função disponível para este perfil ainda.</li>

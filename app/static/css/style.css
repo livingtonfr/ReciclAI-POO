@@ -11,6 +11,7 @@
    7. Mensagens (flash)
    8. Cadastro (formulário) e edição de perfil
    9. Dashboard
+   10. Materiais e IA (blocos de detalhe, botão secundário)
    ========================================================================== */
 
 
@@ -446,4 +447,69 @@ a {
     display: flex;
     justify-content: space-between;
     padding-top: 8px;
+}
+
+.item-rotulo-link {
+    color: var(--verde-escuro);
+}
+
+.item-rotulo-link:hover {
+    text-decoration: underline;
+}
+
+
+/* ==========================================================================
+   10. MATERIAIS E IA
+   ========================================================================== */
+.bloco-detalhe {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 16px;
+    background-color: var(--superficie);
+    border: 1px solid var(--borda);
+    border-radius: 14px;
+    font-size: 13px;
+    color: var(--texto);
+}
+
+.bloco-detalhe .titulo-bloco {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--texto);
+    margin-bottom: 4px;
+}
+
+.acoes-detalhe {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.acoes-detalhe form {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.botao-secundario {
+    background-color: var(--superficie);
+    color: var(--verde-escuro);
+    border: 1px solid var(--verde);
+}
+
+.botao-secundario:hover {
+    background-color: rgba(34, 177, 76, 0.08);
+}
+
+.campo select {
+    width: 100%;
+    padding: 14px 16px;
+    font-family: var(--fonte);
+    font-size: 15px;
+    color: var(--texto);
+    background-color: var(--superficie);
+    border: 1px solid var(--borda-input);
+    border-radius: 12px;
+    outline: none;
 }
