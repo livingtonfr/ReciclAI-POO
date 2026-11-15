@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Recicl.AI - Escolha seu perfil{% endblock %}
+
+{% block content %}
+<div class="tela-perfil">
+    <div class="cabecalho">
+        <h2>Como você deseja usar<br>a Recicl.AI?</h2>
+        <p class="descricao">Escolha seu perfil para uma experiência personalizada</p>
+    </div>
+
+    <div class="grade-perfis">
+        {% for perfil in perfis %}
+        <a class="card-perfil perfil-{{ perfil.chave }}"
+           href="{{ url_for('cadastro_perfil', perfil=perfil.chave) }}">
+            <div class="icone">{{ perfil.icone }}</div>
+            <p class="nome">{{ perfil.nome }}</p>
+            <p class="texto">{{ perfil.descricao }}</p>
+            <span class="selo">{{ perfil.selo }}</span>
+        </a>
+        {% endfor %}
+    </div>
+
+    <p class="rodape-link">
+        Já tem conta?
+        <a class="link-verde" href="{{ url_for('login') }}">Entrar</a>
+    </p>
+</div>
+{% endblock %}

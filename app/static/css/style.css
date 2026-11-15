@@ -1,16 +1,330 @@
-/* placeholder — substituir pelo style.css da aula 20 */
-body {
-    font-family: sans-serif;
-    margin: 0;
-    padding: 2rem;
+/* ==========================================================================
+   Recicl.AI - estilos (baseados no protótipo do Figma)
+   Somente HTML + CSS puro, sem frameworks.
+
+   1. Variáveis de cor e base
+   2. Estrutura da página (tela de celular centralizada)
+   3. Tela de boas-vindas
+   4. Formulários e botões
+   5. Login
+   6. Seleção de perfil
+   7. Mensagens (flash)
+   ========================================================================== */
+
+
+/* ==========================================================================
+   1. VARIÁVEIS DE COR E BASE
+   ========================================================================== */
+:root {
+    --verde: #22b14c;
+    --verde-escuro: #1c9640;
+    --verde-boas-vindas: #7ebf03;
+
+    --fundo: #f9fafb;
+    --fundo-externo: #e9ede9;
+    --superficie: #ffffff;
+
+    --texto: #1a1a1a;
+    --texto-label: #4d4d4d;
+    --texto-suave: #808080;
+    --placeholder: #b3b3b3;
+
+    --borda: #ebebeb;
+    --borda-input: #d9d9d9;
+
+    --fonte: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
 }
 
-header {
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: var(--fonte);
+    background-color: var(--fundo-externo);
+    color: var(--texto);
+    line-height: 1.4;
+}
+
+a {
+    color: inherit;
+    text-decoration: none;
+}
+
+
+/* ==========================================================================
+   2. ESTRUTURA DA PÁGINA
+   O protótipo é de celular (390px): no computador a tela fica centralizada
+   numa coluna estreita; no celular ocupa a largura toda.
+   ========================================================================== */
+.app {
+    width: 100%;
+    max-width: 430px;
+    min-height: 100vh;
+    margin: 0 auto;
+    background-color: var(--fundo);
+    box-shadow: 0 0 40px rgba(0, 0, 0, 0.08);
+}
+
+
+/* ==========================================================================
+   3. TELA DE BOAS-VINDAS
+   ========================================================================== */
+.app.boas-vindas {
+    background-color: var(--verde-boas-vindas);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 24px;
+    padding: 76px 24px 24px;
+}
+
+.boas-vindas .logo {
+    width: 100%;
+    max-width: 381px;
+    height: auto;
+}
+
+.boas-vindas .comecar {
+    color: #ffffff;
+    font-size: 24px;
+    font-weight: 600;
+}
+
+.boas-vindas .comecar:hover {
+    text-decoration: underline;
+}
+
+
+/* ==========================================================================
+   4. FORMULÁRIOS E BOTÕES
+   ========================================================================== */
+.campo {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.campo label {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--texto-label);
+}
+
+.campo input {
+    width: 100%;
+    padding: 14px 16px;
+    font-family: var(--fonte);
+    font-size: 15px;
+    color: var(--texto);
+    background-color: var(--superficie);
+    border: 1px solid var(--borda-input);
+    border-radius: 12px;
+    outline: none;
+}
+
+.campo input::placeholder {
+    color: var(--placeholder);
+}
+
+.campo input:focus {
+    border-color: var(--verde);
+    box-shadow: 0 0 0 3px rgba(34, 177, 76, 0.15);
+}
+
+.botao {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    font-family: var(--fonte);
+    font-size: 17px;
+    font-weight: 600;
+    text-align: center;
+    color: #ffffff;
+    background-color: var(--verde);
+    border: none;
+    border-radius: 14px;
+    cursor: pointer;
+}
+
+.botao:hover {
+    background-color: var(--verde-escuro);
+}
+
+.link-verde {
+    color: var(--verde);
+    font-weight: 600;
+}
+
+.link-verde:hover {
+    text-decoration: underline;
+}
+
+
+/* ==========================================================================
+   5. LOGIN
+   ========================================================================== */
+.tela-login {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 24px;
+    padding: 80px 24px 40px;
+}
+
+.tela-login .faixa {
+    width: 100%;
+    height: 4px;
+    background-color: var(--verde);
+}
+
+.tela-login .marca {
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 39px;
+    color: var(--verde);
+}
+
+.tela-login .subtitulo {
+    font-size: 15px;
+    color: #666666;
+}
+
+.tela-login form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+}
+
+.tela-login .esqueceu {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--verde);
+}
+
+.rodape-link {
+    font-size: 14px;
+    color: var(--texto-suave);
+}
+
+
+/* ==========================================================================
+   6. SELEÇÃO DE PERFIL
+   Cada perfil define só a sua cor (--cor, em RGB); o restante é compartilhado.
+   ========================================================================== */
+.tela-perfil {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 60px 20px 40px;
+}
+
+.tela-perfil .cabecalho {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.tela-perfil h2 {
+    font-size: 22px;
+    font-weight: 700;
+    line-height: 28px;
+    text-align: center;
+    color: var(--texto);
+}
+
+.tela-perfil .descricao {
+    font-size: 13px;
+    text-align: center;
+    color: var(--texto-suave);
+}
+
+.grade-perfis {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    width: 100%;
+}
+
+.card-perfil {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 16px 14px;
+    background-color: var(--superficie);
+    border: 1px solid var(--borda);
+    border-radius: 16px;
+}
+
+.card-perfil:hover {
+    border-color: rgb(var(--cor));
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+}
+
+.card-perfil .icone {
     display: flex;
     align-items: center;
-    gap: 1rem;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    font-size: 20px;
+    border-radius: 20px;
+    background-color: rgba(var(--cor), 0.12);
 }
 
-.logo {
-    height: 48px;
+.card-perfil .nome {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f1f1f;
 }
+
+.card-perfil .texto {
+    font-size: 11px;
+    color: var(--texto-suave);
+}
+
+.card-perfil .selo {
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 500;
+    border-radius: 8px;
+    color: rgb(var(--cor));
+    background-color: rgba(var(--cor), 0.10);
+}
+
+.perfil-comum     { --cor: 34, 177, 76; }
+.perfil-catador   { --cor: 46, 139, 87; }
+.perfil-cooperativa { --cor: 40, 122, 163; }
+.perfil-empresa   { --cor: 156, 108, 30; }
+.perfil-industria { --cor: 126, 78, 156; }
+
+
+/* ==========================================================================
+   7. MENSAGENS (flash)
+   ========================================================================== */
+.mensagens {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 16px 20px 0;
+}
+
+.mensagem {
+    padding: 12px 14px;
+    font-size: 13px;
+    font-weight: 500;
+    border-radius: 12px;
+    border: 1px solid var(--borda-input);
+    background-color: var(--superficie);
+}
+
+.mensagem-success { background-color: #e6f6ea; border-color: var(--verde); color: #166a31; }
+.mensagem-error   { background-color: #fdecec; border-color: #dc2626; color: #991b1b; }
+.mensagem-info    { background-color: #e8f3f8; border-color: #287aa3; color: #1d5a7a; }

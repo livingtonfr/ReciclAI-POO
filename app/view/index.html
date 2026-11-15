@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block title %}Recicl.AI{% endblock %}
+{% block classe_app %}boas-vindas{% endblock %}
+
+{% block content %}
+    <img class="logo" src="{{ url_for('static', filename='img/logo-boas-vindas.png') }}"
+         alt="Recicl.AI - Ecossistema inteligente para transformar resíduos em valor">
+    <a class="comecar" href="{{ url_for('login') }}">Começar &rarr;</a>
+{% endblock %}

@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Recicl.AI - Entrar{% endblock %}
+
+{% block content %}
+<div class="tela-login">
+    <div class="faixa"></div>
+    <h1 class="marca">Recicl.AI</h1>
+    <p class="subtitulo">Faça login para continuar</p>
+
+    <form method="POST" action="{{ url_for('login') }}">
+        <div class="campo">
+            <label for="email">E-mail</label>
+            <input id="email" name="email" type="email" placeholder="seu@email.com" required>
+        </div>
+        <div class="campo">
+            <label for="senha">Senha</label>
+            <input id="senha" name="senha" type="password" placeholder="••••••••" required>
+        </div>
+        <a class="esqueceu" href="#">Esqueceu a senha?</a>
+        <button class="botao" type="submit">Entrar</button>
+    </form>
+
+    <p class="rodape-link">
+        Não tem conta?
+        <a class="link-verde" href="{{ url_for('cadastro') }}">Cadastre-se</a>
+    </p>
+</div>
+{% endblock %}
