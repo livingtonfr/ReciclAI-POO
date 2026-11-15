@@ -7,7 +7,9 @@
     <div class="faixa"></div>
     <div class="cabecalho-dashboard">
         <p class="saudacao">Meus materiais</p>
+        {% if usuario_e_catador %}
         <a class="link-verde" href="{{ url_for('materiais_novo') }}">+ Novo</a>
+        {% endif %}
     </div>
 
     <ul class="menu-dashboard">
@@ -19,7 +21,11 @@
             <span class="item-fase">{{ material.status.value }}</span>
         </li>
         {% else %}
-        <li class="item-menu item-menu-vazio">Nenhum material registrado ainda.</li>
+            {% if usuario_e_catador %}
+            <li class="item-menu item-menu-vazio">Nenhum material registrado ainda.</li>
+            {% else %}
+            <li class="item-menu item-menu-vazio">Os materiais chegam por compra, a partir da Fase 7.</li>
+            {% endif %}
         {% endfor %}
     </ul>
 

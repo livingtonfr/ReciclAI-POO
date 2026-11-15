@@ -20,6 +20,15 @@ def requer_perfil_material(view):
     return decorado
 
 
+def requer_catador(view):
+    @wraps(view)
+    def decorado(*args, **kwargs):
+        if not isinstance(usuario_atual(), Catador):
+            abort(403)
+        return view(*args, **kwargs)
+    return decorado
+
+
 def buscar_material_do_usuario(material_id):
     usuario = usuario_atual()
 
@@ -48,12 +57,16 @@ def materiais():
         material for material in Repositorio().materiais
         if material.responsavelAtual is usuario
     ]
-    return render_template('materiais_lista.html', materiais=meus_materiais)
+    return render_template(
+        'materiais_lista.html',
+        materiais=meus_materiais,
+        usuario_e_catador=isinstance(usuario, Catador),
+    )
 
 
 @app.route('/materiais/novo', methods=['GET', 'POST'])
 @login_obrigatorio
-@requer_perfil_material
+@requer_catador
 def materiais_novo():
     usuario = usuario_atual()
     tipos = Repositorio().tipos
