@@ -180,6 +180,7 @@ class Material:
         self.adicionarEvento(evento)
 
     def destinar(self):
+        self.__loteAtual = None
         self.__status = StatusMaterial.DESTINADO
 
         evento = EventoRastreio(

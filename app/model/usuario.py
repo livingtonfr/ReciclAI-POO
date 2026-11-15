@@ -2,6 +2,8 @@ from abc import ABC, abstractmethod
 from uuid import uuid4
 from datetime import datetime
 
+from werkzeug.security import check_password_hash
+
 from app.model.enums import StatusValidacao
 from app.model.material import Material
 from app.model.lote import LoteMaterial
@@ -67,6 +69,9 @@ class Usuario(ABC):
     @property
     def criadoEm(self):
         return self.__criadoEm
+
+    def verificarSenha(self, senha):
+        return check_password_hash(self.__senhaHash, senha)
 
 
 class UsuarioComum(Usuario):

@@ -1,9 +1,14 @@
 from uuid import uuid4
+from datetime import time
 
 
 class HorarioFuncionamento:
 
     def __init__(self, diaSemana, horaAbertura, horaFechamento):
+        if isinstance(horaAbertura, str):
+            horaAbertura = time.fromisoformat(horaAbertura)
+        if isinstance(horaFechamento, str):
+            horaFechamento = time.fromisoformat(horaFechamento)
         if horaAbertura >= horaFechamento:
             raise ValueError(
                 "A hora de abertura deve ser anterior à hora de fechamento."
