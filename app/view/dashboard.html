@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+
+{% block title %}Recicl.AI - Dashboard{% endblock %}
+
+{% block content %}
+<div class="tela-dashboard">
+    <div class="faixa"></div>
+    <div class="cabecalho-dashboard">
+        <p class="saudacao">Olá, {{ usuario.nome }}</p>
+        <span class="selo-perfil">{{ perfil_nome }}</span>
+    </div>
+
+    <ul class="menu-dashboard">
+        {% for rotulo, fase in menu %}
+        <li class="item-menu">
+            <span class="item-rotulo">{{ rotulo }}</span>
+            <span class="item-fase">{{ fase }}</span>
+        </li>
+        {% else %}
+        <li class="item-menu item-menu-vazio">Nenhuma função disponível para este perfil ainda.</li>
+        {% endfor %}
+    </ul>
+
+    <div class="acoes-dashboard">
+        <a class="link-verde" href="{{ url_for('perfil') }}">Editar meu perfil</a>
+        <a class="link-verde" href="{{ url_for('logout') }}">Sair</a>
+    </div>
+</div>
+{% endblock %}

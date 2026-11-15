@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+
+{% block title %}Recicl.AI - Cadastro de {{ perfil.nome }}{% endblock %}
+
+{% block content %}
+<div class="tela-cadastro">
+    <div class="faixa"></div>
+    <h1 class="marca">Recicl.AI</h1>
+    <p class="subtitulo">Cadastro de {{ perfil.nome }}</p>
+
+    <form method="POST" action="{{ url_for('cadastro_perfil', perfil=perfil.chave) }}">
+        <div class="campo">
+            <label for="nome">Nome</label>
+            <input id="nome" name="nome" type="text" placeholder="Seu nome ou razão social" required>
+        </div>
+        <div class="campo">
+            <label for="email">E-mail</label>
+            <input id="email" name="email" type="email" placeholder="seu@email.com" required>
+        </div>
+        <div class="campo">
+            <label for="senha">Senha</label>
+            <input id="senha" name="senha" type="password" placeholder="••••••••" required minlength="6">
+        </div>
+        <div class="campo">
+            <label for="telefone">Telefone</label>
+            <input id="telefone" name="telefone" type="tel" placeholder="(62) 90000-0000" required>
+        </div>
+        <div class="campo">
+            <label for="endereco">Endereço</label>
+            <input id="endereco" name="endereco" type="text" placeholder="Rua, número, bairro" required>
+        </div>
+        {% if perfil.documento %}
+        <div class="campo">
+            <label for="documento">{{ 'CPF' if perfil.documento == 'cpf' else 'CNPJ' }}</label>
+            <input id="documento" name="documento" type="text"
+                   placeholder="Somente números" required>
+        </div>
+        {% endif %}
+        <button class="botao" type="submit">Criar conta</button>
+    </form>
+
+    <p class="rodape-link">
+        <a class="link-verde" href="{{ url_for('cadastro') }}">&larr; Escolher outro perfil</a>
+    </p>
+</div>
+{% endblock %}

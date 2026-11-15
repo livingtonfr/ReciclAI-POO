@@ -142,6 +142,18 @@ class Repositorio:
             ),
         ])
 
+    def buscarUsuarioPorEmail(self, email):
+        for usuario in self.usuarios:
+            if usuario.email == email:
+                return usuario
+        return None
+
+    def buscarUsuarioPorId(self, usuario_id):
+        for usuario in self.usuarios:
+            if str(usuario.id) == str(usuario_id):
+                return usuario
+        return None
+
     def resetar(self):
         """Recria o repositório do zero (usado pelo endpoint de demo /admin/reset)."""
         type(self).__instancia = None

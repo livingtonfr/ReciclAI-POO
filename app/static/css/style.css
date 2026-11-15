@@ -9,6 +9,8 @@
    5. Login
    6. Seleção de perfil
    7. Mensagens (flash)
+   8. Cadastro (formulário) e edição de perfil
+   9. Dashboard
    ========================================================================== */
 
 
@@ -328,3 +330,120 @@ a {
 .mensagem-success { background-color: #e6f6ea; border-color: var(--verde); color: #166a31; }
 .mensagem-error   { background-color: #fdecec; border-color: #dc2626; color: #991b1b; }
 .mensagem-info    { background-color: #e8f3f8; border-color: #287aa3; color: #1d5a7a; }
+
+
+/* ==========================================================================
+   8. CADASTRO (FORMULÁRIO) E EDIÇÃO DE PERFIL
+   Reaproveita a estrutura visual do Login (faixa + marca + form).
+   ========================================================================== */
+.tela-cadastro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 48px 24px 40px;
+}
+
+.tela-cadastro .faixa {
+    width: 100%;
+    height: 4px;
+    background-color: var(--verde);
+}
+
+.tela-cadastro .marca {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--verde);
+}
+
+.tela-cadastro .subtitulo {
+    font-size: 15px;
+    color: #666666;
+    text-align: center;
+}
+
+.tela-cadastro form {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    width: 100%;
+}
+
+
+/* ==========================================================================
+   9. DASHBOARD
+   ========================================================================== */
+.tela-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 48px 24px 40px;
+}
+
+.tela-dashboard .faixa {
+    width: 100%;
+    height: 4px;
+    background-color: var(--verde);
+}
+
+.cabecalho-dashboard {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.saudacao {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--texto);
+}
+
+.selo-perfil {
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--verde-escuro);
+    background-color: rgba(34, 177, 76, 0.12);
+    border-radius: 8px;
+}
+
+.menu-dashboard {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    list-style: none;
+}
+
+.item-menu {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    background-color: var(--superficie);
+    border: 1px solid var(--borda);
+    border-radius: 14px;
+}
+
+.item-rotulo {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--texto);
+}
+
+.item-fase {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--texto-suave);
+}
+
+.item-menu-vazio {
+    justify-content: center;
+    color: var(--texto-suave);
+    font-size: 13px;
+}
+
+.acoes-dashboard {
+    display: flex;
+    justify-content: space-between;
+    padding-top: 8px;
+}
