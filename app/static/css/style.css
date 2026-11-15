@@ -1,0 +1,16 @@
+/* placeholder — substituir pelo style.css da aula 20 */
+body {
+    font-family: sans-serif;
+    margin: 0;
+    padding: 2rem;
+}
+
+header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.logo {
+    height: 48px;
+}
