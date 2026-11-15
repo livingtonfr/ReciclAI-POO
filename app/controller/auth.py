@@ -37,13 +37,10 @@ PERFIS = [
 PERFIS_POR_CHAVE = {p['chave']: p for p in PERFIS}
 
 # Menu do /dashboard por perfil (isinstance = polimorfismo na escolha do menu).
+# UsuarioComum não usa esse menu: tem a tela "Início" própria (ações rápidas).
 # Itens sem "endpoint" ainda não têm rota (entram nas próximas fases) e
 # aparecem só com o rótulo e a fase em que a função é ativada.
 MENU_POR_PERFIL = [
-    (UsuarioComum, [
-        {'rotulo': 'Consultar pontos de coleta', 'endpoint': None, 'fase': 'Fase 8'},
-        {'rotulo': 'Identificar resíduo por IA', 'endpoint': 'ia_identificar', 'fase': None},
-    ]),
     (Catador, [
         {'rotulo': 'Meus materiais', 'endpoint': 'materiais', 'fase': None},
         {'rotulo': 'Meus lotes', 'endpoint': None, 'fase': 'Fase 6'},
@@ -140,6 +137,22 @@ def cadastro_perfil(perfil):
         endereco = request.form.get('endereco', '').strip()
         documento = request.form.get('documento', '').strip()
 
+        campos_obrigatorios = [nome, email, senha, telefone, endereco]
+        if info_perfil['documento'] is not None:
+            campos_obrigatorios.append(documento)
+
+        if not all(campos_obrigatorios):
+            flash('Preencha todos os campos obrigatórios.', 'error')
+            return render_template('cadastro_formulario.html', perfil=info_perfil)
+
+        if '@' not in email:
+            flash('Informe um e-mail válido.', 'error')
+            return render_template('cadastro_formulario.html', perfil=info_perfil)
+
+        if len(senha) < 6:
+            flash('A senha deve ter pelo menos 6 caracteres.', 'error')
+            return render_template('cadastro_formulario.html', perfil=info_perfil)
+
         if Repositorio().buscarUsuarioPorEmail(email) is not None:
             flash('Já existe uma conta cadastrada com este e-mail.', 'error')
             return render_template('cadastro_formulario.html', perfil=info_perfil)
@@ -164,6 +177,10 @@ def cadastro_perfil(perfil):
 @login_obrigatorio
 def dashboard():
     usuario = usuario_atual()
+
+    if isinstance(usuario, UsuarioComum):
+        return render_template('inicio.html', usuario=usuario)
+
     return render_template(
         'dashboard.html',
         usuario=usuario,
@@ -178,12 +195,25 @@ def perfil():
     usuario = usuario_atual()
 
     if request.method == 'POST':
-        usuario.atualizarPerfil(
-            nome=request.form.get('nome', '').strip() or None,
-            email=request.form.get('email', '').strip().lower() or None,
-            telefone=request.form.get('telefone', '').strip() or None,
-            endereco=request.form.get('endereco', '').strip() or None,
-        )
+        nome = request.form.get('nome', '').strip()
+        email = request.form.get('email', '').strip().lower()
+        telefone = request.form.get('telefone', '').strip()
+        endereco = request.form.get('endereco', '').strip()
+
+        if not all([nome, email, telefone, endereco]):
+            flash('Preencha todos os campos.', 'error')
+            return render_template('perfil.html', usuario=usuario)
+
+        if '@' not in email:
+            flash('Informe um e-mail válido.', 'error')
+            return render_template('perfil.html', usuario=usuario)
+
+        usuario_com_email = Repositorio().buscarUsuarioPorEmail(email)
+        if usuario_com_email is not None and usuario_com_email is not usuario:
+            flash('Este e-mail já está em uso por outra conta.', 'error')
+            return render_template('perfil.html', usuario=usuario)
+
+        usuario.atualizarPerfil(nome=nome, email=email, telefone=telefone, endereco=endereco)
         flash('Perfil atualizado com sucesso.', 'success')
         return redirect(url_for('perfil'))
 

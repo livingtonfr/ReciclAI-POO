@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block title %}Recicl.AI - Início{% endblock %}
+
+{% block content %}
+<div class="tela-inicio">
+    <div class="faixa"></div>
+    <div class="saudacao-inicio">
+        <p class="ola">Olá, {{ usuario.nome }} 👋</p>
+        <p class="pergunta">Vamos reciclar?</p>
+    </div>
+
+    <div class="grade-acoes">
+        <a class="card-acao" href="{{ url_for('ia_identificar') }}">
+            <div class="icone">📷</div>
+            <p class="nome">Identificar resíduo</p>
+            <p class="texto">Descubra o material e como descartar</p>
+        </a>
+
+        <div class="card-acao card-acao-bloqueado">
+            <div class="icone">📍</div>
+            <p class="nome">Pontos de coleta</p>
+            <p class="texto">Encontre onde entregar seus materiais</p>
+            <span class="selo-fase">Fase 8</span>
+        </div>
+    </div>
+
+    <div class="acoes-dashboard">
+        <a class="link-verde" href="{{ url_for('perfil') }}">Editar meu perfil</a>
+        <a class="link-verde" href="{{ url_for('logout') }}">Sair</a>
+    </div>
+</div>
+{% endblock %}

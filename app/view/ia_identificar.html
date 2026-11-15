@@ -3,29 +3,23 @@
 {% block title %}Recicl.AI - Identificar resíduo{% endblock %}
 
 {% block content %}
-<div class="tela-cadastro">
+<div class="tela-ia">
     <div class="faixa"></div>
     <h1 class="marca">Recicl.AI</h1>
-    <p class="subtitulo">Identificar resíduo por foto</p>
+    <p class="subtitulo">Identificar resíduo</p>
 
     <form method="POST" action="{{ url_for('ia_identificar') }}">
-        <div class="campo">
-            <label for="foto">Foto (simulada)</label>
-            <input id="foto" name="foto" type="text" placeholder="foto_garrafa_pet.jpg" value="foto_garrafa_pet.jpg">
+        <div class="cartao-foto">
+            <div class="icone-foto">📷</div>
+            <p class="texto-foto">Tire uma foto do material para a IA identificar</p>
         </div>
-        <button class="botao" type="submit">Identificar</button>
+
+        <input type="hidden" name="foto" value="foto_garrafa_pet.jpg">
+        <button class="botao" type="submit">Analisar exemplo</button>
     </form>
 
-    {% if resultado %}
-    <div class="bloco-detalhe">
-        <p class="titulo-bloco">Resultado da IA</p>
-        <p>Material identificado: <strong>{{ resultado.tipoMaterial.nome }}</strong></p>
-        <p>Confiança: {{ '%.0f'|format(resultado.confianca * 100) }}%</p>
-    </div>
-    {% endif %}
-
     <p class="rodape-link">
-        <a class="link-verde" href="{{ url_for('dashboard') }}">&larr; Voltar ao dashboard</a>
+        <a class="link-verde" href="{{ url_for('dashboard') }}">&larr; Voltar ao início</a>
     </p>
 </div>
 {% endblock %}

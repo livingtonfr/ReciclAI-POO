@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}Recicl.AI - Resultado{% endblock %}
+
+{% block content %}
+<div class="tela-ia">
+    <div class="faixa"></div>
+    <h1 class="marca">Recicl.AI</h1>
+    <p class="subtitulo">Resultado da identificação</p>
+
+    <div class="resultado-ia">
+        <div class="icone-resultado">♻️</div>
+        <p class="material-identificado">{{ categoria_label }} {{ resultado.tipoMaterial.nome }}</p>
+        <p class="confianca-resultado">Confiança da IA: {{ '%.0f'|format(resultado.confianca * 100) }}%</p>
+    </div>
+
+    <div class="bloco-detalhe">
+        <p class="titulo-bloco">Dica de descarte</p>
+        <p>{{ dica }}</p>
+    </div>
+
+    <div class="card-acao card-acao-bloqueado">
+        <p class="nome">Encontrar ponto de coleta</p>
+        <span class="selo-fase">Fase 8</span>
+    </div>
+
+    <p class="rodape-link">
+        <a class="link-verde" href="{{ url_for('ia_identificar') }}">&larr; Analisar outra foto</a>
+    </p>
+</div>
+{% endblock %}

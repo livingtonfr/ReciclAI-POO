@@ -12,6 +12,7 @@
    8. Cadastro (formulário) e edição de perfil
    9. Dashboard
    10. Materiais e IA (blocos de detalhe, botão secundário)
+   11. Início (usuário comum) e telas de IA (Identificar/Resultado)
    ========================================================================== */
 
 
@@ -512,4 +513,155 @@ a {
     border: 1px solid var(--borda-input);
     border-radius: 12px;
     outline: none;
+}
+
+
+/* ==========================================================================
+   11. INÍCIO (USUÁRIO COMUM) E TELAS DE IA
+   ========================================================================== */
+.tela-inicio {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    padding: 56px 24px 40px;
+}
+
+.tela-inicio .faixa {
+    width: 100%;
+    height: 4px;
+    background-color: var(--verde);
+}
+
+.saudacao-inicio .ola {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--texto);
+}
+
+.saudacao-inicio .pergunta {
+    font-size: 15px;
+    color: var(--texto-suave);
+}
+
+.grade-acoes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.card-acao {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 18px 14px;
+    background-color: var(--superficie);
+    border: 1px solid var(--borda);
+    border-radius: 16px;
+}
+
+.card-acao .icone {
+    font-size: 24px;
+}
+
+.card-acao .nome {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--texto);
+}
+
+.card-acao .texto {
+    font-size: 11px;
+    color: var(--texto-suave);
+}
+
+.card-acao-bloqueado {
+    opacity: 0.6;
+}
+
+.selo-fase {
+    align-self: flex-start;
+    padding: 3px 8px;
+    font-size: 10px;
+    font-weight: 500;
+    color: var(--texto-suave);
+    background-color: var(--fundo-externo);
+    border-radius: 8px;
+}
+
+.tela-ia {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+    padding: 48px 24px 40px;
+}
+
+.tela-ia .faixa {
+    width: 100%;
+    height: 4px;
+    background-color: var(--verde);
+}
+
+.tela-ia .marca {
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--verde);
+}
+
+.tela-ia form {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    width: 100%;
+    align-items: center;
+}
+
+.cartao-foto {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    padding: 40px 20px;
+    border: 2px dashed var(--borda-input);
+    border-radius: 16px;
+    text-align: center;
+}
+
+.icone-foto {
+    font-size: 40px;
+}
+
+.texto-foto {
+    font-size: 13px;
+    color: var(--texto-suave);
+}
+
+.resultado-ia {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    width: 100%;
+    padding: 24px;
+    background-color: var(--superficie);
+    border: 1px solid var(--borda);
+    border-radius: 16px;
+    text-align: center;
+}
+
+.icone-resultado {
+    font-size: 36px;
+}
+
+.material-identificado {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--texto);
+}
+
+.confianca-resultado {
+    font-size: 13px;
+    color: var(--texto-suave);
 }
