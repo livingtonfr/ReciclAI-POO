@@ -43,17 +43,17 @@ PERFIS_POR_CHAVE = {p['chave']: p for p in PERFIS}
 MENU_POR_PERFIL = [
     (Catador, [
         {'rotulo': 'Meus materiais', 'endpoint': 'materiais', 'fase': None},
-        {'rotulo': 'Meus lotes', 'endpoint': None, 'fase': 'Fase 6'},
+        {'rotulo': 'Meus lotes', 'endpoint': 'lotes', 'fase': None},
         {'rotulo': 'Mercado e transações', 'endpoint': None, 'fase': 'Fase 7'},
     ]),
     (Cooperativa, [
         {'rotulo': 'Meus materiais', 'endpoint': 'materiais', 'fase': None},
-        {'rotulo': 'Meus lotes', 'endpoint': None, 'fase': 'Fase 6'},
+        {'rotulo': 'Meus lotes', 'endpoint': 'lotes', 'fase': None},
         {'rotulo': 'Mercado e transações', 'endpoint': None, 'fase': 'Fase 7'},
     ]),
     (EmpresaCompradora, [
         {'rotulo': 'Meus materiais', 'endpoint': 'materiais', 'fase': None},
-        {'rotulo': 'Meus lotes', 'endpoint': None, 'fase': 'Fase 6'},
+        {'rotulo': 'Meus lotes', 'endpoint': 'lotes', 'fase': None},
         {'rotulo': 'Mercado e transações', 'endpoint': None, 'fase': 'Fase 7'},
     ]),
     (IndustriaTransformadora, [

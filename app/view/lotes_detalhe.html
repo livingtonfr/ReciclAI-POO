@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+
+{% block title %}Recicl.AI - Lote{% endblock %}
+
+{% block content %}
+<div class="tela-dashboard">
+    <div class="faixa"></div>
+    <div class="cabecalho-dashboard">
+        <p class="saudacao">Lote de {{ lote.materiais[0].tipoMaterial.nome }}</p>
+        <span class="selo-perfil">{{ lote.status.value }}</span>
+    </div>
+
+    <div class="bloco-detalhe">
+        <p><strong>Peso total (materiais):</strong> {{ lote.calcularPesoTotal() }} kg</p>
+        <p><strong>Peso registrado (pesagem):</strong> {{ lote.pesoRegistrado if lote.pesoRegistrado is not none else '—' }}</p>
+    </div>
+
+    <div class="bloco-detalhe">
+        <p class="titulo-bloco">Materiais no lote</p>
+        {% for material in lote.materiais %}
+        <div class="item-material-lote">
+            <span>{{ material.tipoMaterial.nome }} - {{ material.pesoKg }} kg</span>
+            {% if lote.status.value == 'EM_FORMACAO' %}
+            <form method="POST" action="{{ url_for('lotes_remover', lote_id=lote.id) }}">
+                <input type="hidden" name="material_id" value="{{ material.id }}">
+                <button class="botao-link" type="submit">Remover</button>
+            </form>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if lote.status.value == 'EM_FORMACAO' %}
+    <div class="bloco-detalhe">
+        <p class="titulo-bloco">Adicionar material</p>
+        {% if materiais_para_adicionar %}
+        <form method="POST" action="{{ url_for('lotes_adicionar', lote_id=lote.id) }}">
+            <div class="campo">
+                <select name="material_id" required>
+                    {% for material in materiais_para_adicionar %}
+                    <option value="{{ material.id }}">
+                        {{ material.tipoMaterial.nome }} - {{ material.pesoKg }} kg
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button class="botao botao-secundario" type="submit">Adicionar ao lote</button>
+        </form>
+        {% else %}
+        <p>Nenhum outro material disponível para adicionar.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <div class="acoes-detalhe">
+        {% if lote.status.value in ('EM_FORMACAO', 'DISPONIVEL') %}
+        <form method="POST" action="{{ url_for('lotes_pesagem', lote_id=lote.id) }}">
+            <div class="campo">
+                <label for="peso">Registrar pesagem (kg)</label>
+                <input id="peso" name="peso" type="number" step="0.1" min="0.1" required>
+            </div>
+            <button class="botao botao-secundario" type="submit">Registrar pesagem</button>
+        </form>
+        {% endif %}
+
+        {% if lote.status.value == 'EM_FORMACAO' %}
+        <form method="POST" action="{{ url_for('lotes_disponibilizar', lote_id=lote.id) }}">
+            <button class="botao" type="submit">Disponibilizar</button>
+        </form>
+        {% endif %}
+
+        {% if lote.status.value == 'DISPONIVEL' %}
+        <form method="POST" action="{{ url_for('lotes_cotar', lote_id=lote.id) }}">
+            <div class="campo">
+                <label for="horizonteDias">Cotar para quantos dias?</label>
+                <input id="horizonteDias" name="horizonteDias" type="number" min="1" value="15">
+            </div>
+            <button class="botao botao-secundario" type="submit">Cotar preço</button>
+        </form>
+        {% endif %}
+
+        {% if lote.status.value in ('EM_FORMACAO', 'DISPONIVEL') %}
+        <form method="POST" action="{{ url_for('lotes_cancelar', lote_id=lote.id) }}">
+            <button class="botao botao-secundario" type="submit">Cancelar lote</button>
+        </form>
+        {% endif %}
+    </div>
+
+    <p class="rodape-link">
+        <a class="link-verde" href="{{ url_for('lotes') }}">&larr; Voltar aos meus lotes</a>
+    </p>
+</div>
+{% endblock %}

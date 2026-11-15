@@ -6,3 +6,4 @@ app.secret_key = 'reciclai-dev-secret'
 from app.controller import auth
 from app.controller import materiais
 from app.controller import ia
+from app.controller import lotes

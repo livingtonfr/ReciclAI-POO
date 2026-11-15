@@ -13,6 +13,7 @@
    9. Dashboard
    10. Materiais e IA (blocos de detalhe, botão secundário)
    11. Início (usuário comum) e telas de IA (Identificar/Resultado)
+   12. Lotes
    ========================================================================== */
 
 
@@ -664,4 +665,29 @@ a {
 .confianca-resultado {
     font-size: 13px;
     color: var(--texto-suave);
+}
+
+
+/* ==========================================================================
+   12. LOTES
+   ========================================================================== */
+.item-material-lote {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 13px;
+}
+
+.botao-link {
+    padding: 0;
+    background: none;
+    border: none;
+    color: #dc2626;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.botao-link:hover {
+    text-decoration: underline;
 }

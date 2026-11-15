@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block title %}Recicl.AI - Novo lote{% endblock %}
+
+{% block content %}
+<div class="tela-cadastro">
+    <div class="faixa"></div>
+    <h1 class="marca">Recicl.AI</h1>
+    <p class="subtitulo">Criar lote a partir de um material</p>
+
+    {% if materiais %}
+    <form method="POST" action="{{ url_for('lotes_novo') }}">
+        <div class="campo">
+            <label for="material_id">Material disponível</label>
+            <select id="material_id" name="material_id" required>
+                {% for material in materiais %}
+                <option value="{{ material.id }}">
+                    {{ material.tipoMaterial.nome }} - {{ material.pesoKg }} kg
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button class="botao" type="submit">Criar lote</button>
+    </form>
+    {% else %}
+    <div class="bloco-detalhe">
+        <p>Você não tem nenhum material disponível para iniciar um lote.</p>
+        <p>Registre e disponibilize um material primeiro.</p>
+    </div>
+    {% endif %}
+
+    <p class="rodape-link">
+        <a class="link-verde" href="{{ url_for('lotes') }}">&larr; Voltar aos meus lotes</a>
+    </p>
+</div>
+{% endblock %}

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Recicl.AI - Meus lotes{% endblock %}
+
+{% block content %}
+<div class="tela-dashboard">
+    <div class="faixa"></div>
+    <div class="cabecalho-dashboard">
+        <p class="saudacao">Meus lotes</p>
+        <a class="link-verde" href="{{ url_for('lotes_novo') }}">+ Novo</a>
+    </div>
+
+    <ul class="menu-dashboard">
+        {% for lote in lotes %}
+        <li class="item-menu">
+            <a class="item-rotulo item-rotulo-link" href="{{ url_for('lotes_detalhe', lote_id=lote.id) }}">
+                {{ lote.materiais[0].tipoMaterial.nome }} - {{ lote.calcularPesoTotal() }} kg
+            </a>
+            <span class="item-fase">{{ lote.status.value }}</span>
+        </li>
+        {% else %}
+        <li class="item-menu item-menu-vazio">Nenhum lote criado ainda.</li>
+        {% endfor %}
+    </ul>
+
+    <p class="rodape-link">
+        <a class="link-verde" href="{{ url_for('dashboard') }}">&larr; Voltar ao dashboard</a>
+    </p>
+</div>
+{% endblock %}
