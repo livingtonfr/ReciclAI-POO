@@ -24,6 +24,11 @@
         {% endwith %}
 
         {% block content %}{% endblock %}
+
+        <form class="rodape-admin" method="POST" action="{{ url_for('admin_reset') }}"
+              onsubmit="return confirm('Resetar a demo? Todos os dados voltam ao estado inicial.');">
+            <button type="submit">Resetar demo</button>
+        </form>
     </div>
 </body>
 </html>

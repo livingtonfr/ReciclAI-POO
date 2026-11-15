@@ -16,6 +16,7 @@
    12. Lotes
    13. Certificado (página imprimível)
    14. Pontos de coleta
+   15. Erro amigável e rodapé de demo (resetar)
    ========================================================================== */
 
 
@@ -778,4 +779,55 @@ a {
 
 .filtro-pontos .campo {
     flex: 1;
+}
+
+
+/* ==========================================================================
+   15. ERRO AMIGÁVEL E RODAPÉ DE DEMO (RESETAR)
+   ========================================================================== */
+.tela-erro {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+    padding: 80px 24px 40px;
+    text-align: center;
+}
+
+.tela-erro .faixa {
+    width: 100%;
+    height: 4px;
+    background-color: var(--verde);
+}
+
+.codigo-erro {
+    font-size: 48px;
+    font-weight: 700;
+    color: var(--borda-input);
+}
+
+.titulo-erro {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--texto);
+}
+
+.mensagem-erro-texto {
+    font-size: 14px;
+    color: var(--texto-suave);
+}
+
+.rodape-admin {
+    padding: 16px 20px 24px;
+    text-align: center;
+}
+
+.rodape-admin button {
+    background: none;
+    border: none;
+    font-family: var(--fonte);
+    font-size: 11px;
+    color: var(--texto-suave);
+    text-decoration: underline;
+    cursor: pointer;
 }
