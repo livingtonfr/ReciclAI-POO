@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+
+{% block title %}Recicl.AI - Minhas transações{% endblock %}
+
+{% block content %}
+<div class="tela-dashboard">
+    <div class="faixa"></div>
+    <div class="cabecalho-dashboard">
+        <p class="saudacao">Minhas transações</p>
+    </div>
+
+    {% for transacao in transacoes %}
+    <div class="bloco-detalhe">
+        <p><strong>{{ transacao.lote.materiais[0].tipoMaterial.nome }}</strong> - {{ transacao.lote.calcularPesoTotal() }} kg</p>
+        <p>Comprador: {{ transacao.comprador.nome }}</p>
+        <p>Valor proposto: R$ {{ '%.2f'|format(transacao.valorTotal) }}</p>
+        <p>Status: <span class="selo-perfil">{{ transacao.status.value }}</span></p>
+
+        {% if transacao.status.value == 'PENDENTE' %}
+        <div class="acoes-detalhe">
+            <form method="POST" action="{{ url_for('transacoes_concluir', transacao_id=transacao.id) }}">
+                <button class="botao" type="submit">Concluir</button>
+            </form>
+            <form method="POST" action="{{ url_for('transacoes_cancelar', transacao_id=transacao.id) }}">
+                <button class="botao botao-secundario" type="submit">Cancelar</button>
+            </form>
+        </div>
+        {% elif transacao.status.value == 'CONCLUIDA' %}
+            {% if transacao.certificado %}
+            <a class="link-verde" href="{{ url_for('certificado_detalhe', certificado_id=transacao.certificado.id) }}">
+                Ver certificado
+            </a>
+            {% else %}
+            <form method="POST" action="{{ url_for('transacoes_certificado', transacao_id=transacao.id) }}">
+                <button class="botao botao-secundario" type="submit">Emitir certificado</button>
+            </form>
+            {% endif %}
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="bloco-detalhe">
+        <p>Nenhuma proposta recebida ainda.</p>
+    </div>
+    {% endfor %}
+
+    <p class="rodape-link">
+        <a class="link-verde" href="{{ url_for('dashboard') }}">&larr; Voltar ao dashboard</a>
+    </p>
+</div>
+{% endblock %}

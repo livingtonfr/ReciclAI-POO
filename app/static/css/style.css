@@ -14,6 +14,7 @@
    10. Materiais e IA (blocos de detalhe, botão secundário)
    11. Início (usuário comum) e telas de IA (Identificar/Resultado)
    12. Lotes
+   13. Certificado (página imprimível)
    ========================================================================== */
 
 
@@ -690,4 +691,76 @@ a {
 
 .botao-link:hover {
     text-decoration: underline;
+}
+
+
+/* ==========================================================================
+   13. CERTIFICADO (PÁGINA IMPRIMÍVEL)
+   ========================================================================== */
+.tela-certificado {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 48px 24px 40px;
+}
+
+.moldura-certificado {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 32px 20px;
+    text-align: center;
+    background-color: var(--superficie);
+    border: 2px solid var(--verde);
+    border-radius: 16px;
+}
+
+.selo-recicl {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--verde-escuro);
+}
+
+.titulo-certificado {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--texto);
+}
+
+.codigo-certificado {
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    color: var(--verde-escuro);
+}
+
+.dados-certificado {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-align: left;
+    width: 100%;
+    font-size: 13px;
+    padding-top: 10px;
+}
+
+.emissao-certificado {
+    font-size: 11px;
+    color: var(--texto-suave);
+    padding-top: 10px;
+}
+
+.acoes-certificado {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+}
+
+@media print {
+    .acoes-certificado,
+    .mensagens {
+        display: none;
+    }
 }

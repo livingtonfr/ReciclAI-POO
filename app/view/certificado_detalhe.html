@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Recicl.AI - Certificado{% endblock %}
+
+{% block content %}
+<div class="tela-certificado">
+    <div class="moldura-certificado">
+        <p class="selo-recicl">♻️ Recicl.AI</p>
+        <h1 class="titulo-certificado">Certificado de Reciclagem</h1>
+        <p class="codigo-certificado">{{ certificado.codigo }}</p>
+
+        {% if transacao %}
+        <div class="dados-certificado">
+            <p><strong>Material:</strong> {{ transacao.lote.materiais[0].tipoMaterial.nome }}</p>
+            <p><strong>Peso negociado:</strong> {{ transacao.pesoNegociado }} kg</p>
+            <p><strong>Vendedor:</strong> {{ transacao.vendedor.nome }}</p>
+            <p><strong>Comprador:</strong> {{ transacao.comprador.nome }}</p>
+            <p><strong>Valor:</strong> R$ {{ '%.2f'|format(transacao.valorTotal) }}</p>
+        </div>
+        {% endif %}
+
+        <p class="emissao-certificado">Emitido em {{ certificado.dataEmissao.strftime('%d/%m/%Y %H:%M') }}</p>
+    </div>
+
+    <div class="acoes-certificado">
+        <button class="botao" type="button" onclick="window.print()">Imprimir</button>
+        <a class="link-verde" href="{{ url_for('transacoes') }}">&larr; Voltar às transações</a>
+    </div>
+</div>
+{% endblock %}

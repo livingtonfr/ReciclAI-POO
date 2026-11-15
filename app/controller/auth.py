@@ -44,20 +44,22 @@ MENU_POR_PERFIL = [
     (Catador, [
         {'rotulo': 'Meus materiais', 'endpoint': 'materiais', 'fase': None},
         {'rotulo': 'Meus lotes', 'endpoint': 'lotes', 'fase': None},
-        {'rotulo': 'Mercado e transações', 'endpoint': None, 'fase': 'Fase 7'},
+        {'rotulo': 'Minhas transações (venda)', 'endpoint': 'transacoes', 'fase': None},
     ]),
     (Cooperativa, [
         {'rotulo': 'Meus materiais', 'endpoint': 'materiais', 'fase': None},
         {'rotulo': 'Meus lotes', 'endpoint': 'lotes', 'fase': None},
-        {'rotulo': 'Mercado e transações', 'endpoint': None, 'fase': 'Fase 7'},
+        {'rotulo': 'Mercado (comprar)', 'endpoint': 'mercado', 'fase': None},
+        {'rotulo': 'Minhas transações (venda)', 'endpoint': 'transacoes', 'fase': None},
     ]),
     (EmpresaCompradora, [
         {'rotulo': 'Meus materiais', 'endpoint': 'materiais', 'fase': None},
         {'rotulo': 'Meus lotes', 'endpoint': 'lotes', 'fase': None},
-        {'rotulo': 'Mercado e transações', 'endpoint': None, 'fase': 'Fase 7'},
+        {'rotulo': 'Mercado (comprar)', 'endpoint': 'mercado', 'fase': None},
+        {'rotulo': 'Minhas transações (venda)', 'endpoint': 'transacoes', 'fase': None},
     ]),
     (IndustriaTransformadora, [
-        {'rotulo': 'Mercado (como compradora)', 'endpoint': None, 'fase': 'Fase 7'},
+        {'rotulo': 'Mercado (como compradora)', 'endpoint': 'mercado', 'fase': None},
     ]),
 ]
 
