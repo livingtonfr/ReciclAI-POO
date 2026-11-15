@@ -8,3 +8,4 @@ from app.controller import materiais
 from app.controller import ia
 from app.controller import lotes
 from app.controller import transacoes
+from app.controller import pontos

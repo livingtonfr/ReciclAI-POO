@@ -1,0 +1,55 @@
+{% extends 'base.html' %}
+
+{% block title %}Recicl.AI - Pontos de coleta{% endblock %}
+
+{% block content %}
+<div class="tela-dashboard">
+    <div class="faixa"></div>
+    <div class="cabecalho-dashboard">
+        <p class="saudacao">Pontos de coleta</p>
+    </div>
+
+    <form method="GET" action="{{ url_for('pontos') }}" class="filtro-pontos">
+        <div class="campo">
+            <label for="tipo">Filtrar por material</label>
+            <select id="tipo" name="tipo">
+                <option value="">Todos os materiais</option>
+                {% for tipo in tipos %}
+                <option value="{{ tipo.id }}" {% if tipo_selecionado and tipo.id == tipo_selecionado.id %}selected{% endif %}>
+                    {{ tipo.nome }}
+                </option>
+                {% endfor %}
+            </select>
+        </div>
+        <button class="botao botao-secundario" type="submit">Filtrar</button>
+    </form>
+
+    {% for ponto in pontos %}
+    <div class="bloco-detalhe">
+        <p class="titulo-bloco">{{ ponto.nome }}</p>
+        <p>{{ tipo_label.get(ponto.tipo.name, ponto.tipo.value) }}</p>
+        <p>{{ ponto.endereco }}</p>
+
+        {% if ponto.horarios %}
+        <p><strong>Horários:</strong></p>
+        {% for horario in ponto.horarios %}
+        <p>{{ horario.diaSemana.value.capitalize() }}: {{ horario.horaAbertura.strftime('%H:%M') }} - {{ horario.horaFechamento.strftime('%H:%M') }}</p>
+        {% endfor %}
+        {% endif %}
+
+        <a class="link-verde" target="_blank" rel="noopener"
+           href="https://www.google.com/maps?q={{ ponto.latitude }},{{ ponto.longitude }}">
+            Ver no mapa
+        </a>
+    </div>
+    {% else %}
+    <div class="bloco-detalhe">
+        <p>Nenhum ponto de coleta aceita este material ainda.</p>
+    </div>
+    {% endfor %}
+
+    <p class="rodape-link">
+        <a class="link-verde" href="{{ url_for('dashboard') }}">&larr; Voltar</a>
+    </p>
+</div>
+{% endblock %}

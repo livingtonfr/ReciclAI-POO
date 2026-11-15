@@ -15,6 +15,7 @@
    11. Início (usuário comum) e telas de IA (Identificar/Resultado)
    12. Lotes
    13. Certificado (página imprimível)
+   14. Pontos de coleta
    ========================================================================== */
 
 
@@ -763,4 +764,18 @@ a {
     .mensagens {
         display: none;
     }
+}
+
+
+/* ==========================================================================
+   14. PONTOS DE COLETA
+   ========================================================================== */
+.filtro-pontos {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+.filtro-pontos .campo {
+    flex: 1;
 }

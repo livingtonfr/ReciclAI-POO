@@ -19,10 +19,9 @@
         <p>{{ dica }}</p>
     </div>
 
-    <div class="card-acao card-acao-bloqueado">
+    <a class="card-acao" href="{{ url_for('pontos', tipo=resultado.tipoMaterial.id) }}">
         <p class="nome">Encontrar ponto de coleta</p>
-        <span class="selo-fase">Fase 8</span>
-    </div>
+    </a>
 
     <p class="rodape-link">
         <a class="link-verde" href="{{ url_for('ia_identificar') }}">&larr; Analisar outra foto</a>
