@@ -167,3 +167,115 @@ class LoteSQLiteDAO:
             )
 
         return lote
+
+    def buscar_por_id(self, lote_id):
+        from app.dao.tipo_material_sqlite_dao import TipoMaterialSQLiteDAO
+        from app.dao.usuario_sqlite_dao import UsuarioSQLiteDAO
+        from app.model.material import EventoRastreio, AvaliacaoQualidade
+
+        registro = self._conexao.execute(
+            "SELECT * FROM lotes WHERE id = ?",
+            (str(lote_id),),
+        ).fetchone()
+
+        if registro is None:
+            return None
+
+        if registro["status"] not in ("EM_FORMACAO", "DISPONIVEL"):
+            raise ValueError(
+                "A consulta de lotes encerrados ainda não foi implementada."
+            )
+
+        criador = UsuarioSQLiteDAO(self._conexao).buscar_por_id(
+            registro["criador_id"]
+        )
+
+        composicao = self._conexao.execute(
+            "SELECT m.* FROM lotes_materiais AS lm "
+            "JOIN materiais AS m ON m.id = lm.material_id "
+            "WHERE lm.lote_id = ? ORDER BY lm.ordem",
+            (registro["id"],),
+        ).fetchall()
+
+        vinculos = self._conexao.execute(
+            "SELECT material_id FROM vinculos_lotes_atuais "
+            "WHERE lote_id = ?",
+            (registro["id"],),
+        ).fetchall()
+
+        if (
+            {r["id"] for r in composicao}
+            != {r["material_id"] for r in vinculos}
+        ):
+            raise ValueError(
+                "A composição e os vínculos atuais estão inconsistentes."
+            )
+
+        tipos = {}
+        dados_materiais = []
+
+        for item in composicao:
+            if item["responsavel_atual_id"] != registro["criador_id"]:
+                raise ValueError(
+                    "O responsável do material difere do criador."
+                )
+
+            tipo_id = item["tipo_material_id"]
+
+            if tipo_id not in tipos:
+                tipos[tipo_id] = TipoMaterialSQLiteDAO(
+                    self._conexao
+                ).buscar_por_id(tipo_id)
+
+            eventos = self._conexao.execute(
+                "SELECT * FROM eventos_rastreio "
+                "WHERE material_id = ? ORDER BY ordem",
+                (item["id"],),
+            ).fetchall()
+
+            avaliacoes = self._conexao.execute(
+                "SELECT * FROM avaliacoes_qualidade "
+                "WHERE material_id = ? ORDER BY ordem",
+                (item["id"],),
+            ).fetchall()
+
+            dados_materiais.append(
+                dict(
+                    identificador=item["id"],
+                    tipoMaterial=tipos[tipo_id],
+                    pesoKg=item["peso_kg"],
+                    condicaoDeclarada=item["condicao_declarada"],
+                    responsavelAtual=criador,
+                    status=item["status"],
+                    dataRegistro=item["data_registro"],
+                    observacoesDeclaradas=item["observacoes_declaradas"],
+                    eventos=[
+                        EventoRastreio.reconstituir(
+                            e["id"],
+                            e["tipo"],
+                            e["descricao"],
+                            e["data_evento"],
+                        )
+                        for e in eventos
+                    ],
+                    avaliacoes=[
+                        AvaliacaoQualidade.reconstituir(
+                            a["id"],
+                            a["condicao_detectada"],
+                            a["confianca"],
+                            a["data_avaliacao"],
+                            a["observacoes"],
+                        )
+                        for a in avaliacoes
+                    ],
+                )
+            )
+
+        return LoteMaterial.reconstituir_ativo(
+            identificador=registro["id"],
+            criador=criador,
+            dataCriacao=registro["data_criacao"],
+            status=registro["status"],
+            dadosMateriais=dados_materiais,
+            pesoRegistrado=registro["peso_registrado"],
+        )

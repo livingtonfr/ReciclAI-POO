@@ -560,8 +560,29 @@ O DAO de materiais ainda não carrega materiais EM_LOTE isoladamente.
 
 A aplicação continua utilizando o repositório em memória.
 
-Próxima etapa: implementar a consulta SQLite dos lotes ativos,
-restaurando composição, histórico e vínculos.
+## Fase 5E.5 — Consulta SQLite de lotes ativos
+
+- [x] Implementada busca de lote ativo por ID.
+- [x] Recuperadas composição, ordem, pesagem, estado e data.
+- [x] Recuperados eventos e avaliações dos materiais.
+- [x] Restaurados os vínculos entre o lote e seus materiais.
+- [x] Compartilhadas as instâncias de criador e tipo dentro do lote carregado.
+- [x] Conferida a correspondência entre composição e vínculos atuais.
+- [x] Testada a recuperação após fechar e reabrir o banco.
+- [x] Testado que a consulta não realiza gravações.
+- [x] Testada a recusa de vínculos e estados inconsistentes.
+- [x] Executados os 174 testes com sucesso.
+
+A consulta implementada atende lotes EM_FORMACAO e DISPONIVEL.
+Lotes encerrados ainda são recusados explicitamente pelo DAO.
+
+A recuperação das transações permanece pendente.
+Consultas independentes ainda produzem instâncias diferentes.
+
+Alterações feitas nos objetos recuperados não são gravadas automaticamente.
+A aplicação continua utilizando o repositório em memória.
+
+Próxima etapa: implementar a atualização persistente dos lotes.
 
 
 
