@@ -123,18 +123,21 @@ class LoteService:
 
     def registrar_pesagem(self, lote_id, usuario, peso):
         lote = self.buscar_do_usuario(lote_id, usuario)
-        lote.registrarPesagem(peso)
-        return lote
+
+        return self._lote_dao.registrar_pesagem(
+            lote.id,
+            peso,
+        )
 
     def disponibilizar(self, lote_id, usuario):
         lote = self.buscar_do_usuario(lote_id, usuario)
-        lote.disponibilizar()
-        return lote
+
+        return self._lote_dao.disponibilizar(lote.id)
 
     def cancelar(self, lote_id, usuario):
         lote = self.buscar_do_usuario(lote_id, usuario)
-        lote.cancelar()
-        return lote
+
+        return self._lote_dao.cancelar(lote.id)
 
     def cotar(self, lote_id, usuario, horizonte_dias):
         lote = self.buscar_do_usuario(lote_id, usuario)

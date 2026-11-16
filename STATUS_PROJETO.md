@@ -701,8 +701,30 @@ precisam ser encaminhados às operações persistentes.
 
 A aplicação Flask continua utilizando o repositório em memória.
 
-Próxima etapa: 5E.12 — integrar pesagem, disponibilização
-e cancelamento pelo serviço.
+## Fase 5E.12 — Pesagem, disponibilização e cancelamento pelo serviço
+
+- [x] Encaminhada a pesagem do LoteService ao DAO.
+- [x] Encaminhada a disponibilização do LoteService ao DAO.
+- [x] Encaminhado o cancelamento do LoteService ao DAO.
+- [x] Implementadas as operações correspondentes no DAO em memória.
+- [x] Reutilizadas as regras do modelo e a atualização SQLite existente.
+- [x] Mantida a autorização antes das operações de alteração.
+- [x] Testada a persistência após reabrir a conexão.
+- [x] Testada a preservação dos dados em operações recusadas.
+- [x] Testadas falhas SQL e reversão pela transação externa.
+- [x] Executados os 206 testes com sucesso.
+
+As operações de estado do LoteService estão integradas
+aos DAOs em memória e SQLite.
+
+O cancelamento persistente continua limitado aos lotes
+sem transações persistidas. A integração das propostas
+permanece prevista para o bloco 5F.
+
+A aplicação Flask continua utilizando o repositório em memória.
+
+Próxima etapa: 5E.13 — conferir cotação com objetos
+reconstruídos e revisar o fluxo integrado dos lotes.
 
 
 

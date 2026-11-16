@@ -684,3 +684,23 @@ class LoteSQLiteDAO:
             self.buscar_por_id(registro["id"])
             for registro in registros
         ]
+
+    def registrar_pesagem(self, lote_id, peso):
+        lote = self.buscar_por_id(lote_id)
+
+        if lote is None:
+            raise ValueError("Lote não encontrado.")
+
+        lote.registrarPesagem(peso)
+
+        return self.atualizar_pesagem_e_estado(lote)
+
+    def disponibilizar(self, lote_id):
+        lote = self.buscar_por_id(lote_id)
+
+        if lote is None:
+            raise ValueError("Lote não encontrado.")
+
+        lote.disponibilizar()
+
+        return self.atualizar_pesagem_e_estado(lote)

@@ -63,3 +63,30 @@ class LoteDAO:
 
         lote.removerMaterial(material)
         return lote
+
+    def registrar_pesagem(self, lote_id, peso):
+        lote = self.buscar_por_id(lote_id)
+
+        if lote is None:
+            raise ValueError("Lote não encontrado.")
+
+        lote.registrarPesagem(peso)
+        return lote
+
+    def disponibilizar(self, lote_id):
+        lote = self.buscar_por_id(lote_id)
+
+        if lote is None:
+            raise ValueError("Lote não encontrado.")
+
+        lote.disponibilizar()
+        return lote
+
+    def cancelar(self, lote_id):
+        lote = self.buscar_por_id(lote_id)
+
+        if lote is None:
+            raise ValueError("Lote não encontrado.")
+
+        lote.cancelar()
+        return lote
