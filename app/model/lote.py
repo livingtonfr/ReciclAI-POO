@@ -92,6 +92,9 @@ class LoteMaterial:
         material.agruparEmLote(self)
         self.__materiais.append(material)
 
+        # A composição mudou; a pesagem anterior deixou de ser válida.
+        self.__pesoRegistrado = None
+
     def removerMaterial(self, material):
         if self.__status != StatusLote.EM_FORMACAO:
             raise ValueError("Materiais só podem ser removidos enquanto o lote estiver EM_FORMACAO.")
@@ -104,6 +107,9 @@ class LoteMaterial:
 
         material.removerDoLote(self)
         self.__materiais.remove(material)
+
+        # A composição mudou; a pesagem anterior deixou de ser válida.
+        self.__pesoRegistrado = None
 
     def calcularPesoTotal(self):
         return sum(material.pesoKg for material in self.__materiais)

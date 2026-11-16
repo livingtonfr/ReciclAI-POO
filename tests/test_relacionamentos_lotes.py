@@ -150,6 +150,121 @@ class TestRelacionamentosLotes(unittest.TestCase):
             StatusMaterial.EM_LOTE,
         )
 
+    def test_adicao_invalida_pesagem_e_permite_nova_pesagem(self):
+        primeiro = self.criar_material_disponivel()
+        segundo = Material(
+            self.tipo, 20.0, CondicaoMaterial.LIMPO, self.catador
+        )
+        segundo.disponibilizar()
+        lote = self.catador.criarLote(primeiro)
+        lote.registrarPesagem(10.0)
+
+        lote.adicionarMaterial(segundo)
+
+        self.assertEqual(lote.calcularPesoTotal(), 30.0)
+        self.assertIsNone(lote.pesoRegistrado)
+        self.assertIs(segundo.loteAtual, lote)
+
+        lote.registrarPesagem(29.5)
+        self.assertEqual(lote.pesoRegistrado, 29.5)
+
+    def test_remocao_invalida_pesagem(self):
+        primeiro = self.criar_material_disponivel()
+        segundo = self.criar_material_disponivel()
+        lote = self.catador.criarLote(primeiro)
+        lote.adicionarMaterial(segundo)
+        lote.registrarPesagem(19.5)
+
+        lote.removerMaterial(segundo)
+
+        self.assertEqual(lote.calcularPesoTotal(), 10.0)
+        self.assertIsNone(lote.pesoRegistrado)
+        self.assertEqual(lote.materiais, [primeiro])
+        self.assertIsNone(segundo.loteAtual)
+
+    def test_operacoes_recusadas_preservam_pesagem(self):
+        primeiro = self.criar_material_disponivel()
+        externo = self.criar_material_disponivel()
+        excessivo = Material(
+            self.tipo, 50_000.0, CondicaoMaterial.LIMPO, self.catador
+        )
+        excessivo.disponibilizar()
+        lote = self.catador.criarLote(primeiro)
+        lote.registrarPesagem(9.5)
+        historico = primeiro.obterHistorico()
+
+        tentativas = (
+            (lote.adicionarMaterial, primeiro),
+            (lote.adicionarMaterial, excessivo),
+            (lote.removerMaterial, primeiro),
+            (lote.removerMaterial, externo),
+        )
+
+        for operacao, material in tentativas:
+            with self.subTest(
+                operacao=operacao.__name__, material=material.id
+            ):
+                with self.assertRaises(ValueError):
+                    operacao(material)
+
+                self.assertEqual(lote.pesoRegistrado, 9.5)
+                self.assertEqual(lote.materiais, [primeiro])
+                self.assertIs(primeiro.loteAtual, lote)
+                self.assertEqual(
+                    primeiro.obterHistorico(), historico
+                )
+
+        lote.disponibilizar()
+
+        for operacao, material in (
+            (lote.adicionarMaterial, externo),
+            (lote.removerMaterial, primeiro),
+        ):
+            with self.subTest(
+                lote_disponivel=operacao.__name__
+            ):
+                with self.assertRaises(ValueError):
+                    operacao(material)
+
+                self.assertEqual(lote.pesoRegistrado, 9.5)
+                self.assertEqual(lote.materiais, [primeiro])
+
+    def test_recusas_do_material_preservam_pesagem(self):
+        primeiro = self.criar_material_disponivel()
+        segundo = self.criar_material_disponivel()
+        lote = self.catador.criarLote(primeiro)
+        lote.registrarPesagem(9.5)
+
+        with patch.object(
+            Material,
+            "agruparEmLote",
+            side_effect=ValueError("Recusa simulada"),
+        ):
+            with self.assertRaisesRegex(
+                ValueError, "Recusa simulada"
+            ):
+                lote.adicionarMaterial(segundo)
+
+        self.assertEqual(lote.pesoRegistrado, 9.5)
+        self.assertEqual(lote.materiais, [primeiro])
+        self.assertIsNone(segundo.loteAtual)
+
+        lote.adicionarMaterial(segundo)
+        lote.registrarPesagem(19.5)
+
+        with patch.object(
+            Material,
+            "removerDoLote",
+            side_effect=ValueError("Recusa simulada"),
+        ):
+            with self.assertRaisesRegex(
+                ValueError, "Recusa simulada"
+            ):
+                lote.removerMaterial(segundo)
+
+        self.assertEqual(lote.pesoRegistrado, 19.5)
+        self.assertEqual(lote.materiais, [primeiro, segundo])
+        self.assertIs(segundo.loteAtual, lote)
 
 if __name__ == "__main__":
     unittest.main()
