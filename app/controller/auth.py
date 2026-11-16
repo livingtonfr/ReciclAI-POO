@@ -13,7 +13,6 @@ from app.model.usuario import (
 )
 from app.dao.usuario_dao import UsuarioDAO
 from app.services.usuario_service import UsuarioService, CredenciaisInvalidasError
-from werkzeug.security import generate_password_hash
 
 # Perfis exibidos na seleção de cadastro (um para cada subclasse concreta de Usuario).
 # "chave" é usada na URL e no nome da classe CSS que define a cor do card;
@@ -153,47 +152,34 @@ def cadastro_perfil(perfil):
         abort(404)
 
     if request.method == 'POST':
-        nome = request.form.get('nome', '').strip()
-        email = request.form.get('email', '').strip().lower()
-        senha = request.form.get('senha', '')
-        telefone = request.form.get('telefone', '').strip()
-        endereco = request.form.get('endereco', '').strip()
-        documento = request.form.get('documento', '').strip()
+        try:
+            obter_usuario_service().cadastrar(
+                perfil=perfil,
+                nome=request.form.get('nome', ''),
+                email=request.form.get('email', ''),
+                senha=request.form.get('senha', ''),
+                telefone=request.form.get('telefone', ''),
+                endereco=request.form.get('endereco', ''),
+                documento=request.form.get('documento', ''),
+            )
+        except ValueError as erro:
+            flash(str(erro), 'error')
+            return render_template(
+                'cadastro_formulario.html',
+                perfil=info_perfil,
+            )
 
-        campos_obrigatorios = [nome, email, senha, telefone, endereco]
-        if info_perfil['documento'] is not None:
-            campos_obrigatorios.append(documento)
-
-        if not all(campos_obrigatorios):
-            flash('Preencha todos os campos obrigatórios.', 'error')
-            return render_template('cadastro_formulario.html', perfil=info_perfil)
-
-        if '@' not in email:
-            flash('Informe um e-mail válido.', 'error')
-            return render_template('cadastro_formulario.html', perfil=info_perfil)
-
-        if len(senha) < 6:
-            flash('A senha deve ter pelo menos 6 caracteres.', 'error')
-            return render_template('cadastro_formulario.html', perfil=info_perfil)
-
-        if Repositorio().buscarUsuarioPorEmail(email) is not None:
-            flash('Já existe uma conta cadastrada com este e-mail.', 'error')
-            return render_template('cadastro_formulario.html', perfil=info_perfil)
-
-        senha_hash = generate_password_hash(senha)
-        classe = info_perfil['classe']
-
-        if info_perfil['documento'] is not None:
-            usuario = classe(nome, email, senha_hash, telefone, endereco, documento)
-        else:
-            usuario = classe(nome, email, senha_hash, telefone, endereco)
-
-        Repositorio().usuarios.append(usuario)
-
-        flash('Cadastro realizado com sucesso! Faça login para continuar.', 'success')
+        flash(
+            'Cadastro realizado com sucesso! '
+            'Faça login para continuar.',
+            'success',
+        )
         return redirect(url_for('login'))
 
-    return render_template('cadastro_formulario.html', perfil=info_perfil)
+    return render_template(
+        'cadastro_formulario.html',
+        perfil=info_perfil,
+    )
 
 
 @app.route('/dashboard')
@@ -218,26 +204,25 @@ def perfil():
     usuario = usuario_atual()
 
     if request.method == 'POST':
-        nome = request.form.get('nome', '').strip()
-        email = request.form.get('email', '').strip().lower()
-        telefone = request.form.get('telefone', '').strip()
-        endereco = request.form.get('endereco', '').strip()
+        try:
+            obter_usuario_service().atualizar_perfil(
+                usuario=usuario,
+                nome=request.form.get('nome', ''),
+                email=request.form.get('email', ''),
+                telefone=request.form.get('telefone', ''),
+                endereco=request.form.get('endereco', ''),
+            )
+        except ValueError as erro:
+            flash(str(erro), 'error')
+            return render_template(
+                'perfil.html',
+                usuario=usuario,
+            )
 
-        if not all([nome, email, telefone, endereco]):
-            flash('Preencha todos os campos.', 'error')
-            return render_template('perfil.html', usuario=usuario)
-
-        if '@' not in email:
-            flash('Informe um e-mail válido.', 'error')
-            return render_template('perfil.html', usuario=usuario)
-
-        usuario_com_email = Repositorio().buscarUsuarioPorEmail(email)
-        if usuario_com_email is not None and usuario_com_email is not usuario:
-            flash('Este e-mail já está em uso por outra conta.', 'error')
-            return render_template('perfil.html', usuario=usuario)
-
-        usuario.atualizarPerfil(nome=nome, email=email, telefone=telefone, endereco=endereco)
         flash('Perfil atualizado com sucesso.', 'success')
         return redirect(url_for('perfil'))
 
-    return render_template('perfil.html', usuario=usuario)
+    return render_template(
+        'perfil.html',
+        usuario=usuario,
+    )

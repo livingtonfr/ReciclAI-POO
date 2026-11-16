@@ -19,3 +19,15 @@ class UsuarioDAO:
                 return usuario
 
         return None
+
+    def adicionar(self, usuario):
+        if self.buscar_por_id(usuario.id) is not None:
+            raise ValueError("O usuário já está cadastrado.")
+
+        if self.buscar_por_email(usuario.email) is not None:
+            raise ValueError(
+                "Já existe uma conta cadastrada com este e-mail."
+            )
+
+        self._repositorio.usuarios.append(usuario)
+        return usuario

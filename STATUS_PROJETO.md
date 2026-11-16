@@ -246,3 +246,13 @@ para serviços e DAOs ainda está pendente.
 
 Cadastro e atualização de perfil serão migrados na 4H.2.
 
+### Fase 4H.2 — Cadastro e atualização de perfil
+
+- [x] Cadastro coordenado pelo UsuarioService.
+- [x] Armazenamento centralizado no UsuarioDAO.
+- [x] Criação de usuários limitada aos cinco perfis previstos.
+- [x] Atualização de perfil coordenada pelo serviço.
+- [x] Validação de e-mail duplicado antes das alterações.
+- [x] Preservada a geração e verificação de hash de senha.
+- [x] Adicionados seis testes de cadastro e perfil.
+- [x] Suíte e verificações no navegador aprovadas.
