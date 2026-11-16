@@ -278,3 +278,12 @@ Cadastro e atualização de perfil serão migrados na 4H.2.
 - [x] Reset testado sem apagar dados reais da demonstração.
 - [x] Adicionados quatro testes dos serviços complementares.
 - [x] Suíte, cenário e consultas pelo navegador aprovados.
+
+### Fase 4J — Revisão final
+
+- [x] Conferidas as referências ao Repositorio nos controladores.
+- [x] Documentada a divisão entre controladores, serviços,
+      DAOs e modelo.
+- [x] Documentadas as limitações do armazenamento em memória.
+- [x] Suíte automatizada e cenário aprovados após as alterações.
+- [x] Integrar a branch fase-4-servicos-dao à master.
