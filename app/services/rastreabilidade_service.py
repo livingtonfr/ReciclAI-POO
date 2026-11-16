@@ -22,7 +22,7 @@ class RastreabilidadeService:
                 "Material não encontrado."
             )
 
-        if material.responsavelAtual is usuario:
+        if material.responsavelAtual.id == usuario.id:
             return material.obterHistorico()
 
         transacoes = (
@@ -31,8 +31,8 @@ class RastreabilidadeService:
         )
 
         participou = any(
-            usuario is transacao.vendedor
-            or usuario is transacao.comprador
+            usuario.id == transacao.vendedor.id
+            or usuario.id == transacao.comprador.id
             for transacao in transacoes
         )
 

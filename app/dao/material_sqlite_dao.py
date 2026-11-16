@@ -69,6 +69,9 @@ class MaterialSQLiteDAO:
         return [self._converter(registro) for registro in registros]
 
     def _converter(self, registro):
+        if registro["status"] == StatusMaterial.EM_LOTE.value:
+            return self._converter_em_lote(registro)
+
         tipo = TipoMaterialSQLiteDAO(self._conexao).buscar_por_id(
             registro["tipo_material_id"]
         )
@@ -99,15 +102,61 @@ class MaterialSQLiteDAO:
             ) for item in avaliacoes],
         )
 
+    def _converter_em_lote(self, registro):
+        """Material EM_LOTE é reconstruído junto com seu lote ativo."""
+        from app.dao.lote_sqlite_dao import LoteSQLiteDAO
+
+        vinculo = self._conexao.execute(
+            "SELECT lote_id FROM vinculos_lotes_atuais "
+            "WHERE material_id = ?",
+            (registro["id"],),
+        ).fetchone()
+
+        if vinculo is None:
+            raise ValueError("Material EM_LOTE sem vínculo atual.")
+
+        lote = LoteSQLiteDAO(self._conexao).buscar_por_id(
+            vinculo["lote_id"]
+        )
+
+        material = next(
+            (m for m in lote.materiais if str(m.id) == registro["id"]),
+            None,
+        )
+
+        if material is None:
+            raise ValueError("Material ausente do lote vinculado.")
+
+        return material
+
     def atualizar(self, material):
-        if material.status == StatusMaterial.EM_LOTE or material.loteAtual is not None:
-            raise ValueError("A persistência de materiais em lote ainda não foi implementada.")
+        em_lote = (
+            material.status == StatusMaterial.EM_LOTE
+            or material.loteAtual is not None
+        )
 
         self._conexao.execute("SAVEPOINT atualizar_material")
         try:
             anterior = self.buscar_por_id(material.id)
             if anterior is None:
                 raise ValueError("Material não encontrado.")
+
+            # Entrar ou sair de um lote é responsabilidade do DAO de lotes;
+            # aqui só se aceita manter o vínculo atual (ex.: nova avaliação).
+            if em_lote or anterior.status == StatusMaterial.EM_LOTE:
+                if (
+                    material.status != StatusMaterial.EM_LOTE
+                    or anterior.status != StatusMaterial.EM_LOTE
+                    or material.loteAtual is None
+                    or anterior.loteAtual is None
+                    or material.loteAtual.id != anterior.loteAtual.id
+                    or material.responsavelAtual.id
+                    != anterior.responsavelAtual.id
+                ):
+                    raise ValueError(
+                        "Alterações de vínculo com lote devem usar "
+                        "as operações de lotes."
+                    )
             if (
                 anterior.tipoMaterial.id != material.tipoMaterial.id
                 or anterior.pesoKg != material.pesoKg

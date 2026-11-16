@@ -7,9 +7,10 @@ from app.controller.auth import usuario_atual, login_obrigatorio
 from app.dao.repositorio import Repositorio
 from app.model.enums import CondicaoMaterial
 from app.model.usuario import Catador, Cooperativa, EmpresaCompradora, IndustriaTransformadora
-from app.dao.material_dao import MaterialDAO
+from app.database.contexto import obter_conexao
+from app.dao.material_sqlite_dao import MaterialSQLiteDAO
 from app.services.material_service import MaterialService, MaterialNaoEncontradoError, AcessoMaterialNegadoError
-from app.dao.tipo_material_dao import TipoMaterialDAO
+from app.dao.tipo_material_sqlite_dao import TipoMaterialSQLiteDAO
 
 # Quem opera materiais (registra, disponibiliza, avalia, cota): só quem tem
 # esses métodos no UML. A Indústria NÃO tem solicitarPrecificacaoMaterial,
@@ -21,11 +22,14 @@ PERFIS_MATERIAL = (Catador, Cooperativa, EmpresaCompradora)
 PERFIS_TITULARES_MATERIAL = PERFIS_MATERIAL + (IndustriaTransformadora,)
 
 def obter_material_service():
+    # Visão e precificação continuam simuladas (ficam no Repositorio);
+    # materiais e tipos vêm do SQLite.
     repositorio = Repositorio()
+    conexao = obter_conexao()
 
     return MaterialService(
-        material_dao=MaterialDAO(repositorio),
-        tipo_material_dao=TipoMaterialDAO(repositorio),
+        material_dao=MaterialSQLiteDAO(conexao),
+        tipo_material_dao=TipoMaterialSQLiteDAO(conexao),
         servico_visao=repositorio.servico_visao,
         servico_precificacao=repositorio.servico_precificacao,
     )

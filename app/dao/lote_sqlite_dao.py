@@ -1,5 +1,5 @@
 from app.dao.material_sqlite_dao import MaterialSQLiteDAO
-from app.model.enums import StatusLote, StatusMaterial
+from app.model.enums import StatusLote, StatusMaterial, StatusTransacao
 from app.model.lote import LoteMaterial
 from app.model.material import Material
 from app.model.usuario import (
@@ -28,7 +28,7 @@ class LoteSQLiteDAO:
 
         if lote.transacoes:
             raise ValueError(
-                "A persistência das transações ainda não foi implementada."
+                "Um lote novo não pode possuir transações."
             )
 
         if not isinstance(
@@ -182,7 +182,9 @@ class LoteSQLiteDAO:
             return None
 
         if registro["status"] in ("NEGOCIADO", "CANCELADO"):
-            return self._reconstituir_encerrado(registro)
+            return self._com_transacoes(
+                self._reconstituir_encerrado(registro)
+            )
 
         criador = UsuarioSQLiteDAO(self._conexao).buscar_por_id(
             registro["criador_id"]
@@ -269,14 +271,23 @@ class LoteSQLiteDAO:
                 )
             )
 
-        return LoteMaterial.reconstituir_ativo(
-            identificador=registro["id"],
-            criador=criador,
-            dataCriacao=registro["data_criacao"],
-            status=registro["status"],
-            dadosMateriais=dados_materiais,
-            pesoRegistrado=registro["peso_registrado"],
+        return self._com_transacoes(
+            LoteMaterial.reconstituir_ativo(
+                identificador=registro["id"],
+                criador=criador,
+                dataCriacao=registro["data_criacao"],
+                status=registro["status"],
+                dadosMateriais=dados_materiais,
+                pesoRegistrado=registro["peso_registrado"],
+            )
         )
+
+    def _com_transacoes(self, lote):
+        from app.dao.transacao_sqlite_dao import (
+            carregar_transacoes_do_lote,
+        )
+
+        return carregar_transacoes_do_lote(self._conexao, lote)
 
     def atualizar_pesagem_e_estado(self, lote):
         """Atualiza somente pesagem e estado ativo; não salva a composição."""
@@ -289,11 +300,6 @@ class LoteSQLiteDAO:
         ):
             raise ValueError(
                 "Esta operação aceita somente lotes ativos."
-            )
-
-        if lote.transacoes:
-            raise ValueError(
-                "A persistência das transações ainda não foi implementada."
             )
 
         if lote.pesoRegistrado is not None:
@@ -553,6 +559,15 @@ class LoteSQLiteDAO:
                     "WHERE id = ?",
                     (str(material.id),),
                 )
+
+            # lote.cancelar() já cancelou, no modelo, as propostas pendentes.
+            for transacao in lote.transacoes:
+                if transacao.status == StatusTransacao.CANCELADA:
+                    self._conexao.execute(
+                        "UPDATE transacoes SET status = 'CANCELADA' "
+                        "WHERE id = ? AND status = 'PENDENTE'",
+                        (str(transacao.id),),
+                    )
 
             self._conexao.execute(
                 "UPDATE lotes SET status = 'CANCELADO' "

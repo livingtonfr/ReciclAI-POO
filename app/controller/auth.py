@@ -1,9 +1,9 @@
 from functools import wraps
 
-from flask import render_template, request, redirect, url_for, flash, abort, session
+from flask import render_template, request, redirect, url_for, flash, abort, session, g
 
 from app import app
-from app.dao.repositorio import Repositorio
+from app.database.contexto import obter_conexao
 from app.model.usuario import (
     Catador,
     Cooperativa,
@@ -11,7 +11,7 @@ from app.model.usuario import (
     IndustriaTransformadora,
     UsuarioComum,
 )
-from app.dao.usuario_dao import UsuarioDAO
+from app.dao.usuario_sqlite_dao import UsuarioSQLiteDAO
 from app.services.usuario_service import UsuarioService, CredenciaisInvalidasError
 
 # Perfis exibidos na seleção de cadastro (um para cada subclasse concreta de Usuario).
@@ -74,15 +74,17 @@ MENU_POR_PERFIL = [
 
 def obter_usuario_service():
     return UsuarioService(
-        UsuarioDAO(Repositorio())
+        UsuarioSQLiteDAO(obter_conexao())
     )
 
 def usuario_atual():
-    usuario_id = session.get('usuario_id')
+    """Usuário da sessão, carregado do banco uma vez por requisição."""
+    if 'usuario_cache' not in g:
+        g.usuario_cache = obter_usuario_service().buscar_por_id(
+            session.get('usuario_id')
+        )
 
-    return obter_usuario_service().buscar_por_id(
-        usuario_id
-    )
+    return g.usuario_cache
 
 def login_obrigatorio(view):
     @wraps(view)

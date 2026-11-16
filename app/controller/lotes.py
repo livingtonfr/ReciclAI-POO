@@ -4,16 +4,18 @@ from app import app
 from app.controller.auth import usuario_atual, login_obrigatorio
 from app.controller.materiais import requer_perfil_material
 from app.dao.repositorio import Repositorio
-from app.dao.lote_dao import LoteDAO
-from app.dao.material_dao import MaterialDAO
+from app.database.contexto import obter_conexao
+from app.dao.lote_sqlite_dao import LoteSQLiteDAO
+from app.dao.material_sqlite_dao import MaterialSQLiteDAO
 from app.services.lote_service import LoteService, LoteNaoEncontradoError, AcessoLoteNegadoError
 
 def obter_lote_service():
     repositorio = Repositorio()
+    conexao = obter_conexao()
 
     return LoteService(
-        lote_dao=LoteDAO(repositorio),
-        material_dao=MaterialDAO(repositorio),
+        lote_dao=LoteSQLiteDAO(conexao),
+        material_dao=MaterialSQLiteDAO(conexao),
         servico_precificacao=repositorio.servico_precificacao,
     )
 

@@ -18,3 +18,8 @@ from app.controller import pontos
 from app.controller import admin
 from app.controller import erros
 from app.controller import api
+
+# Conexão SQLite por requisição, commit/rollback e fechamento.
+from app.database import contexto
+
+contexto.registrar(app)

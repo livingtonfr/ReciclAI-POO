@@ -39,7 +39,7 @@
         </p>
 
         {% if transacao %}
-            {% if usuario is sameas transacao.vendedor %}
+            {% if usuario.id == transacao.vendedor.id %}
                 <a
                     class="link-verde"
                     href="{{ url_for('transacoes') }}"

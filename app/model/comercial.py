@@ -53,7 +53,7 @@ class Transacao:
     def __init__(self, lote, vendedor, comprador, valorTotal):
         validar_positivo(valorTotal, "O valor total")
 
-        if vendedor is comprador:
+        if vendedor is comprador or vendedor.id == comprador.id:
             raise ValueError("Vendedor e comprador devem ser usuários distintos.")
 
         if vendedor is not lote.criador:

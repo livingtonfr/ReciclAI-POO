@@ -11,7 +11,7 @@
 
     {% for transacao in transacoes %}
     <div class="bloco-detalhe">
-        <p><strong>{{ transacao.lote.materiais[0].tipoMaterial.nome }}</strong> - {{ transacao.lote.calcularPesoTotal() }} kg</p>
+        <p><strong>{{ transacao.lote.materiais[0].tipoMaterial.nome }}</strong> - {{ transacao.pesoNegociado if transacao.pesoNegociado is not none else transacao.lote.calcularPesoTotal() }} kg</p>
         <p>Comprador: {{ transacao.comprador.nome }}</p>
         <p>Valor proposto: R$ {{ '%.2f'|format(transacao.valorTotal) }}</p>
         <p>Status: <span class="selo-perfil">{{ transacao.status.value }}</span></p>
