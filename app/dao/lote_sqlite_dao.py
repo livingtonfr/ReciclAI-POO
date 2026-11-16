@@ -351,3 +351,182 @@ class LoteSQLiteDAO:
         )
 
         return lote
+
+    def adicionar_material(self, lote_id, material_id):
+        return self._alterar_composicao(
+            lote_id,
+            material_id,
+            incluir=True,
+        )
+
+    def remover_material(self, lote_id, material_id):
+        return self._alterar_composicao(
+            lote_id,
+            material_id,
+            incluir=False,
+        )
+
+    def _alterar_composicao(self, lote_id, material_id, incluir):
+        self._conexao.execute("SAVEPOINT alterar_composicao")
+
+        try:
+            lote = self.buscar_por_id(lote_id)
+
+            if lote is None:
+                raise ValueError("Lote não encontrado.")
+
+            if lote.status != StatusLote.EM_FORMACAO:
+                raise ValueError(
+                    "A composição só pode mudar em lote EM_FORMACAO."
+                )
+
+            if incluir:
+                original = MaterialSQLiteDAO(
+                    self._conexao
+                ).buscar_por_id(material_id)
+
+                if original is None:
+                    raise ValueError("Material não encontrado.")
+
+                if original.status != StatusMaterial.DISPONIVEL:
+                    raise ValueError(
+                        "O material deve estar DISPONIVEL."
+                    )
+
+                if original.responsavelAtual.id != lote.criador.id:
+                    raise ValueError(
+                        "O material pertence a outro responsável."
+                    )
+
+                tipo = lote.materiais[0].tipoMaterial
+
+                if original.tipoMaterial.id != tipo.id:
+                    raise ValueError(
+                        "O material deve possuir o mesmo tipo do lote."
+                    )
+
+                vinculo = self._conexao.execute(
+                    "SELECT 1 FROM vinculos_lotes_atuais "
+                    "WHERE material_id = ?",
+                    (str(original.id),),
+                ).fetchone()
+
+                if vinculo is not None:
+                    raise ValueError(
+                        "O material já possui vínculo atual."
+                    )
+
+                material = Material.reconstituir(
+                    identificador=original.id,
+                    tipoMaterial=tipo,
+                    pesoKg=original.pesoKg,
+                    condicaoDeclarada=original.condicaoDeclarada,
+                    responsavelAtual=lote.criador,
+                    status=original.status,
+                    dataRegistro=original.dataRegistro.isoformat(),
+                    eventos=original.obterHistorico(),
+                    avaliacoes=original.obterAvaliacoes(),
+                    observacoesDeclaradas=original.observacoesDeclaradas,
+                )
+
+                lote.adicionarMaterial(material)
+
+                ordem = self._conexao.execute(
+                    "SELECT COALESCE(MAX(ordem), -1) + 1 "
+                    "FROM lotes_materiais WHERE lote_id = ?",
+                    (str(lote.id),),
+                ).fetchone()[0]
+
+                self._conexao.execute(
+                    "INSERT INTO lotes_materiais "
+                    "(lote_id, material_id, ordem) VALUES (?, ?, ?)",
+                    (
+                        str(lote.id),
+                        str(material.id),
+                        ordem,
+                    ),
+                )
+
+                self._conexao.execute(
+                    "INSERT INTO vinculos_lotes_atuais "
+                    "(material_id, lote_id) VALUES (?, ?)",
+                    (str(material.id), str(lote.id)),
+                )
+
+                evento = material.obterHistorico()[-1]
+
+                ordem_evento = self._conexao.execute(
+                    "SELECT COALESCE(MAX(ordem), -1) + 1 "
+                    "FROM eventos_rastreio WHERE material_id = ?",
+                    (str(material.id),),
+                ).fetchone()[0]
+
+                self._conexao.execute(
+                    "INSERT INTO eventos_rastreio "
+                    "(id, material_id, ordem, tipo, descricao, data_evento) "
+                    "VALUES (?, ?, ?, ?, ?, ?)",
+                    (
+                        str(evento.id),
+                        str(material.id),
+                        ordem_evento,
+                        evento.tipo.value,
+                        evento.descricao,
+                        evento.dataEvento.isoformat(),
+                    ),
+                )
+
+                estado = "EM_LOTE"
+
+            else:
+                material = next(
+                    (
+                        m
+                        for m in lote.materiais
+                        if str(m.id) == str(material_id)
+                    ),
+                    None,
+                )
+
+                if material is None:
+                    raise ValueError(
+                        "O material não pertence a este lote."
+                    )
+
+                lote.removerMaterial(material)
+
+                self._conexao.execute(
+                    "DELETE FROM vinculos_lotes_atuais "
+                    "WHERE material_id = ? AND lote_id = ?",
+                    (str(material.id), str(lote.id)),
+                )
+
+                self._conexao.execute(
+                    "DELETE FROM lotes_materiais "
+                    "WHERE lote_id = ? AND material_id = ?",
+                    (str(lote.id), str(material.id)),
+                )
+
+                estado = "DISPONIVEL"
+
+            self._conexao.execute(
+                "UPDATE materiais SET status = ? WHERE id = ?",
+                (estado, str(material.id)),
+            )
+
+            self._conexao.execute(
+                "UPDATE lotes SET peso_registrado = NULL "
+                "WHERE id = ?",
+                (str(lote.id),),
+            )
+
+        except Exception:
+            self._conexao.execute(
+                "ROLLBACK TO SAVEPOINT alterar_composicao"
+            )
+            raise
+        finally:
+            self._conexao.execute(
+                "RELEASE SAVEPOINT alterar_composicao"
+            )
+
+        return lote

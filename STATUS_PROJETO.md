@@ -600,8 +600,28 @@ Alterações de composição e cancelamento exigem operações próprias.
 O LoteService ainda não encaminha essas operações ao DAO SQLite.
 A aplicação continua utilizando o repositório em memória.
 
-Próxima etapa: implementar alterações persistentes da composição,
-com atualização dos vínculos e invalidação da pesagem.
+## Fase 5E.7 — Alteração persistente da composição
+
+- [x] Implementadas inclusão e remoção de materiais por IDs.
+- [x] Carregado o estado persistido antes de alterar a composição.
+- [x] Reutilizadas as regras de inclusão e remoção do modelo.
+- [x] Atualizados composição, vínculos e estado do material.
+- [x] Persistido o evento de agrupamento na inclusão.
+- [x] Preservado o histórico do material removido.
+- [x] Invalidada a pesagem na mesma transação da alteração.
+- [x] Testada a preservação dos dados em operações recusadas.
+- [x] Testada a reversão diante de falha SQL após alterações parciais.
+- [x] Testada a reversão por falha posterior na transação externa.
+- [x] Executados os 184 testes com sucesso.
+
+As alterações de composição estão disponíveis no DAO SQLite.
+O LoteService ainda precisa encaminhar essas operações ao DAO.
+
+O cancelamento persistente e a consulta de lotes encerrados
+continuam pendentes. A aplicação permanece em memória.
+
+Próxima etapa: implementar cancelamento persistente de lotes,
+preservando a composição e liberando os vínculos atuais.
 
 
 
