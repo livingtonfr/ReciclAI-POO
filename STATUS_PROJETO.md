@@ -19,19 +19,21 @@ Histórico Git original preservado.
 - [x] Projeto enviado para repositório privado no GitHub.
 
 ## Limitações atuais
-- Armazenamento em memória, sem banco de dados.
+- O fluxo principal (usuários, materiais, lotes, propostas, vendas e
+  certificados) é gravado em SQLite e permanece após reiniciar o servidor.
+- Pontos de coleta continuam fixos em memória e as cotações não são
+  gravadas.
 - Identificação, avaliação e precificação simuladas.
-- Certificado apresentado em página imprimível.
-- Testes existentes baseados principalmente em mensagens no terminal.
+- Certificado apresentado em página imprimível, como recurso acadêmico de
+  rastreabilidade, sem validade jurídica.
+- Testes existentes baseados principalmente em mensagens no terminal
+  foram substituídos por uma suíte automatizada (ver fase 5I).
 
 ## Próximas etapas
-- Reorganizar pastas e responsabilidades.
-- Corrigir validações e regras do domínio.
-- Separar controllers, serviços e DAOs.
-- Implementar persistência com SQLite.
 - Completar desativação de contas e controles de acesso.
 - Integrar os padrões escolhidos.
-- Revisar interface, automatizar testes e atualizar documentação.
+- Persistir pontos de coleta e cotações (blocos 5G.1 e 5G.2).
+- Revisar interface e ajustes de funcionalidades planejados.
 
 ## Ajustes de funcionalidades planejados
 - Adicionar acesso ao mapa em todas as telas.
@@ -792,5 +794,179 @@ A aplicação Flask continua utilizando o repositório em memória.
 Próxima etapa: 5F.2.2 — integrar as consultas SQLite
 à reconstrução de transações, certificados e lotes.
 
+## Fase 5F.2.2 — Reconstrução comercial no SQLite
 
+- [x] Criada a função carregar_transacoes_do_lote, que reconstrói as
+      transações e os certificados de um lote já reconstruído.
+- [x] Reutilizados Transacao.reconstituir, Certificado.reconstituir e
+      LoteMaterial.restaurar_transacoes, sem repetir efeitos de negócio.
+- [x] Evitada a recursão entre lote e transações: o lote é montado
+      primeiro e as transações passam a apontar para a mesma instância.
+- [x] Reconstruído o vendedor como a instância do criador do lote, com
+      conferência de que o vendedor gravado é o criador.
+- [x] Lotes ativos e encerrados passam a recuperar suas transações.
+- [x] Lotes sem registros comerciais continuam sendo lidos sem
+      transações, preservando o comportamento dos testes anteriores.
+- [x] Criado TransacaoSQLiteDAO com consultas por ID, comprador,
+      vendedor, certificado e transações concluídas de um material.
+- [x] Material EM_LOTE passou a ser recuperado junto com o lote ativo
+      ao qual está vinculado, sem carregá-lo isoladamente.
 
+As propostas ainda não eram gravadas nesta etapa.
+
+## Fase 5F.3 — Propostas persistidas
+
+- [x] Implementado adicionar no TransacaoSQLiteDAO, com SAVEPOINT.
+- [x] Exigidos lote DISPONIVEL e vendedor igual ao criador do lote.
+- [x] Recusada segunda proposta pendente do mesmo comprador no mesmo lote.
+- [x] Implementado o cancelamento persistente de propostas, aceito
+      somente para propostas ainda pendentes.
+- [x] Adaptado o TransacaoService para comparar usuários por UUID
+      (mercado, proposta, busca do vendedor e consulta de certificado).
+- [x] Adaptado o modelo Transacao para recusar vendedor e comprador com
+      o mesmo UUID, e não apenas com a mesma instância.
+- [x] Encaminhados conclusão e cancelamento do serviço aos DAOs, por
+      meio de registrar_conclusao e registrar_cancelamento.
+- [x] Implementadas as mesmas operações no DAO em memória, que apenas
+      devolve a transação, pois o modelo já guarda o resultado.
+
+## Fase 5F.4 — Conclusão atômica da negociação
+
+- [x] Mantida a execução das regras em Transacao.concluir(), no modelo.
+- [x] Implementado registrar_conclusao, que grava o resultado em um
+      único SAVEPOINT.
+- [x] Gravados o novo responsável e o novo estado dos materiais.
+- [x] Gravados os eventos de transferência e de destinação.
+- [x] Removidos os vínculos atuais do lote e marcado o lote como NEGOCIADO.
+- [x] Gravados o peso negociado e o cancelamento das propostas concorrentes.
+- [x] Conferidos o estado persistido do lote, da transação e dos vínculos
+      antes de gravar.
+- [x] Respeitado o comprador: empresa ou cooperativa recebem o material
+      como DISPONIVEL; indústria o recebe como DESTINADO.
+- [x] Testada a falha SQL provocada no último passo: nenhum material,
+      evento, vínculo, lote ou transação permaneceu alterado.
+- [x] Testado que o peso negociado não muda quando os materiais mudam
+      depois da conclusão.
+
+## Fase 5F.5 — Certificados e cancelamento de lotes com propostas
+
+- [x] Criado CertificadoSQLiteDAO com busca por ID e inclusão.
+- [x] Inclusão recebe a transação associada; o DAO em memória aceita o
+      parâmetro como opcional.
+- [x] Exigida transação CONCLUIDA no modelo e no banco.
+- [x] Mantido um certificado por transação, com código único; a violação
+      da restrição vira ValueError.
+- [x] Cancelar um lote passou a cancelar, no banco, as propostas pendentes.
+- [x] LoteSQLiteDAO.atualizar_pesagem_e_estado deixou de recusar lotes
+      com transações, pois elas são gravadas por operações próprias.
+- [x] MaterialSQLiteDAO.atualizar passou a aceitar material EM_LOTE desde
+      que o vínculo atual não mude (por exemplo, nova avaliação).
+- [x] Adicionados dez testes em tests/test_transacao_service_sqlite.py.
+
+Os testes anteriores não foram alterados.
+
+## Fase 5G — Pontos de coleta e cotações
+
+- [x] Decidido manter os pontos de coleta como dados fixos de demonstração
+      no Repositorio.
+- [x] Decidido manter a visão computacional e a precificação simuladas,
+      com cotações calculadas sem gravação.
+
+Os blocos 5G.1 (pontos de coleta) e 5G.2 (cotações) permanecem pendentes.
+
+## Fase 5H.1 — Integração do Flask com o SQLite
+
+- [x] Criado app/database/contexto.py com uma conexão por requisição.
+- [x] Definida a política de transação: commit se a resposta tiver status
+      menor que 400; rollback nos demais casos ou diante de exceção;
+      fechamento sempre.
+- [x] Criada preparar_banco, que cria as tabelas e a carga inicial uma
+      vez por processo e por caminho, com trava contra concorrência.
+- [x] Criada abrir_conexao em conexao.py; conectar passou a reutilizá-la.
+- [x] Carregado o usuário da sessão do banco uma vez por requisição.
+- [x] Conectados os controladores de autenticação, materiais, lotes,
+      transações e API aos DAOs SQLite.
+- [x] Mantidos no Repositorio apenas os pontos de coleta e as simulações
+      de IA.
+- [x] Substituída a comparação de identidade do template do certificado
+      por comparação de UUID.
+- [x] Telas de transações e propostas passaram a exibir o peso negociado
+      quando existe.
+- [x] Configurado DATABASE_PATH, com opção de outro caminho pela variável
+      RECICLAI_DB.
+- [x] mainFlask.py passou a preparar o banco e informar seu caminho.
+- [x] Adicionados dezesseis testes em tests/test_flask_sqlite_fluxo.py,
+      com banco temporário e simulação de reinício.
+
+Falhas de negócio tratadas pelos controladores não deixam gravação parcial,
+porque as operações compostas dos DAOs usam SAVEPOINT.
+
+## Fase 5H.2 — Carga de demonstração e reset
+
+- [x] Criado app/database/seed.py com a carga inicial repetível.
+- [x] A carga não duplica usuários nem tipos, não apaga dados e não
+      reaplica senha em conta existente.
+- [x] Reset da demonstração desabilitado por padrão, porque passou a
+      apagar todo o banco.
+- [x] Reset habilitado somente com RECICLAI_PERMITIR_RESET=1 e modo debug;
+      nesse caso apaga todos os dados e recarrega a demonstração.
+- [x] O botão de reset só aparece quando o reset está habilitado.
+- [x] Testados o reset desabilitado, que não apaga nada, e o habilitado.
+
+## Fase 5I — Validação e encerramento da entrega
+
+- [x] Executados os 249 testes com sucesso: 223 anteriores, sem
+      alteração, e 26 novos.
+- [x] Conferido pelo navegador o fluxo completo, com edição de perfil,
+      cotações e persistência após reiniciar o servidor.
+- [x] Conferido o roteiro de duas vendas consecutivas (revenda pela
+      empresa e compra pela indústria), com seis eventos de
+      rastreabilidade e material DESTINADO.
+- [x] Verificado com o servidor real, iniciado e encerrado duas vezes,
+      que usuários, lote, proposta, conclusão, certificado e histórico
+      permanecem.
+- [x] Atualizados README.md, ARQUITETURA.md e este arquivo.
+
+A fase 5 está concluída para o fluxo principal. Permanecem pendentes
+os blocos 5G.1 e 5G.2.
+
+## Pendências e limitações
+
+- Pontos de coleta continuam fixos em memória.
+- Visão computacional e precificação continuam simuladas; as cotações
+  não são gravadas.
+- O certificado é um recurso acadêmico de rastreabilidade, sem validade
+  jurídica.
+- Requer Python 3.12 ou superior, pelo parâmetro autocommit do sqlite3.
+- As tabelas usam IF NOT EXISTS e não há migração de estrutura. Se houver
+  um banco antigo em instance/, deve ser apagado antes de iniciar.
+- Um lote NEGOCIADO sem nenhuma transação gravada (dado legado) é lido
+  sem transações, para não alterar o comportamento dos testes anteriores.
+- Não há controle de concorrência além do bloqueio do próprio SQLite.
+- Não há proteção CSRF, a SECRET_KEY padrão é fixa e GET /logout altera
+  a sessão. São aceitáveis no escopo acadêmico.
+- O Repositorio em memória ainda guarda listas de usuários, materiais e
+  lotes usadas apenas pelos testes e pelos DAOs em memória.
+
+## Orientação para quem for ler o código
+
+Para entender o processo, a leitura em ordem de camadas ajuda mais do que
+a ordem dos arquivos:
+
+1. app/model/: regras do domínio, incluindo os métodos reconstituir, que
+   restauram objetos sem repetir efeitos de negócio.
+2. app/services/: permissões e coordenação, sem dependência do Flask.
+3. app/dao/: cada contrato tem uma versão em memória e uma em SQLite.
+   Os serviços funcionam com as duas, e é por isso que os testes
+   anteriores continuam válidos.
+4. app/database/: esquemas SQL, conexão, carga inicial e integração
+   com o Flask.
+5. app/controller/: rotas, que apenas montam os serviços com a conexão
+   da requisição.
+
+Duas decisões merecem atenção. A primeira é a identidade dos objetos:
+o SQLite devolve uma instância nova a cada consulta, então permissões
+comparam UUID, enquanto as regras do modelo continuam exigindo instâncias
+compartilhadas dentro de um mesmo grafo carregado. A segunda é a
+atomicidade: a conclusão da negociação executa as regras no modelo e
+grava todo o resultado em um único SAVEPOINT.

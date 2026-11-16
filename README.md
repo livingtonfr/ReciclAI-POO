@@ -22,28 +22,39 @@ Os serviços coordenam operações e permissões, utilizando os
 DAOs para acessar os dados e o modelo para executar as regras
 do domínio.
 
-O armazenamento permanece em memória, por meio do Repositorio
-Singleton. Os dados retornam ao estado inicial ao reiniciar
-o servidor ou executar o reset da demonstração.
+O fluxo principal é gravado em SQLite, sem ORM, e os dados permanecem
+após reiniciar o servidor. Cada contrato de acesso a dados tem duas
+implementações com a mesma interface: uma em memória e uma em SQLite.
+Os serviços funcionam com as duas, e por isso os testes escritos antes
+da persistência continuam válidos. Pontos de coleta, identificação,
+avaliação e precificação continuam em memória, por meio do Repositorio
+Singleton, como dados fixos de demonstração e simulações.
+
+O banco fica em `instance/reciclai.sqlite3`, pasta ignorada pelo Git.
+O caminho pode ser alterado pela variável de ambiente `RECICLAI_DB`.
 
 | Local | Responsabilidade |
 |---|---|
 | app/model/ | Entidades, enumerações e regras do domínio |
 | app/controller/ | Rotas Flask e respostas HTML ou JSON |
 | app/services/ | Coordenação das operações e permissões |
-| app/dao/ | DAOs, repositório em memória e dados de demonstração |
+| app/dao/ | DAOs em memória e em SQLite, e o repositório em memória |
 | app/view/ | Templates Jinja |
 | app/static/ | CSS e imagens |
 | app/config.py | Configurações da aplicação |
-| app/database/ | Estrutura reservada para a futura persistência SQLite |
+| app/database/ | Esquemas SQL, conexão, integração com o Flask e carga inicial |
 | app/patterns/ | Estrutura reservada para a integração dos padrões escolhidos |
 | tests/ | Testes automatizados e cenário de integração |
 | docs/ | Documentação técnica |
 | mainFlask.py | Inicialização do servidor |
 
-As pastas app/database e app/patterns ainda não possuem
-implementações próprias nesta etapa. A camada app/services
-já está implementada e integrada aos controladores.
+A pasta app/patterns ainda não possui implementação própria.
+A camada app/services está integrada aos controladores, e a pasta
+app/database está integrada ao fluxo principal.
+
+Para entender o código, a leitura por camadas ajuda mais do que a ordem
+dos arquivos: model, services, dao, database e controller. O detalhamento
+está em docs/ARQUITETURA.md.
 
 O cenário tests/cenario.py reproduz o roteiro de validação
 do modelo desenvolvido no notebook original.
@@ -57,13 +68,15 @@ pip install -r requirements.txt
 python mainFlask.py
 ```
 
-Acesse `http://127.0.0.1:5000`.
+Acesse `http://127.0.0.1:5000`. Ao iniciar, o servidor informa no
+terminal o caminho do banco SQLite em uso.
 
-> O servidor roda com `debug=True` (páginas de erro detalhadas e o botão
-> "Resetar demo", que só funciona em modo debug) mas com
-> `use_reloader=False` — se fosse `True`, o Flask reiniciaria o processo a
-> cada arquivo salvo e isso zeraria o `Repositorio` em memória no meio de
-> uma demonstração. Se for editar código com o servidor rodando, reinicie-o
+Requisito: Python 3.12 ou superior, pois o código usa o parâmetro
+`autocommit` do módulo `sqlite3`.
+
+> O servidor roda com `debug=True` (páginas de erro detalhadas), mas com
+> `use_reloader=False`, para não reiniciar o processo a cada arquivo
+> salvo. Se for editar código com o servidor rodando, reinicie-o
 > manualmente depois de salvar.
 
 Para rodar o cenário de integração do model (sem subir o servidor):
@@ -86,11 +99,23 @@ Todos os usuários de demonstração usam a senha **`123456`**:
 
 Tipos de material cadastrados: PET, Vidro, Papel, Metal.
 4 pontos de coleta em Goiânia (Ecoponto Setor Bueno, Cooperativa Verde,
-PEV Setor Marista, Ecoponto Campinas).
+PEV Setor Marista, Ecoponto Campinas), mantidos em memória.
 
-Para voltar tudo a esse estado inicial a qualquer momento, use o link
-**"Resetar demo"** no rodapé de qualquer página (ou `POST /admin/reset`,
-que exige login e só funciona com `app.debug` ligado).
+Usuários e tipos são gravados no banco na primeira execução. A carga
+inicial é repetível: não duplica registros, não apaga dados e não
+reaplica a senha de uma conta existente.
+
+### Como ver ou zerar os dados
+
+O arquivo `instance/reciclai.sqlite3` pode ser aberto no VS Code com a
+extensão SQLite Viewer. Para começar do zero, pare o servidor e apague
+esse arquivo; ele será recriado com a carga inicial na próxima execução.
+
+O reset pela interface (`POST /admin/reset`) apaga todos os dados do
+banco. Por isso ele vem desabilitado e o botão "Resetar demo" só aparece
+quando o servidor é iniciado com `RECICLAI_PERMITIR_RESET=1` e em modo
+debug. As tabelas usam `IF NOT EXISTS` e não há migração: se existir um
+banco de uma versão anterior, apague-o antes de iniciar.
 
 ## Roteiro de demonstração (≈ 8 min)
 
@@ -129,7 +154,7 @@ que exige login e só funciona com `app.debug` ligado).
 | Comprador (Cooperativa, Empresa, Indústria) | `GET /mercado`, `POST /lotes/<id>/propor`, `GET /minhas-propostas` |
 | Vendedor (Catador, Cooperativa, Empresa) | `GET /transacoes`, `POST /transacoes/<id>/concluir`, `/cancelar`, `/certificado` |
 | Vendedor ou comprador da transação (logado) | `GET /certificados/<id>` |
-| Demo (logado, só com `app.debug` ligado) | `POST /admin/reset` |
+| Demo (logado, `RECICLAI_PERMITIR_RESET=1` e `app.debug` ligado) | `POST /admin/reset` |
 | API (JSON) | `GET /api/pontos` (público, aceita `?tipo=<id>`); `GET /api/materiais/<id>/historico` (logado — dono atual, ou vendedor/comprador de uma transação `CONCLUIDA` daquele material) |
 
 **Nota para a arguição:** `GET /logout` é tecnicamente uma ação com efeito
@@ -146,33 +171,21 @@ STATUS_PROJETO.md:
 2. Fase 2 — Organização das pastas e configurações: concluída.
 3. Fase 3 — Validações e regras do domínio: concluída.
 4. Fase 4 — Separação entre controladores, serviços e DAOs: concluída.
-5. Fase 5 — Persistência SQLite: ainda não iniciada.
+5. Fase 5 — Persistência SQLite: concluída para o fluxo principal.
 
-A antiga referência às fases 0 a 9 correspondia ao roteiro
-inicial de construção e foi substituída pelo acompanhamento
-atual.
+A fase 5 foi feita em etapas: esquemas e DAOs de usuários, tipos,
+materiais e lotes; reconstrução dos objetos do modelo a partir do banco;
+propostas, conclusão atômica e certificados (5F); integração com o Flask
+e carga de demonstração (5H); e validação final (5I).
 
-Após a fase 4, foi corrigida a invalidação da pesagem quando
-materiais são adicionados ou removidos de um lote. Operações
-recusadas preservam a pesagem anterior.
+Continuam em memória ou simulados: pontos de coleta, identificação,
+avaliação e precificação por IA, e as cotações, que não são gravadas.
+A persistência dessas duas últimas partes (blocos 5G.1 e 5G.2) está
+pendente. O certificado é um recurso acadêmico de rastreabilidade, sem
+validade jurídica.
 
-O armazenamento continua em memória. Identificação, avaliação
-e precificação por IA permanecem simuladas.
-
-## Testes
-
-Execute os comandos na raiz do projeto, utilizando o Python
-do ambiente virtual:
-
-```powershell
-python -m unittest discover -s tests -v
-python -m tests.cenario
-```
-
-Após a correção da pesagem, a suíte possui 92 testes.
-
-O cenário de integração termina com duas transações concluídas,
-seis eventos de rastreabilidade e material destinado à indústria.
+A versão anterior, totalmente em memória, foi preservada na branch
+`apresentacao-memoria-validada`.
 
 ## Certificados e PDF
 
