@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import Mock
 from types import SimpleNamespace
 
 from app.dao.lote_dao import LoteDAO
@@ -8,7 +9,8 @@ from app.model.material import TipoMaterial
 from app.model.usuario import Catador, IndustriaTransformadora
 from app.model.enums import StatusMaterial
 from app.services.lote_service import LoteService, LoteNaoEncontradoError, AcessoLoteNegadoError
-
+from app.model.enums import StatusLote
+from app.model.servicos_ia import PrecificacaoIA
 
 class TestLoteService(unittest.TestCase):
 
@@ -257,6 +259,134 @@ class TestLoteService(unittest.TestCase):
 
         self.assertEqual(self.lote.materiais, [material])
         self.assertIs(material.loteAtual, self.lote)
+
+    def test_pesagem_invalida_preserva_anterior(self):
+        self.servico.registrar_pesagem(
+            self.lote.id,
+            self.catador,
+            9.5,
+        )
+
+        with self.assertRaises(ValueError):
+            self.servico.registrar_pesagem(
+                self.lote.id,
+                self.catador,
+                50_001,
+            )
+
+        self.assertEqual(self.lote.pesoRegistrado, 9.5)
+
+    def test_disponibilizacao_e_cancelamento_pelo_servico(self):
+        material = self.lote.materiais[0]
+
+        self.servico.disponibilizar(
+            self.lote.id,
+            self.catador,
+        )
+        self.assertEqual(
+            self.lote.status,
+            StatusLote.DISPONIVEL,
+        )
+
+        self.servico.cancelar(
+            self.lote.id,
+            self.catador,
+        )
+        self.assertEqual(
+            self.lote.status,
+            StatusLote.CANCELADO,
+        )
+        self.assertIsNone(material.loteAtual)
+        self.assertEqual(
+            material.status,
+            StatusMaterial.DISPONIVEL,
+        )
+
+        with self.assertRaises(ValueError):
+            self.servico.disponibilizar(
+                self.lote.id,
+                self.catador,
+            )
+
+        with self.assertRaises(ValueError):
+            self.servico.registrar_pesagem(
+                self.lote.id,
+                self.catador,
+                10.0,
+            )
+
+    def test_cotacao_referencia_lote_e_valida_prazo(self):
+        servico = LoteService(
+            LoteDAO(self.repositorio),
+            MaterialDAO(self.repositorio),
+            servico_precificacao=PrecificacaoIA(2.75),
+        )
+
+        cotacao = servico.cotar(
+            self.lote.id,
+            self.catador,
+            15,
+        )
+
+        self.assertIs(cotacao.lote, self.lote)
+        self.assertIsNone(cotacao.material)
+        self.assertEqual(cotacao.valorPorKg, 2.75)
+        self.assertEqual(cotacao.horizonteDias, 15)
+
+        with self.assertRaises(ValueError):
+            servico.cotar(
+                self.lote.id,
+                self.catador,
+                0,
+            )
+
+    def test_outro_usuario_nao_pesa_disponibiliza_ou_cancela(self):
+        with self.assertRaises(AcessoLoteNegadoError):
+            self.servico.registrar_pesagem(
+                self.lote.id,
+                self.outro_catador,
+                8.0,
+            )
+
+        with self.assertRaises(AcessoLoteNegadoError):
+            self.servico.disponibilizar(
+                self.lote.id,
+                self.outro_catador,
+            )
+
+        with self.assertRaises(AcessoLoteNegadoError):
+            self.servico.cancelar(
+                self.lote.id,
+                self.outro_catador,
+            )
+
+        self.assertIsNone(self.lote.pesoRegistrado)
+        self.assertEqual(
+            self.lote.status,
+            StatusLote.EM_FORMACAO,
+        )
+        self.assertIs(
+            self.lote.materiais[0].loteAtual,
+            self.lote,
+        )
+
+    def test_cotacao_proibida_nao_aciona_precificacao(self):
+        precificacao = Mock()
+
+        servico = LoteService(
+            LoteDAO(self.repositorio),
+            MaterialDAO(self.repositorio),
+            servico_precificacao=precificacao,
+        )
+
+        with self.assertRaises(AcessoLoteNegadoError):
+            servico.cotar(
+                self.lote.id,
+                self.outro_catador,
+                15,
+            )
+
+        precificacao.cotarLote.assert_not_called()
 
 if __name__ == "__main__":
     unittest.main()

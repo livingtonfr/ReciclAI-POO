@@ -23,9 +23,10 @@ class LoteService:
         EmpresaCompradora,
     )
 
-    def __init__(self, lote_dao, material_dao):
+    def __init__(self, lote_dao, material_dao, servico_precificacao=None):
         self._lote_dao = lote_dao
         self._material_dao = material_dao
+        self._servico_precificacao = servico_precificacao
 
     def _validar_perfil(self, usuario):
         if not isinstance(usuario, self.PERFIS_OPERADORES):
@@ -121,3 +122,32 @@ class LoteService:
 
         lote.removerMaterial(material)
         return lote
+
+    def registrar_pesagem(self, lote_id, usuario, peso):
+        lote = self.buscar_do_usuario(lote_id, usuario)
+        lote.registrarPesagem(peso)
+        return lote
+
+    def disponibilizar(self, lote_id, usuario):
+        lote = self.buscar_do_usuario(lote_id, usuario)
+        lote.disponibilizar()
+        return lote
+
+    def cancelar(self, lote_id, usuario):
+        lote = self.buscar_do_usuario(lote_id, usuario)
+        lote.cancelar()
+        return lote
+
+    def cotar(self, lote_id, usuario, horizonte_dias):
+        lote = self.buscar_do_usuario(lote_id, usuario)
+
+        if self._servico_precificacao is None:
+            raise RuntimeError(
+                "O serviço de precificação não foi configurado."
+            )
+
+        return usuario.solicitarPrecificacaoLote(
+            lote,
+            horizonte_dias,
+            self._servico_precificacao,
+        )

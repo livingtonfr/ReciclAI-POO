@@ -185,3 +185,14 @@ Criação e alterações dos lotes ainda serão migradas.
 - [x] Preservadas as permissões e as regras de LoteMaterial.
 - [x] Adicionados cinco testes das operações.
 - [x] Suíte e verificações no navegador aprovadas.
+
+### Fase 4F — Pesagem, estados e cotação dos lotes
+
+- [x] Pesagem coordenada pelo LoteService.
+- [x] Disponibilização e cancelamento passam pelo serviço.
+- [x] Precificação recebida pelo construtor do serviço.
+- [x] Cotação coordenada pelo LoteService.
+- [x] Controlador de lotes sem acesso direto ao repositório nas rotas.
+- [x] Adicionados cinco testes das operações e permissões.
+- [x] Suíte, cenário e verificações no navegador aprovados.
+

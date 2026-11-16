@@ -14,6 +14,7 @@ def obter_lote_service():
     return LoteService(
         lote_dao=LoteDAO(repositorio),
         material_dao=MaterialDAO(repositorio),
+        servico_precificacao=repositorio.servico_precificacao,
     )
 
 def buscar_lote_do_usuario(lote_id):
@@ -159,52 +160,83 @@ def lotes_remover(lote_id):
 @login_obrigatorio
 @requer_perfil_material
 def lotes_pesagem(lote_id):
-    lote = buscar_lote_do_usuario(lote_id)
+    # Confere o acesso antes de processar o formulário.
+    buscar_lote_do_usuario(lote_id)
 
     try:
-        peso = float(request.form.get('peso', '0').replace(',', '.'))
+        peso = float(
+            request.form.get('peso', '0').replace(',', '.')
+        )
     except ValueError:
         flash('Informe um número válido.', 'error')
-        return redirect(url_for('lotes_detalhe', lote_id=lote.id))
+        return redirect(
+            url_for('lotes_detalhe', lote_id=lote_id)
+        )
 
     try:
-        lote.registrarPesagem(peso)
+        obter_lote_service().registrar_pesagem(
+            lote_id,
+            usuario_atual(),
+            peso,
+        )
         flash('Pesagem registrada.', 'success')
+    except LoteNaoEncontradoError:
+        abort(404)
+    except AcessoLoteNegadoError:
+        abort(403)
     except ValueError as erro:
         flash(str(erro), 'error')
 
-    return redirect(url_for('lotes_detalhe', lote_id=lote.id))
+    return redirect(
+        url_for('lotes_detalhe', lote_id=lote_id)
+    )
 
 
 @app.route('/lotes/<lote_id>/disponibilizar', methods=['POST'])
 @login_obrigatorio
 @requer_perfil_material
 def lotes_disponibilizar(lote_id):
-    lote = buscar_lote_do_usuario(lote_id)
-
     try:
-        lote.disponibilizar()
-        flash('Lote disponibilizado para negociação.', 'success')
+        obter_lote_service().disponibilizar(
+            lote_id,
+            usuario_atual(),
+        )
+        flash(
+            'Lote disponibilizado para negociação.',
+            'success',
+        )
+    except LoteNaoEncontradoError:
+        abort(404)
+    except AcessoLoteNegadoError:
+        abort(403)
     except ValueError as erro:
         flash(str(erro), 'error')
 
-    return redirect(url_for('lotes_detalhe', lote_id=lote.id))
+    return redirect(
+        url_for('lotes_detalhe', lote_id=lote_id)
+    )
 
 
 @app.route('/lotes/<lote_id>/cancelar', methods=['POST'])
 @login_obrigatorio
 @requer_perfil_material
 def lotes_cancelar(lote_id):
-    lote = buscar_lote_do_usuario(lote_id)
-
     try:
-        lote.cancelar()
+        obter_lote_service().cancelar(
+            lote_id,
+            usuario_atual(),
+        )
         flash('Lote cancelado.', 'success')
+    except LoteNaoEncontradoError:
+        abort(404)
+    except AcessoLoteNegadoError:
+        abort(403)
     except ValueError as erro:
         flash(str(erro), 'error')
 
-    return redirect(url_for('lotes_detalhe', lote_id=lote.id))
-
+    return redirect(
+        url_for('lotes_detalhe', lote_id=lote_id)
+    )
 
 @app.route('/lotes/<lote_id>/cotar', methods=['POST'])
 @login_obrigatorio
@@ -214,25 +246,42 @@ def lotes_cotar(lote_id):
     lote = buscar_lote_do_usuario(lote_id)
 
     try:
-        horizonte_dias = int(request.form.get('horizonteDias', '15'))
+        horizonte_dias = int(
+            request.form.get('horizonteDias', '15')
+        )
     except ValueError:
         flash('Informe um número válido de dias.', 'error')
-        return redirect(url_for('lotes_detalhe', lote_id=lote.id))
+        return redirect(
+            url_for('lotes_detalhe', lote_id=lote_id)
+        )
 
     try:
-        cotacao = usuario.solicitarPrecificacaoLote(
-            lote,
+        cotacao = obter_lote_service().cotar(
+            lote_id,
+            usuario,
             horizonte_dias,
-            Repositorio().servico_precificacao,
         )
-        peso = lote.pesoRegistrado if lote.pesoRegistrado is not None else lote.calcularPesoTotal()
+
+        peso = (
+            lote.pesoRegistrado
+            if lote.pesoRegistrado is not None
+            else lote.calcularPesoTotal()
+        )
         total = cotacao.valorPorKg * peso
+
         flash(
-            f'Cotação: R$ {cotacao.valorPorKg:.2f}/kg por {cotacao.horizonteDias} dias '
+            f'Cotação: R$ {cotacao.valorPorKg:.2f}/kg '
+            f'por {cotacao.horizonteDias} dias '
             f'(total estimado: R$ {total:.2f}).',
             'success',
         )
+    except LoteNaoEncontradoError:
+        abort(404)
+    except AcessoLoteNegadoError:
+        abort(403)
     except ValueError as erro:
         flash(str(erro), 'error')
 
-    return redirect(url_for('lotes_detalhe', lote_id=lote.id))
+    return redirect(
+        url_for('lotes_detalhe', lote_id=lote_id)
+    )
