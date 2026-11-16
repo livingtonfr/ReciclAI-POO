@@ -723,8 +723,33 @@ permanece prevista para o bloco 5F.
 
 A aplicação Flask continua utilizando o repositório em memória.
 
-Próxima etapa: 5E.13 — conferir cotação com objetos
-reconstruídos e revisar o fluxo integrado dos lotes.
+## Fase 5E.13 — Cotação e integração dos lotes
+
+- [x] Adaptada a cotação para utilizar o criador do lote recuperado.
+- [x] Mantida a autorização por UUID antes de solicitar cotação.
+- [x] Testada a cotação com objetos reconstruídos do SQLite.
+- [x] Verificado que a cotação não realiza gravações no banco.
+- [x] Testados acesso negado, prazo inválido e ausência de precificação.
+- [x] Testado o fluxo integrado de criação e composição pelo serviço.
+- [x] Testadas pesagem, disponibilização e cancelamento no mesmo fluxo.
+- [x] Testado reagrupamento dos materiais após cancelamento.
+- [x] Preservado o vínculo atual ao consultar a composição antiga.
+- [x] Executados os 210 testes com sucesso.
+
+O bloco 5E está concluído dentro do escopo de persistência
+e integração dos lotes sem transações comerciais persistidas.
+
+As cotações são calculadas, mas sua persistência permanece
+prevista para o bloco 5G.2.
+
+A recuperação das transações associadas e o cancelamento
+conjunto das propostas permanecem previstos para o bloco 5F.
+
+A aplicação Flask continua utilizando o repositório em memória.
+A integração da aplicação com SQLite permanece prevista para 5H.1.
+
+Próxima etapa: 5F.1 — estrutura persistente de transações
+comerciais e certificados.
 
 
 

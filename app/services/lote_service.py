@@ -147,7 +147,7 @@ class LoteService:
                 "O serviço de precificação não foi configurado."
             )
 
-        return usuario.solicitarPrecificacaoLote(
+        return lote.criador.solicitarPrecificacaoLote(
             lote,
             horizonte_dias,
             self._servico_precificacao,
