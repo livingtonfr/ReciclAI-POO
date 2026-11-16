@@ -474,7 +474,27 @@ Os controladores continuam utilizando o repositório em memória.
 A persistência dos vínculos com lotes e a integração geral
 da aplicação com SQLite permanecem pendentes.
 
-Próxima etapa: iniciar a estrutura SQLite dos lotes e de sua composição.
+## Fase 5E.1 — Estrutura SQLite de lotes e composição
+
+- [x] Criada a tabela lotes com criador, data, estado e pesagem.
+- [x] Permitida pesagem ausente e restringidos os valores ao limite do domínio.
+- [x] Criada a tabela lotes_materiais com ordem da composição.
+- [x] Criada a tabela vinculos_lotes_atuais.
+- [x] Impedido mais de um vínculo atual para o mesmo material.
+- [x] Exigida correspondência entre vínculo atual e composição do lote.
+- [x] Preservada a possibilidade de o material aparecer na composição de lotes anteriores.
+- [x] Testadas restrições, reinicialização e reversão de transações.
+- [x] Executados os 153 testes com sucesso.
+- [x] Inicializadas e conferidas as novas tabelas no banco do projeto.
+
+Este bloco prepara somente a estrutura de armazenamento.
+A reconstrução dos lotes e as operações de persistência
+de sua composição ainda serão implementadas.
+
+A aplicação continua utilizando o repositório em memória.
+
+Próxima etapa: implementar a reconstrução dos lotes
+e dos vínculos entre materiais e lotes.
 
 
 
