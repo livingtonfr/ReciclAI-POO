@@ -196,3 +196,16 @@ Criação e alterações dos lotes ainda serão migradas.
 - [x] Adicionados cinco testes das operações e permissões.
 - [x] Suíte, cenário e verificações no navegador aprovados.
 
+### Fase 4G.1 — Consultas do Mercado e das transações
+
+- [x] Criados TransacaoDAO e TransacaoService.
+- [x] Mercado utiliza consulta de lotes disponíveis pelo DAO.
+- [x] Preservados filtro de lotes próprios e cálculo sugerido.
+- [x] Listas de propostas e vendas passam pelo serviço.
+- [x] Busca de transação verifica o vendedor no serviço.
+- [x] Adicionados cinco testes de consultas e permissões.
+- [x] Suíte e verificações no navegador aprovadas.
+
+Envio, conclusão, cancelamento e certificados serão
+migrados no bloco 4G.2.
+

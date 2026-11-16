@@ -1,3 +1,5 @@
+from app.model.enums import StatusLote
+
 class LoteDAO:
     """Consulta lotes no repositório em memória."""
 
@@ -24,5 +26,12 @@ class LoteDAO:
 
         self._repositorio.lotes.append(lote)
         return lote
+
+    def listar_disponiveis(self):
+        return [
+            lote
+            for lote in self._repositorio.lotes
+            if lote.status == StatusLote.DISPONIVEL
+        ]
 
     

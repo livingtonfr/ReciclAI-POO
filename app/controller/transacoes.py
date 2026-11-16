@@ -10,9 +10,20 @@ from app.dao.repositorio import Repositorio
 from app.model.enums import StatusLote, StatusTransacao
 from app.model.usuario import Cooperativa, EmpresaCompradora, IndustriaTransformadora
 from app.model.comercial import Transacao, Certificado
+from app.dao.lote_dao import LoteDAO
+from app.dao.transacao_dao import TransacaoDAO
+from app.services.transacao_service import TransacaoService, TransacaoNaoEncontradaError, AcessoTransacaoNegadoError
 
 PERFIS_COMPRADOR = (Cooperativa, EmpresaCompradora, IndustriaTransformadora)
 
+def obter_transacao_service():
+    repositorio = Repositorio()
+
+    return TransacaoService(
+        transacao_dao=TransacaoDAO(repositorio),
+        lote_dao=LoteDAO(repositorio),
+        servico_precificacao=repositorio.servico_precificacao,
+    )
 
 def requer_comprador(view):
     @wraps(view)
@@ -31,38 +42,15 @@ def buscar_lote(lote_id):
 
 
 def buscar_transacao_do_vendedor(transacao_id):
-    usuario = usuario_atual()
-
-    for transacao in Repositorio().transacoes:
-        if str(transacao.id) == str(transacao_id):
-            if transacao.vendedor is not usuario:
-                abort(403)
-            return transacao
-
-    abort(404)
-
-
-@app.route('/mercado')
-@login_obrigatorio
-@requer_comprador
-def mercado():
-    usuario = usuario_atual()
-    lotes_disponiveis = []
-
-    for lote in Repositorio().lotes:
-        if lote.status != StatusLote.DISPONIVEL or lote.criador is usuario:
-            continue
-
-        peso = lote.pesoRegistrado if lote.pesoRegistrado is not None else lote.calcularPesoTotal()
-        cotacao = Repositorio().servico_precificacao.cotarLote(lote, 15)
-
-        lotes_disponiveis.append({
-            'lote': lote,
-            'peso': peso,
-            'valor_sugerido': round(cotacao.valorPorKg * peso, 2),
-        })
-
-    return render_template('mercado.html', lotes=lotes_disponiveis)
+    try:
+        return obter_transacao_service().buscar_do_vendedor(
+            transacao_id,
+            usuario_atual(),
+        )
+    except TransacaoNaoEncontradaError:
+        abort(404)
+    except AcessoTransacaoNegadoError:
+        abort(403)
 
 
 @app.route('/lotes/<lote_id>/propor', methods=['POST'])
@@ -96,22 +84,55 @@ def lotes_propor(lote_id):
     return redirect(url_for('mercado'))
 
 
+@app.route('/mercado')
+@login_obrigatorio
+@requer_comprador
+def mercado():
+    try:
+        ofertas = obter_transacao_service().listar_mercado(
+            usuario_atual()
+        )
+    except AcessoTransacaoNegadoError:
+        abort(403)
+
+    return render_template(
+        'mercado.html',
+        lotes=ofertas,
+    )
+
+
 @app.route('/minhas-propostas')
 @login_obrigatorio
 @requer_comprador
 def minhas_propostas():
-    usuario = usuario_atual()
-    propostas = [t for t in Repositorio().transacoes if t.comprador is usuario]
-    return render_template('minhas_propostas.html', propostas=propostas)
+    try:
+        propostas = obter_transacao_service().listar_propostas(
+            usuario_atual()
+        )
+    except AcessoTransacaoNegadoError:
+        abort(403)
+
+    return render_template(
+        'minhas_propostas.html',
+        propostas=propostas,
+    )
 
 
 @app.route('/transacoes')
 @login_obrigatorio
 @requer_vendedor
 def transacoes():
-    usuario = usuario_atual()
-    minhas_transacoes = [t for t in Repositorio().transacoes if t.vendedor is usuario]
-    return render_template('transacoes_lista.html', transacoes=minhas_transacoes)
+    try:
+        vendas = obter_transacao_service().listar_vendas(
+            usuario_atual()
+        )
+    except AcessoTransacaoNegadoError:
+        abort(403)
+
+    return render_template(
+        'transacoes_lista.html',
+        transacoes=vendas,
+    )
 
 
 @app.route('/transacoes/<transacao_id>/concluir', methods=['POST'])
