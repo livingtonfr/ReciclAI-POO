@@ -313,3 +313,15 @@ A fase 5 de persistência SQLite ainda não foi iniciada.
 A fase 5 está em andamento. Este bloco prepara a infraestrutura.
 As tabelas do domínio e a migração dos DAOs ainda estão pendentes.
 A aplicação continua utilizando o repositório em memória.
+
+## Fase 5B.1 — Tabela de tipos de material
+
+- [x] Criada a tabela tipos_material.
+- [x] Representados UUID como texto e booleano como 0 ou 1.
+- [x] Restringidas as categorias aos valores do enum atual.
+- [x] Implementada inicialização sem apagar registros existentes.
+- [x] Testada a preservação dos dados após reinicialização.
+- [x] Executados os 100 testes com sucesso.
+
+A tabela ainda não está conectada ao TipoMaterialDAO.
+A interface continua utilizando o repositório em memória.
