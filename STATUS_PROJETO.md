@@ -387,3 +387,17 @@ Os controladores ainda utilizam o repositório em memória.
 A integração com SQLite e a identidade dos demais objetos
 relacionados continuam pendentes.
 
+## Fase 5D.1 — Estrutura de materiais e rastreabilidade
+
+- [x] Criadas as tabelas materiais, eventos_rastreio e avaliacoes_qualidade.
+- [x] Definidos vínculos com tipos de material e usuários.
+- [x] Definidas posições para preservar a ordem de eventos e avaliações.
+- [x] Preservada a separação entre condição declarada e detectada.
+- [x] Testados limites numéricos e referências inexistentes.
+- [x] Testada a preservação dos registros após reinicialização.
+- [x] Testada a reversão conjunta de material e evento.
+- [x] Executados os 123 testes com sucesso.
+
+A reconstrução dos objetos e o DAO SQLite de materiais ainda
+estão pendentes. O vínculo com lotes será implementado no bloco 5E.
+A interface continua utilizando o repositório em memória.
