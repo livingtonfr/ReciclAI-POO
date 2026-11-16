@@ -1,6 +1,8 @@
 from uuid import uuid4
 from datetime import datetime
 
+from app.model.validacoes import validar_positivo
+from app.model.validacoes import validar_peso_lote
 from app.model.enums import StatusLote, StatusMaterial, StatusTransacao
 
 
@@ -67,6 +69,11 @@ class LoteMaterial:
             if material.tipoMaterial is not tipo_lote:
                 raise ValueError("Todos os materiais do lote devem possuir o mesmo TipoMaterial.")
 
+        peso_apos_adicao = (
+            self.calcularPesoTotal() + material.pesoKg
+        )
+        validar_peso_lote(peso_apos_adicao)
+
         self.__materiais.append(material)
         material.agruparEmLote(self)
 
@@ -96,8 +103,7 @@ class LoteMaterial:
         if self.__status in (StatusLote.NEGOCIADO, StatusLote.CANCELADO):
             raise ValueError("Não é possível registrar pesagem em lote encerrado.")
 
-        if peso <= 0:
-            raise ValueError("A pesagem deve ser maior que zero.")
+        validar_peso_lote(peso)
 
         self.__pesoRegistrado = peso
 

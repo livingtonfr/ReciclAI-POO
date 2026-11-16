@@ -1,6 +1,7 @@
 from uuid import uuid4
 from datetime import datetime
 
+from app.model.validacoes import validar_positivo, validar_inteiro_positivo
 from app.model.enums import StatusLote, StatusTransacao
 from app.model.usuario import Catador, Cooperativa, EmpresaCompradora, IndustriaTransformadora
 
@@ -8,11 +9,9 @@ from app.model.usuario import Catador, Cooperativa, EmpresaCompradora, Industria
 class CotacaoPreco:
 
     def __init__(self, valorPorKg, horizonteDias, material=None, lote=None):
-        if valorPorKg <= 0:
-            raise ValueError("O valor por kg deve ser maior que zero.")
 
-        if horizonteDias <= 0:
-            raise ValueError("O horizonte em dias deve ser maior que zero.")
+        validar_positivo(valorPorKg, "O valor por kg")
+        validar_inteiro_positivo(horizonteDias, "O horizonte em dias")
 
         if (material is None) == (lote is None):
             raise ValueError("A cotação deve referenciar exatamente um Material ou um LoteMaterial.")
@@ -52,8 +51,7 @@ class CotacaoPreco:
 class Transacao:
 
     def __init__(self, lote, vendedor, comprador, valorTotal):
-        if valorTotal <= 0:
-            raise ValueError("O valor total deve ser maior que zero.")
+        validar_positivo(valorTotal, "O valor total")
 
         if vendedor is comprador:
             raise ValueError("Vendedor e comprador devem ser usuários distintos.")

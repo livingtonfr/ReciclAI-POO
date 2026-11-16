@@ -1,14 +1,12 @@
 from app.model.material import AvaliacaoQualidade
 from app.model.comercial import CotacaoPreco
 
+from app.model.validacoes import validar_positivo, validar_confianca
 
 class ResultadoIdentificacao:
 
     def __init__(self, tipoMaterial, confianca):
-        if confianca < 0 or confianca > 1:
-            raise ValueError(
-                "A confiança deve estar entre 0 e 1."
-            )
+        validar_confianca(confianca)
 
         self.__tipoMaterial = tipoMaterial
         self.__confianca = confianca
@@ -25,6 +23,9 @@ class ResultadoIdentificacao:
 class VisaoComputacionalIA:
 
     def __init__(self, tipoMaterialSimulado, confiancaIdentificacaoSimulada, condicaoSimulada, confiancaAvaliacaoSimulada):
+        validar_confianca(confiancaIdentificacaoSimulada)
+        validar_confianca(confiancaAvaliacaoSimulada)
+        
         self.__tipoMaterialSimulado = tipoMaterialSimulado
         self.__confiancaIdentificacaoSimulada = confiancaIdentificacaoSimulada
         self.__condicaoSimulada = condicaoSimulada
@@ -51,10 +52,7 @@ class VisaoComputacionalIA:
 class PrecificacaoIA:
 
     def __init__(self, valorPorKgSimulado):
-        if valorPorKgSimulado <= 0:
-            raise ValueError(
-                "O valor por kg simulado deve ser maior que zero."
-            )
+        validar_positivo(valorPorKgSimulado, "O valor por kg simulado")
 
         self.__valorPorKgSimulado = valorPorKgSimulado
 

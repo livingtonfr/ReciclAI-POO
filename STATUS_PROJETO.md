@@ -59,3 +59,20 @@ Histórico Git original preservado.
 - [x] Cenário de classes executado após as alterações.
 - [x] Navegação básica conferida após as alterações.
 - [x] Alterações registradas e enviadas ao GitHub.
+
+## Fase 3 — Regras do domínio
+
+### Bloco 3A — Validações numéricas
+- [x] Centralizadas as validações numéricas.
+- [x] Pesos e valores exigem números finitos e positivos.
+- [x] Confianças exigem valores numéricos entre 0 e 1.
+- [x] Horizonte de cotação exige inteiro positivo.
+- [x] Testes automáticos do bloco executados.
+- [x] Cenário anterior e cadastro de material conferidos.
+- [ ] Definir e aplicar limites máximos de peso para materiais e lotes. A validação atual rejeita valores não positivos, NaN e infinito, mas ainda permite números finitos incompatíveis com a operação, como 1e107 kg.
+
+### Próximos blocos
+- [ ] Revisar permissões de criação e registro no domínio.
+- [ ] Corrigir horários compartilhados.
+- [ ] Revisar estados e operações comerciais.
+- [ ] Integrar a Fase 3 à master.

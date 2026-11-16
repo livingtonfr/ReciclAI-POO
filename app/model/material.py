@@ -1,6 +1,8 @@
 from uuid import uuid4
 from datetime import datetime
 
+from app.model.validacoes import validar_positivo, validar_confianca
+from app.model.validacoes import validar_peso_material
 from app.model.enums import StatusMaterial, TipoEventoRastreio
 
 
@@ -62,8 +64,7 @@ class EventoRastreio:
 class AvaliacaoQualidade:
 
     def __init__(self, condicaoDetectada, confianca, observacoes=None):
-        if confianca < 0 or confianca > 1:
-            raise ValueError("A confiança deve estar entre 0 e 1.")
+        validar_confianca(confianca)
 
         self.__id = uuid4()
         self.__condicaoDetectada = condicaoDetectada
@@ -95,10 +96,7 @@ class AvaliacaoQualidade:
 class Material:
 
     def __init__(self, tipoMaterial, pesoKg, condicaoDeclarada, responsavelAtual, observacoesDeclaradas=None):
-        if pesoKg <= 0:
-            raise ValueError(
-                "O peso do material deve ser maior que zero."
-            )
+        validar_peso_material(pesoKg)
 
         self.__id = uuid4()
         self.__tipoMaterial = tipoMaterial
