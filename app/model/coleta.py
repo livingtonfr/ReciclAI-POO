@@ -42,7 +42,24 @@ class PontoColeta:
         self.__tipo = tipo
 
         self.__tiposAceitos = list(tiposAceitos) if tiposAceitos is not None else []
-        self.__horarios = list(horarios) if horarios is not None else []
+
+        self.__horarios = []
+
+        if horarios is not None:
+            for horario in horarios:
+                if not isinstance(horario, HorarioFuncionamento):
+                    raise ValueError(
+                        "Cada horário deve ser um "
+                        "objeto HorarioFuncionamento."
+                    )
+
+                horario_proprio = HorarioFuncionamento(
+                    diaSemana=horario.diaSemana,
+                    horaAbertura=horario.horaAbertura,
+                    horaFechamento=horario.horaFechamento,
+                )
+
+                self.__horarios.append(horario_proprio)
 
     @property
     def id(self):

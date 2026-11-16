@@ -112,3 +112,15 @@ um lote já negociado.
 inconsistentes, sem transferência parcial.
 - [x] Executados 27 testes automatizados com sucesso.
 - [x] Cenário completo de rastreabilidade preservado.
+
+### Fase 3D — Horários dos pontos e conferência final
+
+- [x] Cada ponto de coleta possui seus próprios objetos de horário.
+- [x] Alterações nas listas externas não apagam os horários internos.
+- [x] Testada a rejeição de elementos que não são horários.
+- [x] Testada a regra de abertura anterior ao fechamento.
+- [x] Executada a suíte automatizada sem falhas.
+- [x] Reexecutado o cenário completo de rastreabilidade.
+- [x] Conferidas as páginas de pontos de coleta e o fluxo
+de cadastro de material e criação de lote.
+
