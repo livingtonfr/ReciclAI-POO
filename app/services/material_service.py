@@ -24,8 +24,9 @@ class MaterialService:
         IndustriaTransformadora,
     )
 
-    def __init__(self, material_dao):
+    def __init__(self, material_dao, tipo_material_dao=None):
         self._material_dao = material_dao
+        self._tipo_material_dao = tipo_material_dao
 
     def _validar_perfil(self, usuario):
         if not isinstance(usuario, self.PERFIS_TITULARES):
@@ -91,3 +92,17 @@ class MaterialService:
         )
         material.disponibilizar()
         return material
+
+    def _obter_tipo_material_dao(self):
+        if self._tipo_material_dao is None:
+            raise RuntimeError(
+                "O DAO de tipos de material não foi configurado."
+            )
+
+        return self._tipo_material_dao
+
+    def listar_tipos(self):
+        return self._obter_tipo_material_dao().listar()
+
+    def buscar_tipo(self, tipo_id):
+        return self._obter_tipo_material_dao().buscar_por_id(tipo_id)

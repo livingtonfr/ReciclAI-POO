@@ -136,3 +136,13 @@ a material de outro responsável.
 
 Cadastro, disponibilização, avaliação e cotação ainda serão
 migrados nas próximas etapas.
+
+### Fase 4B — Cadastro e disponibilização de materiais
+
+- [x] Cadastro coordenado pelo MaterialService.
+- [x] Inclusão no armazenamento centralizada no MaterialDAO.
+- [x] Disponibilização coordenada pelo serviço.
+- [x] Preservadas as permissões e validações do modelo.
+- [x] Adicionados cinco testes do serviço e do DAO.
+- [x] Suíte, cenário e verificações no navegador aprovados.
+

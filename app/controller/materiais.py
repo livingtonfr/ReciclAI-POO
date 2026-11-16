@@ -9,6 +9,7 @@ from app.model.enums import CondicaoMaterial
 from app.model.usuario import Catador, Cooperativa, EmpresaCompradora, IndustriaTransformadora
 from app.dao.material_dao import MaterialDAO
 from app.services.material_service import MaterialService, MaterialNaoEncontradoError, AcessoMaterialNegadoError
+from app.dao.tipo_material_dao import TipoMaterialDAO
 
 # Quem opera materiais (registra, disponibiliza, avalia, cota): só quem tem
 # esses métodos no UML. A Indústria NÃO tem solicitarPrecificacaoMaterial,
@@ -20,8 +21,11 @@ PERFIS_MATERIAL = (Catador, Cooperativa, EmpresaCompradora)
 PERFIS_TITULARES_MATERIAL = PERFIS_MATERIAL + (IndustriaTransformadora,)
 
 def obter_material_service():
+    repositorio = Repositorio()
+
     return MaterialService(
-        MaterialDAO(Repositorio())
+        material_dao=MaterialDAO(repositorio),
+        tipo_material_dao=TipoMaterialDAO(repositorio),
     )
 
 def requer_perfil_material(view):
@@ -62,10 +66,7 @@ def buscar_material_do_usuario(material_id):
         abort(403)
 
 def buscar_tipo(tipo_id):
-    for tipo in Repositorio().tipos:
-        if str(tipo.id) == str(tipo_id):
-            return tipo
-    return None
+    return obter_material_service().buscar_tipo(tipo_id)
 
 @app.route('/materiais')
 @login_obrigatorio
@@ -91,7 +92,7 @@ def materiais():
 @requer_catador
 def materiais_novo():
     usuario = usuario_atual()
-    tipos = Repositorio().tipos
+    tipos = obter_material_service().listar_tipos()
     condicoes = list(CondicaoMaterial)
 
     if request.method == 'POST':
