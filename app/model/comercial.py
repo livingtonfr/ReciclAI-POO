@@ -1,8 +1,8 @@
 from uuid import uuid4
 from datetime import datetime
 
-from app.model.validacoes import validar_positivo, validar_inteiro_positivo
-from app.model.enums import StatusLote, StatusTransacao
+from app.model.validacoes import validar_positivo, validar_inteiro_positivo, validar_peso_lote
+from app.model.enums import StatusLote, StatusTransacao, StatusMaterial
 from app.model.usuario import Catador, Cooperativa, EmpresaCompradora, IndustriaTransformadora
 
 
@@ -139,11 +139,30 @@ class Transacao:
         if self.__vendedor is not self.__lote.criador:
             raise ValueError("O vendedor deve ser o criador do lote.")
 
+        # Confere todos os materiais antes de alterar qualquer um.
+        for material in self.__lote.materiais:
+            if material.responsavelAtual is not self.__vendedor:
+                raise ValueError(
+                    "Todos os materiais devem continuar "
+                    "sob responsabilidade do vendedor."
+                )
+
+            if (
+                material.status != StatusMaterial.EM_LOTE
+                or material.loteAtual is not self.__lote
+            ):
+                raise ValueError(
+                    "Todos os materiais devem continuar "
+                    "vinculados ao lote negociado."
+                )
+            
         # Define o peso comercial da negociação
         if self.__lote.pesoRegistrado is not None:
             peso_negociado = self.__lote.pesoRegistrado
         else:
             peso_negociado = self.__lote.calcularPesoTotal()
+
+        validar_peso_lote(peso_negociado)
 
         # A partir daqui começam as alterações
         self.__pesoNegociado = peso_negociado

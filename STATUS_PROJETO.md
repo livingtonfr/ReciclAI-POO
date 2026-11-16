@@ -88,3 +88,27 @@ inclusive por chamada direta ao construtor.
 - [x] Tentativas recusadas preservam o material.
 - [x] Executados 18 testes automatizados com sucesso.
 - [x] Cenário completo de rastreabilidade continua funcionando.
+
+### Fase 3C — Vínculos entre materiais e lotes
+
+- [x] Ajustada a ordem de inclusão e remoção de materiais.
+- [x] Verificada a preservação das listas quando os métodos
+      de agrupamento ou remoção recusam a operação.
+- [x] Testado o impedimento de vínculo simultâneo a dois lotes.
+- [x] Testado o impedimento de remoção do único material.
+- [x] Executados 23 testes automatizados com sucesso.
+- [x] Cenário completo de rastreabilidade preservado.
+
+### Fase 3C — Estados de lotes e transações
+
+- [x] Conferidos responsável, estado e vínculo de todos os
+materiais antes da conclusão de uma transação.
+- [x] Validado o peso negociado antes das alterações.
+- [x] Testado o cancelamento de lote com proposta pendente.
+- [x] Testado o cancelamento de propostas concorrentes.
+- [x] Testadas tentativas de repetir uma conclusão ou cancelar
+um lote já negociado.
+- [x] Testada a recusa de conclusão diante de materiais
+inconsistentes, sem transferência parcial.
+- [x] Executados 27 testes automatizados com sucesso.
+- [x] Cenário completo de rastreabilidade preservado.
