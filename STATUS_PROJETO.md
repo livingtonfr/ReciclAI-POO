@@ -355,3 +355,19 @@ A integração deverá preservar a identidade dos objetos relacionados.
 O DAO SQLite de usuários e sua integração ainda estão pendentes.
 A autenticação da aplicação continua utilizando dados em memória.
 
+## Fase 5C.2 — Reconstrução e DAO SQLite de usuários
+
+- [x] Implementada reconstrução dos cinco perfis.
+- [x] Preservados UUID, data, localização e documentos.
+- [x] Preservada a situação de validação dos perfis empresariais.
+- [x] Disponibilizado o hash existente para persistência.
+- [x] Criado UsuarioSQLiteDAO com inclusão e consultas.
+- [x] Testados cadastro e autenticação após reabrir o banco.
+- [x] Testadas duplicidades e reversão da transação.
+- [x] Executados os 113 testes com sucesso.
+- [x] Reexecutado o cenário de integração.
+
+O DAO SQLite ainda não está conectado aos controladores.
+A atualização persistente de perfil e o tratamento de identidade
+dos objetos serão implementados antes da integração.
+

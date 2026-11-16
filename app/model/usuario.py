@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from uuid import uuid4
+from uuid import UUID, uuid4
 from datetime import datetime
 
 from werkzeug.security import check_password_hash
@@ -21,6 +21,76 @@ class Usuario(ABC):
         self.__latitude = None
         self.__longitude = None
         self.__criadoEm = datetime.now()
+
+    @property
+    def senhaHash(self):
+        """Hash destinado à persistência; não deve ser exibido pela interface."""
+        return self.__senhaHash
+
+    @staticmethod
+    def reconstituir(
+        perfil, identificador, nome, email, senhaHash, telefone,
+        endereco, criadoEm, latitude=None, longitude=None,
+        cpf=None, cnpj=None, statusValidacao=None,
+    ):
+        configuracao = PERFIS_USUARIO.get(perfil)
+
+        if configuracao is None:
+            raise ValueError("Perfil persistido inválido.")
+
+        classe, documento = configuracao
+
+        argumentos = dict(
+            nome=nome,
+            email=email,
+            senhaHash=senhaHash,
+            telefone=telefone,
+            endereco=endereco,
+        )
+
+        if documento == "cpf":
+            if (
+                not cpf
+                or not cpf.strip()
+                or cnpj is not None
+                or statusValidacao is not None
+            ):
+                raise ValueError(
+                    "Dados incompatíveis com o perfil catador."
+                )
+
+            argumentos["cpf"] = cpf
+
+        elif documento == "cnpj":
+            if not cnpj or not cnpj.strip() or cpf is not None:
+                raise ValueError(
+                    "Dados incompatíveis com o perfil empresarial."
+                )
+
+            argumentos["cnpj"] = cnpj
+            argumentos["statusValidacao"] = StatusValidacao(
+                statusValidacao
+            )
+
+        elif any(
+            valor is not None
+            for valor in (cpf, cnpj, statusValidacao)
+        ):
+            raise ValueError(
+                "Dados incompatíveis com o perfil comum."
+            )
+
+        identificador = UUID(str(identificador))
+        data = datetime.fromisoformat(criadoEm)
+
+        usuario = classe(**argumentos)
+        usuario.__id = identificador
+        usuario.__criadoEm = data
+        usuario.__latitude = latitude
+        usuario.__longitude = longitude
+
+        return usuario
+
 
     @abstractmethod
     def atualizarPerfil(self, nome=None, email=None, telefone=None, endereco=None):
@@ -150,10 +220,13 @@ class Catador(Usuario):
 
 class Cooperativa(Usuario):
 
-    def __init__(self, nome, email, senhaHash, telefone, endereco, cnpj):
+    def __init__(
+        self, nome, email, senhaHash, telefone, endereco, cnpj,
+        *, statusValidacao=StatusValidacao.PENDENTE,
+    ):
         super().__init__(nome, email, senhaHash, telefone, endereco)
         self.__cnpj = cnpj
-        self.__statusValidacao = StatusValidacao.PENDENTE
+        self.__statusValidacao = StatusValidacao(statusValidacao)
 
     @property
     def cnpj(self):
@@ -202,10 +275,13 @@ class Cooperativa(Usuario):
 
 class EmpresaCompradora(Usuario):
 
-    def __init__(self, nome, email, senhaHash, telefone, endereco, cnpj):
+    def __init__(
+        self, nome, email, senhaHash, telefone, endereco, cnpj,
+        *, statusValidacao=StatusValidacao.PENDENTE,
+    ):
         super().__init__(nome, email, senhaHash, telefone, endereco)
         self.__cnpj = cnpj
-        self.__statusValidacao = StatusValidacao.PENDENTE
+        self.__statusValidacao = StatusValidacao(statusValidacao)
 
     @property
     def cnpj(self):
@@ -251,10 +327,13 @@ class EmpresaCompradora(Usuario):
 
 class IndustriaTransformadora(Usuario):
 
-    def __init__(self, nome, email, senhaHash, telefone, endereco, cnpj):
+    def __init__(
+        self, nome, email, senhaHash, telefone, endereco, cnpj,
+        *, statusValidacao=StatusValidacao.PENDENTE,
+    ):
         super().__init__(nome, email, senhaHash, telefone, endereco)
         self.__cnpj = cnpj
-        self.__statusValidacao = StatusValidacao.PENDENTE
+        self.__statusValidacao = StatusValidacao(statusValidacao)
 
     @property
     def cnpj(self):
@@ -277,3 +356,11 @@ class IndustriaTransformadora(Usuario):
             lote,
             horizonteDias
         )
+
+PERFIS_USUARIO = {
+    "comum": (UsuarioComum, None),
+    "catador": (Catador, "cpf"),
+    "cooperativa": (Cooperativa, "cnpj"),
+    "empresa": (EmpresaCompradora, "cnpj"),
+    "industria": (IndustriaTransformadora, "cnpj"),
+}
