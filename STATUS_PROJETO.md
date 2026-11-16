@@ -620,8 +620,28 @@ O LoteService ainda precisa encaminhar essas operações ao DAO.
 O cancelamento persistente e a consulta de lotes encerrados
 continuam pendentes. A aplicação permanece em memória.
 
-Próxima etapa: implementar cancelamento persistente de lotes,
-preservando a composição e liberando os vínculos atuais.
+## Fase 5E.8 — Cancelamento persistente dos lotes
+
+- [x] Implementado cancelar no LoteSQLiteDAO.
+- [x] Reutilizada a operação de cancelamento do modelo.
+- [x] Liberados os materiais para DISPONIVEL.
+- [x] Removidos os vínculos atuais com o lote cancelado.
+- [x] Preservados composição, pesagem e eventos anteriores.
+- [x] Testado cancelamento de lotes EM_FORMACAO e DISPONIVEL.
+- [x] Testadas recusa de repetição e busca de lote inexistente.
+- [x] Testada reversão diante de falha SQL após a liberação dos materiais.
+- [x] Testada reversão por falha posterior na transação externa.
+- [x] Executados os 188 testes com sucesso.
+
+O cancelamento atende lotes sem transações persistidas.
+O cancelamento conjunto das propostas será implementado
+no bloco de persistência das transações.
+
+A consulta de lotes encerrados permanece pendente no DAO.
+A aplicação continua utilizando o repositório em memória.
+
+Próxima etapa: implementar a consulta dos lotes encerrados,
+preservando os vínculos atuais dos materiais com outros lotes.
 
 
 

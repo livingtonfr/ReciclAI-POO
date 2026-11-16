@@ -530,3 +530,46 @@ class LoteSQLiteDAO:
             )
 
         return lote
+
+    def cancelar(self, lote_id):
+        """Cancela um lote ativo e libera seus materiais atomicamente."""
+        self._conexao.execute("SAVEPOINT cancelar_lote")
+
+        try:
+            lote = self.buscar_por_id(lote_id)
+
+            if lote is None:
+                raise ValueError("Lote não encontrado.")
+
+            lote.cancelar()
+
+            for material in lote.materiais:
+                self._conexao.execute(
+                    "DELETE FROM vinculos_lotes_atuais "
+                    "WHERE material_id = ? AND lote_id = ?",
+                    (str(material.id), str(lote.id)),
+                )
+
+                self._conexao.execute(
+                    "UPDATE materiais SET status = 'DISPONIVEL' "
+                    "WHERE id = ?",
+                    (str(material.id),),
+                )
+
+            self._conexao.execute(
+                "UPDATE lotes SET status = 'CANCELADO' "
+                "WHERE id = ?",
+                (str(lote.id),),
+            )
+
+        except Exception:
+            self._conexao.execute(
+                "ROLLBACK TO SAVEPOINT cancelar_lote"
+            )
+            raise
+        finally:
+            self._conexao.execute(
+                "RELEASE SAVEPOINT cancelar_lote"
+            )
+
+        return lote
