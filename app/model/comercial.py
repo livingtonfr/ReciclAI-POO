@@ -220,4 +220,14 @@ class Certificado:
         return self.__dataEmissao
 
     def gerarPDF(self):
-        print(f"Certificado {self.__codigo} gerado.")
+        """Exibe uma simulação textual; não cria arquivo PDF.
+
+        Na interface web, a impressão e o salvamento em PDF
+        são realizados pelo navegador, via window.print().
+        """
+        print(
+            f"Simulação do certificado {self.__codigo}: "
+            "nenhum arquivo PDF foi gerado. "
+            "Na aplicação web, use o botão de impressão "
+            "para imprimir ou salvar em PDF."
+        )

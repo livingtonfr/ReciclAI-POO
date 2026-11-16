@@ -1,50 +1,42 @@
 # Organização da Recicl.AI
 
+## Estado atual
+
+As fases 1 a 4 do acompanhamento atual foram concluídas.
+A fase 5, dedicada à persistência SQLite, ainda não começou.
+
+A aplicação utiliza MVC com serviços e DAOs. Os dados
+permanecem em memória.
+
 ## Inicialização
 
 mainFlask.py inicia o servidor.
 
 app/__init__.py cria a aplicação Flask, carrega as configurações
-e importa os controllers para registrar as rotas.
+e importa os controladores para registrar as rotas.
 
 app/config.py centraliza as configurações da aplicação.
 
-## Pastas existentes
+## Organização das pastas
 
-- app/model: entidades, enumerações e regras do domínio.
-- app/controller: rotas e tratamento das requisições.
-- app/dao: acesso aos dados; atualmente utiliza repositório em memória.
-- app/view: páginas HTML com templates Jinja.
-- app/static: arquivos CSS, imagens e JavaScript.
-- tests: cenários e testes.
-- docs: documentação técnica.
+| Local | Responsabilidade |
+|---|---|
+| app/model/ | Entidades, enumerações e regras do domínio |
+| app/controller/ | Requisições HTTP e respostas HTML ou JSON |
+| app/services/ | Coordenação das operações e permissões |
+| app/dao/ | Acesso ao repositório em memória |
+| app/view/ | Templates Jinja |
+| app/static/ | CSS e imagens |
+| app/database/ | Estrutura reservada para SQLite |
+| app/patterns/ | Estrutura reservada para os padrões escolhidos |
+| tests/ | Testes automatizados e cenário de integração |
+| docs/ | Documentação técnica |
 
-## Pastas preparadas para as próximas fases
+A camada de serviços está implementada.
+As pastas database e patterns ainda não possuem implementações
+próprias nesta etapa.
 
-- app/services: coordenação de operações que envolvem domínio e armazenamento.
-- app/patterns: implementações dos padrões de projeto escolhidos.
-- app/database: código de inicialização e estrutura do banco.
-
-Essas três pastas ainda não representam funcionalidades implementadas.
-
-## Armazenamento local futuro
-
-O banco SQLite ficará na pasta instance, ignorada pelo Git.
-
-O código de criação das tabelas ficará em app/database e será versionado.
-
-## Limites desta etapa
-
-A Fase 2 organiza a estrutura e centraliza configurações.
-
-O armazenamento permanece em memória.
-As regras de negócio e funcionalidades existentes foram preservadas.
-A separação efetiva entre controllers, serviços e DAOs será feita
-nas próximas fases.
-
-## Organização após a fase 4
-
-### Controladores — app/controller
+## Controladores
 
 Recebem requisições, leem os campos dos formulários, convertem
 valores de entrada e produzem respostas HTML ou JSON.
@@ -53,7 +45,7 @@ Chamam os serviços para executar as operações da aplicação.
 As referências ao Repositorio ficam nas funções que montam
 as dependências.
 
-### Serviços — app/services
+## Serviços
 
 Coordenam as operações e verificam permissões de acesso.
 
@@ -62,32 +54,81 @@ identificação de resíduos, rastreabilidade e demonstração.
 
 Não dependem de request, session, render_template ou abort.
 
-### Acesso aos dados — app/dao
+## Acesso aos dados
 
 Os DAOs centralizam consultas e inclusões nas listas do
 repositório em memória.
 
 O Repositorio mantém os dados e a inicialização da demonstração.
 
-### Modelo — app/model
+As alterações nos objetos são observadas pelo repositório
+porque ele mantém referências aos mesmos objetos.
 
-As classes preservam as regras do domínio, como limites de peso,
-estados dos materiais e lotes, transferência de responsabilidade
-e condições para conclusão e certificação das transações.
+## Modelo
 
-### Persistência atual
+As classes preservam as regras do domínio, incluindo:
 
-Os dados ainda ficam em memória e não são preservados após
-reiniciar o processo.
+- Limites e validações de valores numéricos.
+- Permissões de criação de lotes.
+- Homogeneidade dos materiais de um lote.
+- Vínculos entre materiais e lotes.
+- Estados dos materiais, lotes e transações.
+- Transferência de responsabilidade e rastreabilidade.
+- Condições para conclusão e certificação das transações.
 
-As alterações nos objetos são observadas pelo repositório porque
-ele mantém referências aos mesmos objetos.
+### Pesagem dos lotes
 
-A fase 5 implementará a persistência SQLite, incluindo gravação
-das alterações, reconstrução dos relacionamentos e transações
+calcularPesoTotal() soma os pesos dos materiais do lote.
+pesoRegistrado representa uma pesagem informada separadamente.
+
+Após adicionar ou remover um material com sucesso,
+pesoRegistrado passa a ser None, pois a composição foi alterada.
+
+A invalidação ocorre depois da atualização do vínculo e da
+lista de materiais. Operações recusadas preservam a pesagem
+anterior.
+
+Uma nova pesagem pode ser registrada conforme as regras
+existentes de estado e de validação numérica.
+
+Na conclusão da transação, o sistema utiliza a pesagem
+registrada quando ela existe. Caso contrário, utiliza
+a soma dos pesos dos materiais.
+
+## Certificados
+
+A emissão e a consulta são coordenadas pelo TransacaoService,
+com armazenamento pelo CertificadoDAO.
+
+O certificado só pode ser associado a uma transação concluída.
+A consulta pela aplicação é restrita aos participantes
+da transação.
+
+A página apresenta o certificado em HTML. Seu botão chama
+window.print(), permitindo imprimir ou salvar em PDF pelo
+navegador.
+
+Certificado.gerarPDF() é uma simulação textual no terminal:
+não gera arquivo PDF e não é chamado pelo botão de impressão.
+
+## Persistência planejada — fase 5
+
+O banco SQLite ficará na pasta instance, ignorada pelo Git.
+O código de inicialização e estrutura ficará em app/database.
+
+A implementação deverá contemplar a gravação das alterações,
+a reconstrução dos relacionamentos e o uso de transações
 de banco de dados.
 
-### Certificados
+Até essa implementação, os dados não são preservados após
+reiniciar o processo.
 
-A página permite imprimir ou salvar em PDF pela janela de
-impressão do navegador. Não há geração de arquivo PDF no servidor.
+## Verificação
+
+A suíte automatizada utiliza unittest e possui 92 testes
+após a correção da pesagem.
+
+O módulo tests.cenario executa o roteiro de integração
+do modelo. Seu resultado final inclui duas transações
+concluídas, seis eventos de rastreabilidade e material
+destinado à indústria.

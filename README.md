@@ -13,25 +13,40 @@ lotes, negociação comercial e emissão de certificado.
 
 ## Arquitetura
 
-MVC + DAO, seguindo o padrão apresentado em sala (aulas 29-32): Flask puro,
-templates Jinja, HTML/CSS sem frameworks, e persistência em memória através
-de um `Repositorio` Singleton (sem banco de dados — os dados voltam ao
-estado inicial a cada reinício do servidor, ou pelo botão "Resetar demo").
+A aplicação utiliza MVC com uma camada de serviços e DAOs:
+Flask para as rotas, templates Jinja para as páginas e classes
+Python para as entidades e regras do domínio.
 
-```
-app/
-├── model/        # Regras de negócio (classes do UML, migradas do notebook)
-├── dao/          # Repositorio (Singleton) + seed de dados de demonstração
-├── controller/   # Rotas Flask, uma por área (auth, materiais, lotes, ...)
-├── view/         # Templates Jinja (um arquivo .html por tela)
-└── static/       # CSS e imagens
-tests/
-└── cenario.py    # Cenário de integração (reproduz as células 8.1-8.10 do notebook)
-```
+Os controladores recebem as requisições e chamam os serviços.
+Os serviços coordenam operações e permissões, utilizando os
+DAOs para acessar os dados e o modelo para executar as regras
+do domínio.
 
-O notebook original (`ReciclAI_POO_Implementação.ipynb`) contém o
-desenvolvimento e a validação do `model/` célula a célula; o `tests/cenario.py`
-reproduz esse mesmo roteiro para rodar fora do notebook.
+O armazenamento permanece em memória, por meio do Repositorio
+Singleton. Os dados retornam ao estado inicial ao reiniciar
+o servidor ou executar o reset da demonstração.
+
+| Local | Responsabilidade |
+|---|---|
+| app/model/ | Entidades, enumerações e regras do domínio |
+| app/controller/ | Rotas Flask e respostas HTML ou JSON |
+| app/services/ | Coordenação das operações e permissões |
+| app/dao/ | DAOs, repositório em memória e dados de demonstração |
+| app/view/ | Templates Jinja |
+| app/static/ | CSS e imagens |
+| app/config.py | Configurações da aplicação |
+| app/database/ | Estrutura reservada para a futura persistência SQLite |
+| app/patterns/ | Estrutura reservada para a integração dos padrões escolhidos |
+| tests/ | Testes automatizados e cenário de integração |
+| docs/ | Documentação técnica |
+| mainFlask.py | Inicialização do servidor |
+
+As pastas app/database e app/patterns ainda não possuem
+implementações próprias nesta etapa. A camada app/services
+já está implementada e integrada aos controladores.
+
+O cenário tests/cenario.py reproduz o roteiro de validação
+do modelo desenvolvido no notebook original.
 
 ## Como rodar
 
@@ -124,7 +139,50 @@ perguntarem. `POST /admin/reset` já segue o padrão correto.
 
 ## Estado do projeto
 
-Fases 0 a 9 do plano concluídas (ambiente, model, DAO/seed, autenticação,
-materiais/IA, lotes, mercado/transações/certificado, pontos de coleta,
-acabamento), incluindo o opcional de endpoints JSON. O mapa Leaflet segue
-como opcional, não implementado.
+O acompanhamento atual utiliza as fases registradas em
+STATUS_PROJETO.md:
+
+1. Fase 1 — Verificação da aplicação e configuração do ambiente: concluída.
+2. Fase 2 — Organização das pastas e configurações: concluída.
+3. Fase 3 — Validações e regras do domínio: concluída.
+4. Fase 4 — Separação entre controladores, serviços e DAOs: concluída.
+5. Fase 5 — Persistência SQLite: ainda não iniciada.
+
+A antiga referência às fases 0 a 9 correspondia ao roteiro
+inicial de construção e foi substituída pelo acompanhamento
+atual.
+
+Após a fase 4, foi corrigida a invalidação da pesagem quando
+materiais são adicionados ou removidos de um lote. Operações
+recusadas preservam a pesagem anterior.
+
+O armazenamento continua em memória. Identificação, avaliação
+e precificação por IA permanecem simuladas.
+
+## Testes
+
+Execute os comandos na raiz do projeto, utilizando o Python
+do ambiente virtual:
+
+```powershell
+python -m unittest discover -s tests -v
+python -m tests.cenario
+```
+
+Após a correção da pesagem, a suíte possui 92 testes.
+
+O cenário de integração termina com duas transações concluídas,
+seis eventos de rastreabilidade e material destinado à indústria.
+
+## Certificados e PDF
+
+O certificado é apresentado em uma página HTML imprimível.
+O botão da página utiliza window.print() para abrir a janela
+de impressão do navegador, onde o usuário pode imprimir ou
+selecionar a opção de salvar em PDF.
+
+Não há geração de arquivo PDF no servidor.
+
+O método Certificado.gerarPDF() mantém uma simulação textual
+no terminal. Ele não cria arquivos e não é o mecanismo
+utilizado pelo botão da página.

@@ -287,3 +287,17 @@ Cadastro e atualização de perfil serão migrados na 4H.2.
 - [x] Documentadas as limitações do armazenamento em memória.
 - [x] Suíte automatizada e cenário aprovados após as alterações.
 - [x] Integrar a branch fase-4-servicos-dao à master.
+
+## Revisão após a fase 4 — preparação para SQLite
+
+- [x] Invalidada a pesagem após inclusão ou remoção bem-sucedida de materiais.
+- [x] Preservada a pesagem quando a operação é recusada.
+- [x] Acrescentados quatro testes de regressão.
+- [x] Executada a suíte de 92 testes com sucesso.
+- [x] Atualizadas as descrições da arquitetura e das fases no README.
+- [x] Atualizada a documentação das responsabilidades das pastas.
+- [x] Esclarecida a simulação de Certificado.gerarPDF().
+- [x] Documentada a impressão e o salvamento em PDF pelo navegador.
+
+A fase 5 de persistência SQLite ainda não foi iniciada.
+
