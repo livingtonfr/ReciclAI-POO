@@ -229,6 +229,35 @@ class Material:
         material.__avaliacoes = avaliacoes
         return material
 
+    @classmethod
+    def _reconstituir_em_lote(cls, lote, **dados):
+        """Uso interno da reconstrução de lotes ativos."""
+        from app.model.lote import LoteMaterial
+        from app.model.enums import StatusLote
+
+        if not isinstance(lote, LoteMaterial) or lote.status not in (
+            StatusLote.EM_FORMACAO,
+            StatusLote.DISPONIVEL,
+        ):
+            raise ValueError("O vínculo exige um lote ativo.")
+
+        if StatusMaterial(dados["status"]) != StatusMaterial.EM_LOTE:
+            raise ValueError(
+                "O material vinculado deve estar EM_LOTE."
+            )
+
+        if dados["responsavelAtual"] is not lote.criador:
+            raise ValueError(
+                "O responsável deve ser a instância do criador do lote."
+            )
+
+        material = cls.reconstituir(
+            **(dados | {"status": "DISPONIVEL"})
+        )
+        material.__status = StatusMaterial.EM_LOTE
+        material.__loteAtual = lote
+        return material
+
     @property
     def id(self):
         return self.__id

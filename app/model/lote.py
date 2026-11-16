@@ -116,6 +116,83 @@ class LoteMaterial:
         lote.__transacoes = []
         return lote
 
+    @classmethod
+    def reconstituir_ativo(
+        cls,
+        identificador,
+        criador,
+        dataCriacao,
+        status,
+        dadosMateriais,
+        pesoRegistrado=None,
+    ):
+        """Restaura lote e materiais juntos, sem eventos novos."""
+        from app.model.material import Material
+        from app.model.usuario import (
+            Catador,
+            Cooperativa,
+            EmpresaCompradora,
+        )
+
+        identificador = UUID(str(identificador))
+        estado = StatusLote(status)
+        data = datetime.fromisoformat(dataCriacao)
+
+        if estado not in (
+            StatusLote.EM_FORMACAO,
+            StatusLote.DISPONIVEL,
+        ):
+            raise ValueError(
+                "Este método restaura somente lotes ativos."
+            )
+
+        if not isinstance(
+            criador,
+            (Catador, Cooperativa, EmpresaCompradora),
+        ):
+            raise ValueError("Perfil de criador inválido.")
+
+        if pesoRegistrado is not None:
+            validar_peso_lote(pesoRegistrado)
+
+        lote = cls.__new__(cls)
+        lote.__id = identificador
+        lote.__criador = criador
+        lote.__dataCriacao = data
+        lote.__status = estado
+        lote.__pesoRegistrado = pesoRegistrado
+        lote.__materiais = []
+        lote.__transacoes = []
+
+        materiais = [
+            Material._reconstituir_em_lote(lote, **dados)
+            for dados in dadosMateriais
+        ]
+
+        if not materiais:
+            raise ValueError(
+                "O lote não pode ficar sem materiais."
+            )
+
+        if len({m.id for m in materiais}) != len(materiais):
+            raise ValueError(
+                "A composição contém material repetido."
+            )
+
+        tipo = materiais[0].tipoMaterial
+
+        if any(m.tipoMaterial is not tipo for m in materiais):
+            raise ValueError(
+                "Os materiais devem compartilhar a instância do tipo."
+            )
+
+        validar_peso_lote(
+            sum(m.pesoKg for m in materiais)
+        )
+
+        lote.__materiais = materiais
+        return lote
+
     @property
     def id(self):
         return self.__id

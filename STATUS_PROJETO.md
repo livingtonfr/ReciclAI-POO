@@ -514,8 +514,32 @@ entre materiais e lotes continuam pendentes.
 
 A aplicação continua utilizando o repositório em memória.
 
-Próxima etapa: reconstruir lotes ativos e seus vínculos
-sem criar novos eventos de agrupamento.
+## Fase 5E.3 — Reconstrução de lotes ativos e vínculos
+
+- [x] Implementado LoteMaterial.reconstituir_ativo.
+- [x] Implementado método interno de reconstrução de materiais vinculados.
+- [x] Restaurados lote e materiais como um conjunto de objetos relacionados.
+- [x] Preservados UUID, data, estado e pesagem do lote.
+- [x] Restaurado material.loteAtual sem gerar eventos de agrupamento.
+- [x] Exigido compartilhamento das instâncias de responsável e tipo.
+- [x] Validados composição não vazia, materiais distintos e peso total.
+- [x] Testada a remoção de material com invalidação da pesagem.
+- [x] Testada a preservação da pesagem quando a remoção é recusada.
+- [x] Testadas as restrições e a liberação de vínculos pelo cancelamento.
+- [x] Executados os 163 testes com sucesso.
+
+A reconstrução dos lotes ativos está preparada no modelo.
+O DAO SQLite ainda precisa carregar os dados e coordenar
+o compartilhamento das instâncias relacionadas.
+
+A recuperação das transações será implementada no bloco
+dedicado às transações. As listas de transações reconstruídas
+permanecem vazias nesta etapa.
+
+A aplicação continua utilizando o repositório em memória.
+
+Próxima etapa: implementar a persistência e a consulta
+de lotes pelo DAO SQLite.
 
 
 
