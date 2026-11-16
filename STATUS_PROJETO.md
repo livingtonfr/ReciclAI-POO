@@ -640,8 +640,29 @@ no bloco de persistência das transações.
 A consulta de lotes encerrados permanece pendente no DAO.
 A aplicação continua utilizando o repositório em memória.
 
-Próxima etapa: implementar a consulta dos lotes encerrados,
-preservando os vínculos atuais dos materiais com outros lotes.
+## Fase 5E.9 — Consulta de lotes encerrados
+
+- [x] Acrescentada consulta de lotes encerrados ao LoteSQLiteDAO.
+- [x] Recuperados criador, data, estado, pesagem e composição.
+- [x] Preservados os vínculos atuais dos materiais com outros lotes.
+- [x] Reutilizadas as instâncias dos lotes ativos durante a consulta.
+- [x] Recusados vínculos atuais apontando para lotes encerrados.
+- [x] Testada a recuperação de lote cancelado após reabrir o banco.
+- [x] Testada a consulta da composição antiga após novo agrupamento.
+- [x] Verificado que a consulta não realiza gravações.
+- [x] Executados os 191 testes com sucesso.
+
+A composição dos lotes encerrados referencia os materiais
+com seus estados e responsáveis atuais.
+
+As transações associadas ainda não são recuperadas.
+A validação do fluxo de negociação persistente ocorrerá
+no bloco dedicado às transações.
+
+A aplicação continua utilizando o repositório em memória.
+
+Próxima etapa: preparar as consultas de listagem e adaptar
+o LoteService para utilizar as operações persistentes.
 
 
 

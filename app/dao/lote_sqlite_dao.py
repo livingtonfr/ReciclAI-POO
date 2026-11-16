@@ -181,10 +181,8 @@ class LoteSQLiteDAO:
         if registro is None:
             return None
 
-        if registro["status"] not in ("EM_FORMACAO", "DISPONIVEL"):
-            raise ValueError(
-                "A consulta de lotes encerrados ainda não foi implementada."
-            )
+        if registro["status"] in ("NEGOCIADO", "CANCELADO"):
+            return self._reconstituir_encerrado(registro)
 
         criador = UsuarioSQLiteDAO(self._conexao).buscar_por_id(
             registro["criador_id"]
@@ -573,3 +571,93 @@ class LoteSQLiteDAO:
             )
 
         return lote
+
+    def _reconstituir_encerrado(self, registro):
+        from app.dao.usuario_sqlite_dao import UsuarioSQLiteDAO
+
+        vinculo_proprio = self._conexao.execute(
+            "SELECT 1 FROM vinculos_lotes_atuais "
+            "WHERE lote_id = ?",
+            (registro["id"],),
+        ).fetchone()
+
+        if vinculo_proprio is not None:
+            raise ValueError(
+                "Lote encerrado não pode manter vínculos atuais."
+            )
+
+        criador = UsuarioSQLiteDAO(self._conexao).buscar_por_id(
+            registro["criador_id"]
+        )
+
+        composicao = self._conexao.execute(
+            "SELECT material_id FROM lotes_materiais "
+            "WHERE lote_id = ? ORDER BY ordem",
+            (registro["id"],),
+        ).fetchall()
+
+        ativos = {}
+        materiais = []
+
+        for item in composicao:
+            material_id = item["material_id"]
+
+            vinculo = self._conexao.execute(
+                "SELECT lote_id FROM vinculos_lotes_atuais "
+                "WHERE material_id = ?",
+                (material_id,),
+            ).fetchone()
+
+            if vinculo is None:
+                material = MaterialSQLiteDAO(
+                    self._conexao
+                ).buscar_por_id(material_id)
+
+            else:
+                atual_id = vinculo["lote_id"]
+
+                if atual_id not in ativos:
+                    atual = self._conexao.execute(
+                        "SELECT status FROM lotes WHERE id = ?",
+                        (atual_id,),
+                    ).fetchone()
+
+                    if atual is None or atual["status"] not in (
+                        "EM_FORMACAO",
+                        "DISPONIVEL",
+                    ):
+                        raise ValueError(
+                            "O vínculo atual deve apontar para um lote ativo."
+                        )
+
+                    ativos[atual_id] = self.buscar_por_id(atual_id)
+
+                material = next(
+                    (
+                        m
+                        for m in ativos[atual_id].materiais
+                        if str(m.id) == material_id
+                    ),
+                    None,
+                )
+
+                if material is None:
+                    raise ValueError(
+                        "Material ausente da composição do lote atual."
+                    )
+
+            if material is None:
+                raise ValueError(
+                    "Material da composição não encontrado."
+                )
+
+            materiais.append(material)
+
+        return LoteMaterial.reconstituir_encerrado(
+            identificador=registro["id"],
+            criador=criador,
+            dataCriacao=registro["data_criacao"],
+            status=registro["status"],
+            materiais=materiais,
+            pesoRegistrado=registro["peso_registrado"],
+        )
