@@ -58,7 +58,7 @@ class LoteService:
     def listar_materiais_disponiveis(self, usuario, excluir=None):
         self._validar_perfil(usuario)
 
-        materiais = self._material_dao.listar_por_responsavel(
+        materiais = self._material_dao.listar_disponiveis_por_responsavel(
             usuario
         )
 
@@ -66,7 +66,7 @@ class LoteService:
             material
             for material in materiais
             if material.status == StatusMaterial.DISPONIVEL
-            and material is not excluir
+            and (excluir is None or material.id != excluir.id)
         ]
 
     def _buscar_material_disponivel(self, material_id, usuario):
@@ -89,7 +89,7 @@ class LoteService:
             usuario,
         )
 
-        lote = usuario.criarLote(material)
+        lote = material.responsavelAtual.criarLote(material)
         return self._lote_dao.adicionar(lote)
 
     def adicionar_material(self, lote_id, material_id, usuario):
@@ -100,8 +100,7 @@ class LoteService:
             usuario,
         )
 
-        lote.adicionarMaterial(material)
-        return lote
+        return self._lote_dao.adicionar_material(lote.id, material.id)
 
     def remover_material(self, lote_id, material_id, usuario):
         lote = self.buscar_do_usuario(lote_id, usuario)
@@ -120,8 +119,7 @@ class LoteService:
                 "Material não encontrado neste lote."
             )
 
-        lote.removerMaterial(material)
-        return lote
+        return self._lote_dao.remover_material(lote.id, material.id)
 
     def registrar_pesagem(self, lote_id, usuario, peso):
         lote = self.buscar_do_usuario(lote_id, usuario)

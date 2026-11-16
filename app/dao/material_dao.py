@@ -1,5 +1,5 @@
 class MaterialDAO:
-    """Acessa materiais no repositório em memória."""
+    """Consulta materiais no repositório em memória."""
 
     def __init__(self, repositorio):
         self._repositorio = repositorio
@@ -27,13 +27,17 @@ class MaterialDAO:
 
     def atualizar(self, material):
         existente = self.buscar_por_id(material.id)
-
         if existente is None:
             raise ValueError("Material não encontrado.")
-
         if existente is not material:
-            raise ValueError(
-                "Use a instância de material do repositório em memória."
-            )
-
+            raise ValueError("Use a instância de material do repositório em memória.")
         return existente
+
+    def listar_disponiveis_por_responsavel(self, usuario):
+        from app.model.enums import StatusMaterial
+
+        return [
+            material
+            for material in self.listar_por_responsavel(usuario)
+            if material.status == StatusMaterial.DISPONIVEL
+        ]

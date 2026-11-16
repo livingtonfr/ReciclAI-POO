@@ -680,8 +680,29 @@ aos métodos persistentes dos DAOs.
 A aplicação continua utilizando o repositório em memória.
 A recuperação das transações associadas permanece pendente.
 
-Próxima etapa: adaptar as operações do LoteService
-e os métodos correspondentes do DAO em memória.
+## Fase 5E.11 — Criação e composição pelo serviço
+
+- [x] Adaptada a criação para reutilizar o responsável do material.
+- [x] Encaminhadas inclusão e remoção de materiais aos DAOs.
+- [x] Implementadas as operações correspondentes no DAO em memória.
+- [x] Criada consulta específica de materiais disponíveis nos dois DAOs.
+- [x] Adaptada a exclusão da seleção de materiais para comparar UUIDs.
+- [x] Testadas criação e composição persistentes pelo serviço.
+- [x] Verificadas autorização e recusa de operações inválidas.
+- [x] Testadas reversões diante de falha SQL e falha externa.
+- [x] Preservadas as instâncias do repositório em memória.
+- [x] Executados os 201 testes com sucesso.
+
+A criação e a composição pelo LoteService estão preparadas
+para os DAOs SQLite e em memória.
+
+Pesagem, disponibilização e cancelamento pelo serviço ainda
+precisam ser encaminhados às operações persistentes.
+
+A aplicação Flask continua utilizando o repositório em memória.
+
+Próxima etapa: 5E.12 — integrar pesagem, disponibilização
+e cancelamento pelo serviço.
 
 
 
