@@ -124,3 +124,15 @@ inconsistentes, sem transferência parcial.
 - [x] Conferidas as páginas de pontos de coleta e o fluxo
 de cadastro de material e criação de lote.
 
+### Fase 4A — Consultas de materiais
+
+- [x] Criado MaterialDAO para consultas em memória.
+- [x] Criado MaterialService para coordenar consultas e permissões.
+- [x] Listagem e busca de materiais utilizam o serviço.
+- [x] Preservadas as respostas 403 e 404.
+- [x] Testes anteriores e cenário executados sem falhas.
+- [x] Conferidos listagem, detalhes e bloqueio de acesso
+a material de outro responsável.
+
+Cadastro, disponibilização, avaliação e cotação ainda serão
+migrados nas próximas etapas.

@@ -17,3 +17,10 @@ class MaterialDAO:
                 return material
 
         return None
+
+    def adicionar(self, material):
+        if self.buscar_por_id(material.id) is not None:
+            raise ValueError("O material já está cadastrado.")
+
+        self._repositorio.materiais.append(material)
+        return material

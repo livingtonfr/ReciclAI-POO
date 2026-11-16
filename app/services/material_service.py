@@ -53,3 +53,41 @@ class MaterialService:
             )
 
         return material
+
+    def registrar(
+        self,
+        usuario,
+        tipo,
+        peso_kg,
+        condicao,
+        observacoes=None,
+    ):
+        if not isinstance(usuario, Catador):
+            raise AcessoMaterialNegadoError(
+                "Este perfil não pode cadastrar materiais."
+            )
+
+        material = usuario.registrarMaterial(
+            tipo,
+            peso_kg,
+            condicao,
+            observacoes,
+        )
+
+        return self._material_dao.adicionar(material)
+
+    def disponibilizar(self, material_id, usuario):
+        if not isinstance(
+            usuario,
+            (Catador, Cooperativa, EmpresaCompradora),
+        ):
+            raise AcessoMaterialNegadoError(
+                "Este perfil não pode disponibilizar materiais."
+            )
+
+        material = self.buscar_do_usuario(
+            material_id,
+            usuario,
+        )
+        material.disponibilizar()
+        return material

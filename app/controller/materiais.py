@@ -78,7 +78,7 @@ def materiais():
         meus_materiais = servico.listar_do_usuario(usuario)
     except AcessoMaterialNegadoError:
         abort(403)
-        
+
     return render_template(
         'materiais_lista.html',
         materiais=meus_materiais,
@@ -115,12 +115,23 @@ def materiais_novo():
             return render_template('materiais_novo.html', tipos=tipos, condicoes=condicoes)
 
         try:
-            material = usuario.registrarMaterial(tipo, peso_kg, condicao, observacoes)
+            material = obter_material_service().registrar(
+                usuario,
+                tipo,
+                peso_kg,
+                condicao,
+                observacoes,
+            )
+        except AcessoMaterialNegadoError:
+            abort(403)
         except ValueError as erro:
             flash(str(erro), 'error')
-            return render_template('materiais_novo.html', tipos=tipos, condicoes=condicoes)
+            return render_template(
+                'materiais_novo.html',
+                tipos=tipos,
+                condicoes=condicoes,
+            )
 
-        Repositorio().materiais.append(material)
         flash('Material registrado com sucesso.', 'success')
         return redirect(url_for('materiais_detalhe', material_id=material.id))
 
@@ -146,15 +157,23 @@ def materiais_detalhe(material_id):
 @login_obrigatorio
 @requer_perfil_material
 def materiais_disponibilizar(material_id):
-    material = buscar_material_do_usuario(material_id)
-
     try:
-        material.disponibilizar()
-        flash('Material disponibilizado para negociação.', 'success')
+        obter_material_service().disponibilizar(
+            material_id,
+            usuario_atual(),
+        )
+        flash(
+            'Material disponibilizado para negociação.',
+            'success',
+        )
+    except MaterialNaoEncontradoError:
+        abort(404)
+    except AcessoMaterialNegadoError:
+        abort(403)
     except ValueError as erro:
         flash(str(erro), 'error')
 
-    return redirect(url_for('materiais_detalhe', material_id=material.id))
+    return redirect(url_for('materiais_detalhe', material_id=material_id))
 
 
 @app.route('/materiais/<material_id>/avaliar', methods=['POST'])
