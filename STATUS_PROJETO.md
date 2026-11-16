@@ -401,3 +401,16 @@ relacionados continuam pendentes.
 A reconstrução dos objetos e o DAO SQLite de materiais ainda
 estão pendentes. O vínculo com lotes será implementado no bloco 5E.
 A interface continua utilizando o repositório em memória.
+
+### 5D.2 — Reconstrução de materiais e rastreabilidade
+
+- Implementada a reconstrução de Material, EventoRastreio e AvaliacaoQualidade.
+- Preservados os identificadores, as datas, os estados e os dados originais.
+- A reconstrução de Material não executa seu construtor nem gera novo evento de registro.
+- Preservada a ordem dos eventos e das avaliações, com cópia das listas recebidas.
+- Incluídas validações dos dados utilizados na reconstrução.
+- A reconstrução de materiais EM_LOTE permanece bloqueada até a implementação da persistência dos vínculos com lotes.
+- Suíte completa validada com 128 testes.
+- Cenário validado com duas transações concluídas, seis eventos e destinação à indústria.
+- Próxima etapa: implementar o DAO SQLite de materiais.
+
