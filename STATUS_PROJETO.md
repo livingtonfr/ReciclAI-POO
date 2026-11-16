@@ -48,3 +48,14 @@ Histórico Git original preservado.
 - Data e formato da entrega final.
 - Funcionalidades mínimas exigidas.
 - Exigência de banco de dados e de integração dos padrões.
+
+## Fase 2 — Organização
+
+- [x] Criada branch específica para a reorganização.
+- [x] Preparadas pastas services, patterns e database.
+- [x] Centralizadas configurações em app/config.py.
+- [x] Atualizados os arquivos de inicialização.
+- [x] Documentada a estrutura em docs/ARQUITETURA.md.
+- [x] Cenário de classes executado após as alterações.
+- [x] Navegação básica conferida após as alterações.
+- [ ] Alterações registradas e enviadas ao GitHub.

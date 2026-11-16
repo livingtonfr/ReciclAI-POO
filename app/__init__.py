@@ -1,8 +1,14 @@
 from flask import Flask
 
-app = Flask(__name__, template_folder='view')
-app.secret_key = 'reciclai-dev-secret'
+from app.config import Config
 
+
+app = Flask(__name__, template_folder="view")
+app.config.from_object(Config)
+
+
+# As rotas são importadas depois da criação da aplicação,
+# pois os controllers utilizam a instância "app".
 from app.controller import auth
 from app.controller import materiais
 from app.controller import ia
