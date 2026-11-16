@@ -582,7 +582,26 @@ Consultas independentes ainda produzem instâncias diferentes.
 Alterações feitas nos objetos recuperados não são gravadas automaticamente.
 A aplicação continua utilizando o repositório em memória.
 
-Próxima etapa: implementar a atualização persistente dos lotes.
+## Fase 5E.6 — Pesagem e disponibilização persistentes
+
+- [x] Implementado atualizar_pesagem_e_estado no LoteSQLiteDAO.
+- [x] Persistidas a pesagem e a disponibilização dos lotes ativos.
+- [x] Preservados criador, data, composição e vínculos.
+- [x] Recusadas alterações de composição por essa operação.
+- [x] Impedido retorno de DISPONIVEL para EM_FORMACAO.
+- [x] Recusado cancelamento por essa operação específica.
+- [x] Testada a preservação da pesagem após tentativa inválida.
+- [x] Testada a reversão da pesagem e do estado por falha posterior.
+- [x] Executados os 179 testes com sucesso.
+
+A atualização implementada grava somente pesagem e estado ativo.
+Alterações de composição e cancelamento exigem operações próprias.
+
+O LoteService ainda não encaminha essas operações ao DAO SQLite.
+A aplicação continua utilizando o repositório em memória.
+
+Próxima etapa: implementar alterações persistentes da composição,
+com atualização dos vínculos e invalidação da pesagem.
 
 
 

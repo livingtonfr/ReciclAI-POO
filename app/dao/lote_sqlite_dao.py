@@ -279,3 +279,75 @@ class LoteSQLiteDAO:
             dadosMateriais=dados_materiais,
             pesoRegistrado=registro["peso_registrado"],
         )
+
+    def atualizar_pesagem_e_estado(self, lote):
+        """Atualiza somente pesagem e estado ativo; não salva a composição."""
+        if not isinstance(lote, LoteMaterial):
+            raise TypeError("Lote inválido.")
+
+        if lote.status not in (
+            StatusLote.EM_FORMACAO,
+            StatusLote.DISPONIVEL,
+        ):
+            raise ValueError(
+                "Esta operação aceita somente lotes ativos."
+            )
+
+        if lote.transacoes:
+            raise ValueError(
+                "A persistência das transações ainda não foi implementada."
+            )
+
+        if lote.pesoRegistrado is not None:
+            validar_peso_lote(lote.pesoRegistrado)
+
+        anterior = self.buscar_por_id(lote.id)
+
+        if anterior is None:
+            raise ValueError("Lote não encontrado.")
+
+        if (
+            anterior.criador.id != lote.criador.id
+            or anterior.dataCriacao != lote.dataCriacao
+        ):
+            raise ValueError(
+                "Os dados originais do lote não podem ser alterados."
+            )
+
+        if (
+            [m.id for m in anterior.materiais]
+            != [m.id for m in lote.materiais]
+        ):
+            raise ValueError(
+                "Salve a composição pela operação específica de composição."
+            )
+
+        for material in lote.materiais:
+            if (
+                material.loteAtual is not lote
+                or material.status != StatusMaterial.EM_LOTE
+                or material.responsavelAtual is not lote.criador
+            ):
+                raise ValueError(
+                    "Os vínculos do lote estão inconsistentes."
+                )
+
+        if (
+            anterior.status == StatusLote.DISPONIVEL
+            and lote.status != StatusLote.DISPONIVEL
+        ):
+            raise ValueError(
+                "Um lote disponibilizado não pode voltar a EM_FORMACAO."
+            )
+
+        self._conexao.execute(
+            "UPDATE lotes SET peso_registrado = ?, status = ? "
+            "WHERE id = ?",
+            (
+                lote.pesoRegistrado,
+                lote.status.value,
+                str(lote.id),
+            ),
+        )
+
+        return lote
