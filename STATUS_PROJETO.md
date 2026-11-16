@@ -453,8 +453,28 @@ O MaterialService ainda precisa encaminhar suas alterações ao DAO.
 Os controladores continuam utilizando o repositório em memória.
 A persistência dos vínculos com lotes permanece pendente.
 
-Próxima etapa: adaptar o MaterialService e o DAO em memória
-para o fluxo de atualização persistente.
+## Fase 5D.5 — Atualização de materiais pelo serviço
+
+- [x] Adaptada a verificação do responsável no MaterialService para comparar UUIDs.
+- [x] Adaptada a listagem do DAO em memória para comparar UUIDs.
+- [x] Disponibilização encaminhada ao método atualizar do DAO.
+- [x] Avaliação encaminhada ao método atualizar do DAO.
+- [x] Preservado o retorno da avaliação utilizado pelos controladores.
+- [x] Implementado atualizar no DAO em memória, preservando a instância compartilhada.
+- [x] Testadas disponibilização e avaliação persistentes pelo serviço.
+- [x] Testado o bloqueio de operações por outro responsável.
+- [x] Testada a reversão das operações diante de falha posterior.
+- [x] Executados os 147 testes com sucesso.
+- [x] Reexecutado o cenário completo de rastreabilidade.
+
+O MaterialService pode utilizar o DAO SQLite nos fluxos testados
+de consulta, disponibilização e avaliação de materiais fora de lotes.
+
+Os controladores continuam utilizando o repositório em memória.
+A persistência dos vínculos com lotes e a integração geral
+da aplicação com SQLite permanecem pendentes.
+
+Próxima etapa: iniciar a estrutura SQLite dos lotes e de sua composição.
 
 
 
