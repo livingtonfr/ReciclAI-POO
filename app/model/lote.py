@@ -89,8 +89,8 @@ class LoteMaterial:
         )
         validar_peso_lote(peso_apos_adicao)
 
-        self.__materiais.append(material)
         material.agruparEmLote(self)
+        self.__materiais.append(material)
 
     def removerMaterial(self, material):
         if self.__status != StatusLote.EM_FORMACAO:
@@ -102,8 +102,8 @@ class LoteMaterial:
         if len(self.__materiais) == 1:
             raise ValueError("O lote não pode ficar sem materiais.")
 
-        self.__materiais.remove(material)
         material.removerDoLote(self)
+        self.__materiais.remove(material)
 
     def calcularPesoTotal(self):
         return sum(material.pesoKg for material in self.__materiais)
