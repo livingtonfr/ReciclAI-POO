@@ -538,8 +538,30 @@ permanecem vazias nesta etapa.
 
 A aplicação continua utilizando o repositório em memória.
 
-Próxima etapa: implementar a persistência e a consulta
-de lotes pelo DAO SQLite.
+## Fase 5E.4 — Inclusão de lotes ativos no SQLite
+
+- [x] Criado LoteSQLiteDAO com método adicionar.
+- [x] Validados estado, criador, composição, pesos e vínculos do lote.
+- [x] Exigidos materiais previamente persistidos como DISPONIVEL.
+- [x] Conferido o responsável persistido antes do agrupamento.
+- [x] Gravados lote, composição, ordem e vínculos atuais.
+- [x] Persistidos os eventos de agrupamento existentes nos objetos.
+- [x] Atualizados os materiais para EM_LOTE na mesma transação.
+- [x] Testada a recusa de duplicidade e material não persistido.
+- [x] Testada a reversão completa diante de falha no segundo material.
+- [x] Testada a reversão por falha posterior na transação externa.
+- [x] Executados os 169 testes com sucesso.
+
+Este bloco implementa somente a inclusão de lotes ativos
+sem transações associadas.
+
+A consulta e a atualização dos lotes ainda serão implementadas.
+O DAO de materiais ainda não carrega materiais EM_LOTE isoladamente.
+
+A aplicação continua utilizando o repositório em memória.
+
+Próxima etapa: implementar a consulta SQLite dos lotes ativos,
+restaurando composição, histórico e vínculos.
 
 
 
