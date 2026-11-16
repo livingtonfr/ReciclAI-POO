@@ -340,3 +340,18 @@ A interface continua utilizando o repositório em memória.
 O DAO SQLite ainda não está conectado aos controladores.
 A aplicação continua utilizando o repositório em memória.
 A integração deverá preservar a identidade dos objetos relacionados.
+
+## Fase 5C.1 — Estrutura de usuários
+
+- [x] Criada a tabela usuarios para os cinco perfis existentes.
+- [x] Preparados campos de hash de senha, data e localização.
+- [x] Definidas restrições de documentos conforme o perfil.
+- [x] Definidos os valores permitidos de situação de validação.
+- [x] Testada a rejeição de e-mail duplicado com variação de caixa ASCII.
+- [x] Adaptada a inicialização para executar os dois arquivos SQL.
+- [x] Testada a preservação dos registros após reinicialização.
+- [x] Executados os 108 testes com sucesso.
+
+O DAO SQLite de usuários e sua integração ainda estão pendentes.
+A autenticação da aplicação continua utilizando dados em memória.
+

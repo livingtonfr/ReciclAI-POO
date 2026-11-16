@@ -4,9 +4,14 @@ from app.database.conexao import conectar
 
 
 def inicializar_banco(caminho):
-    """Cria a tabela inicial sem apagar registros existentes."""
-    arquivo_sql = Path(__file__).with_name("schema.sql")
-    comando = arquivo_sql.read_text(encoding="utf-8")
+    """Cria as tabelas previstas sem apagar registros existentes."""
+    pasta = Path(__file__).parent
+    arquivos = (
+        "schema.sql",
+        "schema_usuarios.sql",
+    )
 
     with conectar(caminho) as conexao:
-        conexao.execute(comando)
+        for nome in arquivos:
+            comando = (pasta / nome).read_text(encoding="utf-8")
+            conexao.execute(comando)
