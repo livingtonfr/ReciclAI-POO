@@ -13,6 +13,8 @@ from app.services.transacao_service import (
     TransacaoNaoEncontradaError,
     AcessoTransacaoNegadoError,
 )
+from app.dao.certificado_dao import CertificadoDAO
+from app.model.enums import StatusTransacao
 
 
 class TestTransacaoService(unittest.TestCase):
@@ -163,6 +165,163 @@ class TestTransacaoService(unittest.TestCase):
         with self.assertRaises(AcessoTransacaoNegadoError):
             self.servico.listar_propostas(self.catador)
 
+    def configurar_certificados(self):
+        self.repositorio.certificados = []
+
+        self.servico = TransacaoService(
+            TransacaoDAO(self.repositorio),
+            LoteDAO(self.repositorio),
+            PrecificacaoIA(2.0),
+            certificado_dao=CertificadoDAO(self.repositorio),
+        )
+
+    def test_proposta_duplicada_nao_duplica_registros(self):
+        lote = self.criar_lote(self.catador)
+
+        proposta = self.servico.propor(
+            lote.id,
+            self.empresa,
+            20.0,
+        )
+
+        with self.assertRaises(ValueError):
+            self.servico.propor(
+                lote.id,
+                self.empresa,
+                25.0,
+            )
+
+        self.assertEqual(
+            self.repositorio.transacoes,
+            [proposta],
+        )
+        self.assertEqual(lote.transacoes, [proposta])
+
+    def test_valor_invalido_nao_registra_proposta(self):
+        lote = self.criar_lote(self.catador)
+
+        with self.assertRaises(ValueError):
+            self.servico.propor(
+                lote.id,
+                self.empresa,
+                float("nan"),
+            )
+
+        self.assertEqual(self.repositorio.transacoes, [])
+        self.assertEqual(lote.transacoes, [])
+
+    def test_conclusao_transfere_e_cancela_concorrente(self):
+        lote = self.criar_lote(self.catador)
+
+        primeira = self.servico.propor(
+            lote.id,
+            self.empresa,
+            20.0,
+        )
+        segunda = self.servico.propor(
+            lote.id,
+            self.outra_empresa,
+            25.0,
+        )
+
+        self.servico.concluir(primeira.id, self.catador)
+
+        self.assertEqual(
+            primeira.status,
+            StatusTransacao.CONCLUIDA,
+        )
+        self.assertEqual(
+            segunda.status,
+            StatusTransacao.CANCELADA,
+        )
+        self.assertIs(
+            lote.materiais[0].responsavelAtual,
+            self.empresa,
+        )
+
+    def test_somente_vendedor_cancela_proposta(self):
+        lote = self.criar_lote(self.catador)
+        proposta = self.servico.propor(
+            lote.id,
+            self.empresa,
+            20.0,
+        )
+
+        with self.assertRaises(AcessoTransacaoNegadoError):
+            self.servico.cancelar(proposta.id, self.empresa)
+
+        with self.assertRaises(AcessoTransacaoNegadoError):
+            self.servico.concluir(proposta.id, self.empresa)
+
+        self.assertEqual(
+            proposta.status,
+            StatusTransacao.PENDENTE,
+        )
+
+        self.servico.cancelar(proposta.id, self.catador)
+
+        self.assertEqual(
+            proposta.status,
+            StatusTransacao.CANCELADA,
+        )
+
+    def test_certificado_exige_conclusao_e_nao_duplica(self):
+        self.configurar_certificados()
+        lote = self.criar_lote(self.catador)
+        proposta = self.servico.propor(
+            lote.id,
+            self.empresa,
+            20.0,
+        )
+
+        with self.assertRaises(ValueError):
+            self.servico.emitir_certificado(
+                proposta.id,
+                self.catador,
+            )
+
+        self.assertEqual(self.repositorio.certificados, [])
+
+        self.servico.concluir(proposta.id, self.catador)
+
+        with self.assertRaises(AcessoTransacaoNegadoError):
+            self.servico.emitir_certificado(
+                proposta.id,
+                self.empresa,
+            )
+
+        certificado = self.servico.emitir_certificado(
+            proposta.id,
+            self.catador,
+        )
+
+        with self.assertRaises(ValueError):
+            self.servico.emitir_certificado(
+                proposta.id,
+                self.catador,
+            )
+
+        self.assertIs(proposta.certificado, certificado)
+        self.assertEqual(
+            self.repositorio.certificados,
+            [certificado],
+        )
+
+        for participante in (self.catador, self.empresa):
+            encontrado, transacao = (
+                self.servico.consultar_certificado(
+                    certificado.id,
+                    participante,
+                )
+            )
+            self.assertIs(encontrado, certificado)
+            self.assertIs(transacao, proposta)
+
+        with self.assertRaises(AcessoTransacaoNegadoError):
+            self.servico.consultar_certificado(
+                certificado.id,
+                self.outra_empresa,
+            )
 
 if __name__ == "__main__":
     unittest.main()

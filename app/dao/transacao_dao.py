@@ -24,3 +24,17 @@ class TransacaoDAO:
             for transacao in self._repositorio.transacoes
             if transacao.vendedor is usuario
         ]
+
+    def adicionar(self, transacao):
+        if self.buscar_por_id(transacao.id) is not None:
+            raise ValueError("A transação já está cadastrada.")
+
+        self._repositorio.transacoes.append(transacao)
+        return transacao
+
+    def buscar_por_certificado(self, certificado):
+        for transacao in self._repositorio.transacoes:
+            if transacao.certificado is certificado:
+                return transacao
+
+        return None

@@ -209,3 +209,26 @@ Criação e alterações dos lotes ainda serão migradas.
 Envio, conclusão, cancelamento e certificados serão
 migrados no bloco 4G.2.
 
+### Fase 4G.2.1 — Saída do certificado em PDF ou impressão
+
+- [x] Botão para abrir a impressão com opção de salvar em PDF.
+- [x] Orientação de escolha do destino apresentada na tela.
+- [x] Estilos de impressão ocultam os controles da aplicação.
+- [x] Link de retorno considera comprador ou vendedor.
+- [x] PDF salvo e conferido visualmente.
+
+A geração do PDF utiliza a impressão do navegador.
+A migração das operações de transações e certificados
+para serviços e DAOs ainda está pendente.
+
+### Fase 4G.2.2 — Operações de transações e certificados
+
+- [x] Envio de propostas coordenado pelo TransacaoService.
+- [x] Verificação de proposta pendente duplicada no serviço.
+- [x] Conclusão e cancelamento passam pelo serviço.
+- [x] Criado CertificadoDAO.
+- [x] Emissão e consulta de certificados passam pelo serviço.
+- [x] Consulta restrita aos participantes da transação.
+- [x] Preservados botão de PDF/impressão e link de retorno.
+- [x] Adicionados cinco testes das operações.
+- [x] Suíte, cenário e fluxo pelo navegador aprovados.
