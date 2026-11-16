@@ -281,6 +281,63 @@ class LoteMaterial:
 
         self.__pesoRegistrado = peso
 
+    def restaurar_transacoes(self, transacoes):
+        """Associa o histórico reconstruído sem executar operações comerciais."""
+        from app.model.comercial import Transacao
+
+        if self.__transacoes:
+            raise ValueError(
+                "O lote já possui transações carregadas."
+            )
+
+        transacoes = list(transacoes)
+
+        if not all(isinstance(t, Transacao) for t in transacoes):
+            raise ValueError(
+                "A lista deve conter somente transações."
+            )
+
+        if len({t.id for t in transacoes}) != len(transacoes):
+            raise ValueError(
+                "A lista contém transações repetidas."
+            )
+
+        if any(t.lote is not self for t in transacoes):
+            raise ValueError(
+                "Todas as transações devem apontar para este lote."
+            )
+
+        concluidas = sum(
+            t.status == StatusTransacao.CONCLUIDA
+            for t in transacoes
+        )
+
+        if self.__status == StatusLote.NEGOCIADO:
+            if concluidas != 1:
+                raise ValueError(
+                    "Lote NEGOCIADO deve possuir uma transação concluída."
+                )
+        elif concluidas:
+            raise ValueError(
+                "Somente lote NEGOCIADO pode possuir transação concluída."
+            )
+
+        if self.__status == StatusLote.EM_FORMACAO and transacoes:
+            raise ValueError(
+                "Lote EM_FORMACAO não pode possuir transações."
+            )
+
+        if self.__status != StatusLote.DISPONIVEL:
+            if any(
+                t.status == StatusTransacao.PENDENTE
+                for t in transacoes
+            ):
+                raise ValueError(
+                    "Transações pendentes exigem lote DISPONIVEL."
+                )
+
+        self.__transacoes = transacoes
+
     def adicionarTransacao(self, transacao):
         self.__transacoes.append(transacao)
 

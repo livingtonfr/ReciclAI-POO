@@ -771,8 +771,26 @@ na integração dos DAOs e serviços.
 
 A aplicação Flask continua utilizando o repositório em memória.
 
-Próxima etapa: 5F.2 — reconstrução de transações
-e certificados sem repetir operações de negócio.
+## Fase 5F.2.1 — Reconstrução comercial no modelo
+
+- [x] Implementada reconstrução de certificados com ID e data originais.
+- [x] Implementada reconstrução de transações sem executar o construtor.
+- [x] Reutilizadas as validações numéricas existentes.
+- [x] Validados participantes, estados, peso e associação de certificado.
+- [x] Implementada restauração validada da lista de transações do lote.
+- [x] Preservadas as mesmas instâncias nos vínculos entre lote e transações.
+- [x] Testada ausência de novos eventos durante a reconstrução.
+- [x] Testado material de negociação antiga já agrupado em novo lote.
+- [x] Executados os 223 testes com sucesso.
+
+Esta entrega prepara a reconstrução no modelo.
+As consultas SQLite ainda não utilizam esses métodos.
+
+A fase 5F.2 permanece em andamento.
+A aplicação Flask continua utilizando o repositório em memória.
+
+Próxima etapa: 5F.2.2 — integrar as consultas SQLite
+à reconstrução de transações, certificados e lotes.
 
 
 

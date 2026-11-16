@@ -1,4 +1,4 @@
-from uuid import uuid4
+from uuid import UUID, uuid4
 from datetime import datetime
 
 from app.model.validacoes import validar_positivo, validar_inteiro_positivo, validar_peso_lote
@@ -82,6 +82,104 @@ class Transacao:
         self.__certificado = None
 
         lote.adicionarTransacao(self)
+
+    @classmethod
+    def reconstituir(
+        cls,
+        identificador,
+        lote,
+        vendedor,
+        comprador,
+        valorTotal,
+        dataTransacao,
+        status,
+        pesoNegociado=None,
+        certificado=None,
+    ):
+        """Recupera dados sem registrar proposta ou executar negociação."""
+        from app.model.lote import LoteMaterial
+
+        identificador = UUID(str(identificador))
+        data = datetime.fromisoformat(dataTransacao)
+        estado = StatusTransacao(status)
+
+        if not isinstance(lote, LoteMaterial):
+            raise ValueError("Lote inválido.")
+
+        if not isinstance(
+            vendedor,
+            (Catador, Cooperativa, EmpresaCompradora),
+        ):
+            raise ValueError("Perfil de vendedor inválido.")
+
+        if not isinstance(
+            comprador,
+            (Cooperativa, EmpresaCompradora, IndustriaTransformadora),
+        ):
+            raise ValueError("Perfil de comprador inválido.")
+
+        if vendedor.id == comprador.id:
+            raise ValueError(
+                "Vendedor e comprador devem ser usuários distintos."
+            )
+
+        if vendedor is not lote.criador:
+            raise ValueError(
+                "Use a instância do criador do lote como vendedor."
+            )
+
+        validar_positivo(valorTotal, "O valor total")
+
+        if estado == StatusTransacao.CONCLUIDA:
+            validar_peso_lote(pesoNegociado)
+
+            if lote.status != StatusLote.NEGOCIADO:
+                raise ValueError(
+                    "Transação concluída exige lote NEGOCIADO."
+                )
+        else:
+            if pesoNegociado is not None:
+                raise ValueError(
+                    "Somente transação concluída possui peso negociado."
+                )
+
+        if estado == StatusTransacao.PENDENTE:
+            if lote.status != StatusLote.DISPONIVEL:
+                raise ValueError(
+                    "Transação pendente exige lote DISPONIVEL."
+                )
+
+        if estado == StatusTransacao.CANCELADA:
+            if lote.status not in (
+                StatusLote.DISPONIVEL,
+                StatusLote.NEGOCIADO,
+                StatusLote.CANCELADO,
+            ):
+                raise ValueError(
+                    "Estado do lote incompatível com transação cancelada."
+                )
+
+        if certificado is not None:
+            if not isinstance(certificado, Certificado):
+                raise ValueError("Certificado inválido.")
+
+            if estado != StatusTransacao.CONCLUIDA:
+                raise ValueError(
+                    "Certificado exige transação concluída."
+                )
+
+        transacao = cls.__new__(cls)
+        transacao.__id = identificador
+        transacao.__lote = lote
+        transacao.__vendedor = vendedor
+        transacao.__comprador = comprador
+        transacao.__valorTotal = valorTotal
+        transacao.__dataTransacao = data
+        transacao.__status = estado
+        transacao.__pesoNegociado = pesoNegociado
+        transacao.__certificado = certificado
+
+        return transacao
 
     @property
     def id(self):
@@ -206,6 +304,24 @@ class Certificado:
         self.__id = uuid4()
         self.__codigo = codigo
         self.__dataEmissao = datetime.now()
+
+    @classmethod
+    def reconstituir(cls, identificador, codigo, dataEmissao):
+        """Recupera um certificado sem gerar novo ID ou data."""
+        identificador = UUID(str(identificador))
+        data = datetime.fromisoformat(dataEmissao)
+
+        if not isinstance(codigo, str) or not codigo.strip():
+            raise ValueError(
+                "O código do certificado deve ser preenchido."
+            )
+
+        certificado = cls.__new__(cls)
+        certificado.__id = identificador
+        certificado.__codigo = codigo
+        certificado.__dataEmissao = data
+
+        return certificado
 
     @property
     def id(self):
