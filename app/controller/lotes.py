@@ -4,38 +4,54 @@ from app import app
 from app.controller.auth import usuario_atual, login_obrigatorio
 from app.controller.materiais import requer_perfil_material
 from app.dao.repositorio import Repositorio
-from app.model.enums import StatusMaterial
+from app.dao.lote_dao import LoteDAO
+from app.dao.material_dao import MaterialDAO
+from app.services.lote_service import LoteService, LoteNaoEncontradoError, AcessoLoteNegadoError
 
+def obter_lote_service():
+    repositorio = Repositorio()
+
+    return LoteService(
+        lote_dao=LoteDAO(repositorio),
+        material_dao=MaterialDAO(repositorio),
+    )
 
 def buscar_lote_do_usuario(lote_id):
-    usuario = usuario_atual()
-
-    for lote in Repositorio().lotes:
-        if str(lote.id) == str(lote_id):
-            if lote.criador is not usuario:
-                abort(403)
-            return lote
-
-    abort(404)
-
+    try:
+        return obter_lote_service().buscar_do_usuario(
+            lote_id,
+            usuario_atual(),
+        )
+    except LoteNaoEncontradoError:
+        abort(404)
+    except AcessoLoteNegadoError:
+        abort(403)
 
 def materiais_disponiveis_do_usuario(usuario, excluir=None):
-    return [
-        material for material in Repositorio().materiais
-        if material.responsavelAtual is usuario
-        and material.status == StatusMaterial.DISPONIVEL
-        and material is not excluir
-    ]
+    try:
+        return obter_lote_service().listar_materiais_disponiveis(
+            usuario,
+            excluir=excluir,
+        )
+    except AcessoLoteNegadoError:
+        abort(403)
 
 
 @app.route('/lotes')
 @login_obrigatorio
 @requer_perfil_material
 def lotes():
-    usuario = usuario_atual()
-    meus_lotes = [lote for lote in Repositorio().lotes if lote.criador is usuario]
-    return render_template('lotes_lista.html', lotes=meus_lotes)
+    try:
+        meus_lotes = obter_lote_service().listar_do_usuario(
+            usuario_atual()
+        )
+    except AcessoLoteNegadoError:
+        abort(403)
 
+    return render_template(
+        'lotes_lista.html',
+        lotes=meus_lotes,
+    )
 
 @app.route('/lotes/novo', methods=['GET', 'POST'])
 @login_obrigatorio

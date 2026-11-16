@@ -1,0 +1,69 @@
+from app.model.enums import StatusMaterial
+from app.model.usuario import (
+    Catador,
+    Cooperativa,
+    EmpresaCompradora,
+)
+
+
+class LoteNaoEncontradoError(LookupError):
+    """O lote solicitado não existe."""
+
+
+class AcessoLoteNegadoError(PermissionError):
+    """O usuário não pode acessar essa operação de lotes."""
+
+
+class LoteService:
+    """Coordena as consultas dos lotes do criador."""
+
+    PERFIS_OPERADORES = (
+        Catador,
+        Cooperativa,
+        EmpresaCompradora,
+    )
+
+    def __init__(self, lote_dao, material_dao):
+        self._lote_dao = lote_dao
+        self._material_dao = material_dao
+
+    def _validar_perfil(self, usuario):
+        if not isinstance(usuario, self.PERFIS_OPERADORES):
+            raise AcessoLoteNegadoError(
+                "Este perfil não pode gerenciar lotes."
+            )
+
+    def listar_do_usuario(self, usuario):
+        self._validar_perfil(usuario)
+        return self._lote_dao.listar_por_criador(usuario)
+
+    def buscar_do_usuario(self, lote_id, usuario):
+        self._validar_perfil(usuario)
+
+        lote = self._lote_dao.buscar_por_id(lote_id)
+
+        if lote is None:
+            raise LoteNaoEncontradoError(
+                "Lote não encontrado."
+            )
+
+        if lote.criador is not usuario:
+            raise AcessoLoteNegadoError(
+                "O lote pertence a outro criador."
+            )
+
+        return lote
+
+    def listar_materiais_disponiveis(self, usuario, excluir=None):
+        self._validar_perfil(usuario)
+
+        materiais = self._material_dao.listar_por_responsavel(
+            usuario
+        )
+
+        return [
+            material
+            for material in materiais
+            if material.status == StatusMaterial.DISPONIVEL
+            and material is not excluir
+        ]
