@@ -1,4 +1,5 @@
 import unittest
+from unittest.mock import Mock
 from types import SimpleNamespace
 
 from app.dao.material_dao import MaterialDAO
@@ -13,6 +14,10 @@ from app.services.material_service import (
     MaterialService,
     AcessoMaterialNegadoError,
     MaterialNaoEncontradoError,
+)
+from app.model.servicos_ia import (
+    VisaoComputacionalIA,
+    PrecificacaoIA,
 )
 
 
@@ -157,6 +162,124 @@ class TestMaterialService(unittest.TestCase):
                 material.id,
                 self.outro_catador,
             )
+
+    def configurar_servicos_ia(self):
+        self.servico = MaterialService(
+            material_dao=self.dao,
+            servico_visao=VisaoComputacionalIA(
+                tipoMaterialSimulado=self.tipo,
+                confiancaIdentificacaoSimulada=0.8,
+                condicaoSimulada=CondicaoMaterial.SUJO,
+                confiancaAvaliacaoSimulada=0.9,
+            ),
+            servico_precificacao=PrecificacaoIA(2.75),
+        )
+
+    def test_avaliacao_preserva_condicao_declarada(self):
+        self.configurar_servicos_ia()
+        material = self.registrar_material()
+
+        avaliacao = self.servico.avaliar(
+            material.id,
+            self.catador,
+            "foto_teste.jpg",
+        )
+
+        self.assertEqual(
+            material.condicaoDeclarada,
+            CondicaoMaterial.LIMPO,
+        )
+        self.assertEqual(
+            avaliacao.condicaoDetectada,
+            CondicaoMaterial.SUJO,
+        )
+        self.assertEqual(
+            material.obterAvaliacoes(),
+            [avaliacao],
+        )
+
+    def test_cotacao_referencia_material_correto(self):
+        self.configurar_servicos_ia()
+        material = self.registrar_material()
+
+        cotacao = self.servico.cotar(
+            material.id,
+            self.catador,
+            15,
+        )
+
+        self.assertIs(cotacao.material, material)
+        self.assertIsNone(cotacao.lote)
+        self.assertEqual(cotacao.valorPorKg, 2.75)
+        self.assertEqual(cotacao.horizonteDias, 15)
+
+        with self.assertRaises(ValueError):
+            self.servico.cotar(
+                material.id,
+                self.catador,
+                0,
+            )
+
+    def test_outro_responsavel_nao_aciona_servicos_ia(self):
+        material = self.registrar_material()
+        visao = Mock()
+        precificacao = Mock()
+
+        servico = MaterialService(
+            material_dao=self.dao,
+            servico_visao=visao,
+            servico_precificacao=precificacao,
+        )
+
+        with self.assertRaises(AcessoMaterialNegadoError):
+            servico.avaliar(
+                material.id,
+                self.outro_catador,
+                "foto_teste.jpg",
+            )
+
+        with self.assertRaises(AcessoMaterialNegadoError):
+            servico.cotar(
+                material.id,
+                self.outro_catador,
+                15,
+            )
+
+        visao.avaliarMaterial.assert_not_called()
+        precificacao.cotarMaterial.assert_not_called()
+        self.assertEqual(material.obterAvaliacoes(), [])
+
+    def test_industria_nao_opera_mesmo_sendo_responsavel(self):
+        material = self.registrar_material()
+
+        # Prepara um material sob responsabilidade da indústria.
+        material.transferirResponsabilidade(self.industria)
+
+        visao = Mock()
+        precificacao = Mock()
+
+        servico = MaterialService(
+            material_dao=self.dao,
+            servico_visao=visao,
+            servico_precificacao=precificacao,
+        )
+
+        with self.assertRaises(AcessoMaterialNegadoError):
+            servico.avaliar(
+                material.id,
+                self.industria,
+                "foto_teste.jpg",
+            )
+
+        with self.assertRaises(AcessoMaterialNegadoError):
+            servico.cotar(
+                material.id,
+                self.industria,
+                15,
+            )
+
+        visao.avaliarMaterial.assert_not_called()
+        precificacao.cotarMaterial.assert_not_called()
 
 
 if __name__ == "__main__":

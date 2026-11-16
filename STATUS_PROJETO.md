@@ -146,3 +146,13 @@ migrados nas próximas etapas.
 - [x] Adicionados cinco testes do serviço e do DAO.
 - [x] Suíte, cenário e verificações no navegador aprovados.
 
+### Fase 4C — Consulta dos tipos de material
+
+- [x] Criado TipoMaterialDAO.
+- [x] Listagem e busca dos tipos passam pelo MaterialService.
+- [x] Removido o acesso direto à lista de tipos no controlador de materiais.
+- [x] Adicionados três testes de consulta dos tipos.
+- [x] Suíte automatizada e cadastro pelo navegador verificados.
+
+Avaliação e cotação ainda serão migradas para o serviço.
+

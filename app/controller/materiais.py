@@ -26,6 +26,8 @@ def obter_material_service():
     return MaterialService(
         material_dao=MaterialDAO(repositorio),
         tipo_material_dao=TipoMaterialDAO(repositorio),
+        servico_visao=repositorio.servico_visao,
+        servico_precificacao=repositorio.servico_precificacao,
     )
 
 def requer_perfil_material(view):
@@ -181,17 +183,35 @@ def materiais_disponibilizar(material_id):
 @login_obrigatorio
 @requer_perfil_material
 def materiais_avaliar(material_id):
-    material = buscar_material_do_usuario(material_id)
     foto = request.form.get('foto', 'foto_simulada.jpg')
 
-    avaliacao = Repositorio().servico_visao.avaliarMaterial(material, foto)
-    flash(
-        f'IA avaliou o material como {avaliacao.condicaoDetectada.value} '
-        f'(confiança {avaliacao.confianca:.0%}). A condição declarada não foi alterada.',
-        'info',
-    )
+    try:
+        avaliacao = obter_material_service().avaliar(
+            material_id,
+            usuario_atual(),
+            foto,
+        )
 
-    return redirect(url_for('materiais_detalhe', material_id=material.id))
+        flash(
+            f'IA avaliou o material como '
+            f'{avaliacao.condicaoDetectada.value} '
+            f'(confiança {avaliacao.confianca:.0%}). '
+            f'A condição declarada não foi alterada.',
+            'info',
+        )
+    except MaterialNaoEncontradoError:
+        abort(404)
+    except AcessoMaterialNegadoError:
+        abort(403)
+    except ValueError as erro:
+        flash(str(erro), 'error')
+
+    return redirect(
+        url_for(
+            'materiais_detalhe',
+            material_id=material_id,
+        )
+    )
 
 
 @app.route('/materiais/<material_id>/cotar', methods=['POST'])
@@ -199,27 +219,49 @@ def materiais_avaliar(material_id):
 @requer_perfil_material
 def materiais_cotar(material_id):
     usuario = usuario_atual()
+
+    # Confere acesso antes de processar os campos do formulário.
     material = buscar_material_do_usuario(material_id)
 
     try:
-        horizonte_dias = int(request.form.get('horizonteDias', '15'))
+        horizonte_dias = int(
+            request.form.get('horizonteDias', '15')
+        )
     except ValueError:
         flash('Informe um número válido de dias.', 'error')
-        return redirect(url_for('materiais_detalhe', material_id=material.id))
+        return redirect(
+            url_for(
+                'materiais_detalhe',
+                material_id=material_id,
+            )
+        )
 
     try:
-        cotacao = usuario.solicitarPrecificacaoMaterial(
-            material,
+        cotacao = obter_material_service().cotar(
+            material_id,
+            usuario,
             horizonte_dias,
-            Repositorio().servico_precificacao,
         )
+
         total = cotacao.valorPorKg * material.pesoKg
+
         flash(
-            f'Cotação: R$ {cotacao.valorPorKg:.2f}/kg por {cotacao.horizonteDias} dias '
+            f'Cotação: R$ {cotacao.valorPorKg:.2f}/kg '
+            f'por {cotacao.horizonteDias} dias '
             f'(total estimado: R$ {total:.2f}).',
             'success',
         )
+    except MaterialNaoEncontradoError:
+        abort(404)
+    except AcessoMaterialNegadoError:
+        abort(403)
     except ValueError as erro:
         flash(str(erro), 'error')
 
-    return redirect(url_for('materiais_detalhe', material_id=material.id))
+    return redirect(
+        url_for(
+            'materiais_detalhe',
+            material_id=material_id,
+        )
+    )
+    

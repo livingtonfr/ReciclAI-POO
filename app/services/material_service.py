@@ -24,9 +24,11 @@ class MaterialService:
         IndustriaTransformadora,
     )
 
-    def __init__(self, material_dao, tipo_material_dao=None):
+    def __init__(self, material_dao, tipo_material_dao=None, servico_visao=None, servico_precificacao=None):
         self._material_dao = material_dao
         self._tipo_material_dao = tipo_material_dao
+        self._servico_visao = servico_visao
+        self._servico_precificacao = servico_precificacao
 
     def _validar_perfil(self, usuario):
         if not isinstance(usuario, self.PERFIS_TITULARES):
@@ -55,14 +57,7 @@ class MaterialService:
 
         return material
 
-    def registrar(
-        self,
-        usuario,
-        tipo,
-        peso_kg,
-        condicao,
-        observacoes=None,
-    ):
+    def registrar(self, usuario, tipo, peso_kg, condicao, observacoes=None):
         if not isinstance(usuario, Catador):
             raise AcessoMaterialNegadoError(
                 "Este perfil não pode cadastrar materiais."
@@ -106,3 +101,41 @@ class MaterialService:
 
     def buscar_tipo(self, tipo_id):
         return self._obter_tipo_material_dao().buscar_por_id(tipo_id)
+
+    def _validar_operador(self, usuario):
+        if not isinstance(
+            usuario,
+            (Catador, Cooperativa, EmpresaCompradora),
+        ):
+            raise AcessoMaterialNegadoError(
+                "Este perfil não pode operar materiais."
+            )
+
+    def avaliar(self, material_id, usuario, foto):
+        self._validar_operador(usuario)
+        material = self.buscar_do_usuario(material_id, usuario)
+
+        if self._servico_visao is None:
+            raise RuntimeError(
+                "O serviço de visão não foi configurado."
+            )
+
+        return self._servico_visao.avaliarMaterial(
+            material,
+            foto,
+        )
+
+    def cotar(self, material_id, usuario, horizonte_dias):
+        self._validar_operador(usuario)
+        material = self.buscar_do_usuario(material_id, usuario)
+
+        if self._servico_precificacao is None:
+            raise RuntimeError(
+                "O serviço de precificação não foi configurado."
+            )
+
+        return usuario.solicitarPrecificacaoMaterial(
+            material,
+            horizonte_dias,
+            self._servico_precificacao,
+        )
