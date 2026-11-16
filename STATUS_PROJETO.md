@@ -232,3 +232,17 @@ para serviços e DAOs ainda está pendente.
 - [x] Preservados botão de PDF/impressão e link de retorno.
 - [x] Adicionados cinco testes das operações.
 - [x] Suíte, cenário e fluxo pelo navegador aprovados.
+
+### Fase 4H.1 — Consultas de usuários e autenticação
+
+- [x] Criados UsuarioDAO e UsuarioService.
+- [x] Busca do usuário conectado passa pelo serviço.
+- [x] Autenticação coordenada pelo UsuarioService.
+- [x] Preservada a verificação de senha pelo modelo.
+- [x] Preservados sessão e redirecionamentos.
+- [x] Corrigido comentário sobre seleção de menu por tipo.
+- [x] Adicionados cinco testes de consultas e autenticação.
+- [x] Suíte e verificações no navegador aprovadas.
+
+Cadastro e atualização de perfil serão migrados na 4H.2.
+

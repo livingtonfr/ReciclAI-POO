@@ -11,6 +11,8 @@ from app.model.usuario import (
     IndustriaTransformadora,
     UsuarioComum,
 )
+from app.dao.usuario_dao import UsuarioDAO
+from app.services.usuario_service import UsuarioService, CredenciaisInvalidasError
 from werkzeug.security import generate_password_hash
 
 # Perfis exibidos na seleção de cadastro (um para cada subclasse concreta de Usuario).
@@ -36,7 +38,7 @@ PERFIS = [
 
 PERFIS_POR_CHAVE = {p['chave']: p for p in PERFIS}
 
-# Menu do /dashboard por perfil (isinstance = polimorfismo na escolha do menu).
+# Menu do /dashboard selecionado conforme a classe do usuário.
 # UsuarioComum não usa esse menu: tem a tela "Início" própria (ações rápidas).
 # Itens sem "endpoint" ainda não têm rota (entram nas próximas fases) e
 # aparecem só com o rótulo e a fase em que a função é ativada.
@@ -71,13 +73,17 @@ MENU_POR_PERFIL = [
     ]),
 ]
 
+def obter_usuario_service():
+    return UsuarioService(
+        UsuarioDAO(Repositorio())
+    )
 
 def usuario_atual():
     usuario_id = session.get('usuario_id')
-    if usuario_id is None:
-        return None
-    return Repositorio().buscarUsuarioPorId(usuario_id)
 
+    return obter_usuario_service().buscar_por_id(
+        usuario_id
+    )
 
 def login_obrigatorio(view):
     @wraps(view)
@@ -104,17 +110,24 @@ def home():
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     if request.method == 'POST':
-        email = request.form.get('email', '').strip().lower()
+        email = request.form.get('email', '')
         senha = request.form.get('senha', '')
 
-        usuario = Repositorio().buscarUsuarioPorEmail(email)
-
-        if usuario is None or not usuario.verificarSenha(senha):
-            flash('E-mail ou senha inválidos.', 'error')
+        try:
+            usuario = obter_usuario_service().autenticar(
+                email,
+                senha,
+            )
+        except CredenciaisInvalidasError as erro:
+            flash(str(erro), 'error')
             return render_template('login.html')
 
         session['usuario_id'] = str(usuario.id)
-        flash(f'Bem-vindo(a), {usuario.nome}!', 'success')
+
+        flash(
+            f'Bem-vindo(a), {usuario.nome}!',
+            'success',
+        )
         return redirect(url_for('dashboard'))
 
     return render_template('login.html')
