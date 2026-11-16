@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 
 {% block title %}Recicl.AI - Certificado{% endblock %}
+{% block classe_app %}pagina-certificado{% endblock %}
 
 {% block content %}
 <div class="tela-certificado">
@@ -23,8 +24,37 @@
     </div>
 
     <div class="acoes-certificado">
-        <button class="botao" type="button" onclick="window.print()">Imprimir</button>
-        <a class="link-verde" href="{{ url_for('transacoes') }}">&larr; Voltar às transações</a>
+        <button
+            class="botao"
+            type="button"
+            onclick="window.print()"
+            aria-describedby="orientacao-impressao"
+        >
+            Salvar em PDF ou imprimir
+        </button>
+
+        <p id="orientacao-impressao" class="orientacao-impressao">
+            Na janela que abrir, escolha “Salvar como PDF”
+            ou selecione sua impressora.
+        </p>
+
+        {% if transacao %}
+            {% if usuario is sameas transacao.vendedor %}
+                <a
+                    class="link-verde"
+                    href="{{ url_for('transacoes') }}"
+                >
+                    &larr; Voltar às transações
+                </a>
+            {% else %}
+                <a
+                    class="link-verde"
+                    href="{{ url_for('minhas_propostas') }}"
+                >
+                    &larr; Voltar às minhas propostas
+                </a>
+            {% endif %}
+        {% endif %}
     </div>
 </div>
 {% endblock %}

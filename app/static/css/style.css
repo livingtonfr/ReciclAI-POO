@@ -831,3 +831,62 @@ a {
     text-decoration: underline;
     cursor: pointer;
 }
+
+/* ==========================================================================
+   16. PREPARAR A APARÊNCIA PARA IMPRESSÃO E PDF
+   ========================================================================== 
+   Orientação exibida somente na tela do certificado. */
+.pagina-certificado .orientacao-impressao {
+    max-width: 420px;
+    margin: 8px auto 16px;
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+/* Apresentação do certificado na impressão e no PDF. */
+@media print {
+    .pagina-certificado > :not(.tela-certificado) {
+        display: none !important;
+    }
+
+    .pagina-certificado .acoes-certificado {
+        display: none !important;
+    }
+
+    .app.pagina-certificado {
+        width: 100% !important;
+        max-width: none !important;
+        min-height: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+        border: none !important;
+        border-radius: 0 !important;
+        box-shadow: none !important;
+        background: white !important;
+        color: black !important;
+    }
+
+    .pagina-certificado .tela-certificado {
+        width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .pagina-certificado .moldura-certificado {
+        box-sizing: border-box;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 12mm;
+        border: 1px solid black;
+        box-shadow: none;
+        background: white;
+        color: black;
+        break-inside: avoid;
+    }
+
+    .pagina-certificado .moldura-certificado p {
+        overflow-wrap: anywhere;
+    }
+}

@@ -205,6 +205,7 @@ def certificado_detalhe(certificado_id):
                 'certificado_detalhe.html',
                 certificado=certificado,
                 transacao=transacao,
+                usuario=usuario,
             )
 
     abort(404)
