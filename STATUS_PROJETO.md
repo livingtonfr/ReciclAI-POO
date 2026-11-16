@@ -748,8 +748,31 @@ conjunto das propostas permanecem previstos para o bloco 5F.
 A aplicação Flask continua utilizando o repositório em memória.
 A integração da aplicação com SQLite permanece prevista para 5H.1.
 
-Próxima etapa: 5F.1 — estrutura persistente de transações
-comerciais e certificados.
+## Fase 5F.1 — Estrutura SQLite comercial
+
+- [x] Incluído schema_usuarios.sql na inicialização do banco.
+- [x] Criada tabela de transações com referências a lote e participantes.
+- [x] Impedidos vendedor e comprador com o mesmo ID.
+- [x] Validados valor positivo finito e estados permitidos.
+- [x] Exigido peso negociado válido somente na conclusão.
+- [x] Criado índice que permite apenas uma conclusão por lote.
+- [x] Criada tabela de certificados vinculados às transações.
+- [x] Garantidos código único e um certificado por transação.
+- [x] Testada reinicialização sem perda dos registros.
+- [x] Testadas restrições e reversão pela transação externa.
+- [x] Executados os 217 testes com sucesso.
+
+A estrutura comercial foi criada. Os DAOs comerciais e
+a integração das operações de negócio ainda estão pendentes.
+
+Regras de perfil, correspondência entre vendedor e criador,
+estado do lote e emissão após conclusão serão verificadas
+na integração dos DAOs e serviços.
+
+A aplicação Flask continua utilizando o repositório em memória.
+
+Próxima etapa: 5F.2 — reconstrução de transações
+e certificados sem repetir operações de negócio.
 
 
 

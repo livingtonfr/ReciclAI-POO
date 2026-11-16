@@ -6,6 +6,7 @@ from app.database.conexao import conectar
 def inicializar_banco(caminho):
     """Cria as tabelas previstas sem apagar registros existentes."""
     pasta = Path(__file__).parent
+
     arquivos = (
         "schema.sql",
         "schema_usuarios.sql",
@@ -15,6 +16,9 @@ def inicializar_banco(caminho):
         "schema_lotes.sql",
         "schema_lotes_materiais.sql",
         "schema_vinculos_lotes.sql",
+        "schema_transacoes.sql",
+        "schema_transacoes_concluidas.sql",
+        "schema_certificados.sql",
     )
 
     with conectar(caminho) as conexao:
