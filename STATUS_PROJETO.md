@@ -402,7 +402,7 @@ A reconstrução dos objetos e o DAO SQLite de materiais ainda
 estão pendentes. O vínculo com lotes será implementado no bloco 5E.
 A interface continua utilizando o repositório em memória.
 
-### 5D.2 — Reconstrução de materiais e rastreabilidade
+## 5D.2 — Reconstrução de materiais e rastreabilidade
 
 - [x] Implementada a reconstrução de Material, EventoRastreio e AvaliacaoQualidade.
 - [x] Preservados os identificadores, as datas, os estados e os dados originais.
@@ -413,7 +413,28 @@ A interface continua utilizando o repositório em memória.
 - [x] Suíte completa validada com 128 testes.
 - [x] Cenário validado com duas transações concluídas, seis eventos e destinação à indústria.
 
-Próxima etapa: implementar o DAO SQLite de materiais.
+## Fase 5D.3 — DAO SQLite de materiais
+
+- [x] Implementado MaterialSQLiteDAO com inclusão, busca por ID e listagem por responsável.
+- [x] Implementada inclusão conjunta do material, dos eventos e das avaliações.
+- [x] Utilizado SAVEPOINT para desfazer inclusões parciais em caso de falha.
+- [x] Mantido o controle da transação externa pelo gerenciador de conexão.
+- [x] Recuperados IDs, datas, estados e vínculos com tipo de material e responsável.
+- [x] Preservada a ordem dos eventos e das avaliações.
+- [x] Testada a recuperação dos dados após reabrir o banco.
+- [x] Testadas duplicidade, referências inexistentes e reversão de transações.
+- [x] Testada a recusa de materiais em lote.
+- [x] Executados os 135 testes com sucesso.
+
+O DAO SQLite de materiais ainda não está conectado aos controladores.
+A aplicação continua utilizando o repositório em memória.
+
+A inclusão persiste o estado atual do material, seus eventos e avaliações.
+Alterações posteriores ainda precisam de operações de atualização persistente.
+
+O vínculo com lotes será implementado no bloco 5E.
+
+Próxima etapa: implementar a atualização persistente dos materiais.
 
 
 
