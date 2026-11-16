@@ -16,7 +16,7 @@ Histórico Git original preservado.
 - [x] Aplicação aberta no navegador.
 - [x] Login e fluxo básico de materiais e lotes verificados.
 - [x] Confirmado que os dados desaparecem após reiniciar.
-- [ ] Projeto enviado para repositório privado no GitHub.
+- [x] Projeto enviado para repositório privado no GitHub.
 
 ## Limitações atuais
 - Armazenamento em memória, sem banco de dados.
