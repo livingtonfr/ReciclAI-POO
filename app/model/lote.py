@@ -9,6 +9,21 @@ from app.model.enums import StatusLote, StatusMaterial, StatusTransacao
 class LoteMaterial:
 
     def __init__(self, criador, materialInicial):
+        from app.model.usuario import (
+            Catador,
+            Cooperativa,
+            EmpresaCompradora,
+        )
+
+        if not isinstance(
+            criador,
+            (Catador, Cooperativa, EmpresaCompradora),
+        ):
+            raise ValueError(
+                "Somente catadores, cooperativas e empresas "
+                "compradoras podem criar lotes."
+            )
+
         if materialInicial.status != StatusMaterial.DISPONIVEL:
             raise ValueError("O material inicial deve estar DISPONIVEL.")
 

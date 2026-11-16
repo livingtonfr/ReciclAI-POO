@@ -69,10 +69,22 @@ Histórico Git original preservado.
 - [x] Horizonte de cotação exige inteiro positivo.
 - [x] Testes automáticos do bloco executados.
 - [x] Cenário anterior e cadastro de material conferidos.
-- [ ] Definir e aplicar limites máximos de peso para materiais e lotes. A validação atual rejeita valores não positivos, NaN e infinito, mas ainda permite números finitos incompatíveis com a operação, como 1e107 kg.
+- [x] Definidos limites operacionais de peso para a versão acadêmica: até 50.000 kg por material e por lote.
+- [x] Validada a soma dos materiais antes da inclusão no lote.
+- [x] Validada a pesagem do lote, preservando o valor anterior quando uma tentativa é recusada.
+- [x] Executados 14 testes de validação numérica.
+- [x] Reexecutado o cenário completo de rastreabilidade.
 
-### Próximos blocos
-- [ ] Revisar permissões de criação e registro no domínio.
-- [ ] Corrigir horários compartilhados.
-- [ ] Revisar estados e operações comerciais.
-- [ ] Integrar a Fase 3 à master.
+Os limites são regras do sistema e não representam a capacidade
+legal de transporte de um veículo específico.
+
+### Fase 3B — Permissões de criação de lotes
+
+- [x] A classe LoteMaterial permite criação somente por catadores,
+cooperativas e empresas compradoras.
+- [x] Indústrias e usuários comuns não podem criar lotes,
+inclusive por chamada direta ao construtor.
+- [x] O criador precisa ser o responsável atual pelo material.
+- [x] Tentativas recusadas preservam o material.
+- [x] Executados 18 testes automatizados com sucesso.
+- [x] Cenário completo de rastreabilidade continua funcionando.
