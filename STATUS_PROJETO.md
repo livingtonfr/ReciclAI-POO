@@ -493,8 +493,29 @@ de sua composição ainda serão implementadas.
 
 A aplicação continua utilizando o repositório em memória.
 
-Próxima etapa: implementar a reconstrução dos lotes
-e dos vínculos entre materiais e lotes.
+## Fase 5E.2 — Reconstrução da composição de lotes encerrados
+
+- [x] Implementado LoteMaterial.reconstituir_encerrado.
+- [x] Preservados UUID, criador, data, estado e pesagem.
+- [x] Preservada a ordem da composição com cópia da lista recebida.
+- [x] Validados perfil do criador, materiais, tipos e limites de peso.
+- [x] Impedidos materiais repetidos na composição.
+- [x] Reconstrução realizada sem executar o construtor.
+- [x] Preservados o histórico e o vínculo atual dos materiais com outros lotes.
+- [x] Mantidas as restrições de alteração de lotes encerrados.
+- [x] Executados os 158 testes com sucesso.
+
+Este método reconstrói os dados e a composição de lotes encerrados.
+A lista de transações ainda não é recuperada nesta etapa;
+sua reconstrução será implementada no bloco de transações.
+
+O carregamento de lotes ativos e a restauração dos vínculos
+entre materiais e lotes continuam pendentes.
+
+A aplicação continua utilizando o repositório em memória.
+
+Próxima etapa: reconstruir lotes ativos e seus vínculos
+sem criar novos eventos de agrupamento.
 
 
 

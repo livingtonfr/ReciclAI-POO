@@ -1,4 +1,4 @@
-from uuid import uuid4
+from uuid import UUID, uuid4
 from datetime import datetime
 
 from app.model.validacoes import validar_positivo
@@ -39,6 +39,82 @@ class LoteMaterial:
         self.__pesoRegistrado = None
 
         self.adicionarMaterial(materialInicial)
+
+    @classmethod
+    def reconstituir_encerrado(
+        cls,
+        identificador,
+        criador,
+        dataCriacao,
+        status,
+        materiais,
+        pesoRegistrado=None,
+    ):
+        """Restaura a composição de lote encerrado sem reagrupar materiais."""
+        from app.model.material import Material
+        from app.model.usuario import (
+            Catador,
+            Cooperativa,
+            EmpresaCompradora,
+        )
+
+        identificador = UUID(str(identificador))
+        estado = StatusLote(status)
+        data = datetime.fromisoformat(dataCriacao)
+
+        if estado not in (StatusLote.NEGOCIADO, StatusLote.CANCELADO):
+            raise ValueError(
+                "Este método restaura somente lotes encerrados."
+            )
+
+        if not isinstance(
+            criador,
+            (Catador, Cooperativa, EmpresaCompradora),
+        ):
+            raise ValueError("Perfil de criador inválido.")
+
+        materiais = list(materiais)
+
+        if not materiais or not all(
+            isinstance(m, Material) for m in materiais
+        ):
+            raise ValueError(
+                "A composição deve conter materiais válidos."
+            )
+
+        if len({m.id for m in materiais}) != len(materiais):
+            raise ValueError(
+                "A composição contém material repetido."
+            )
+
+        if len({m.tipoMaterial.id for m in materiais}) != 1:
+            raise ValueError(
+                "Os materiais devem possuir o mesmo tipo."
+            )
+
+        validar_peso_lote(sum(m.pesoKg for m in materiais))
+
+        if pesoRegistrado is not None:
+            validar_peso_lote(pesoRegistrado)
+
+        if any(
+            m.loteAtual is not None
+            and m.loteAtual.id == identificador
+            for m in materiais
+        ):
+            raise ValueError(
+                "Lote encerrado não pode manter vínculo atual."
+            )
+
+        lote = cls.__new__(cls)
+        lote.__id = identificador
+        lote.__criador = criador
+        lote.__dataCriacao = data
+        lote.__status = estado
+        lote.__materiais = materiais
+        lote.__pesoRegistrado = pesoRegistrado
+        lote.__transacoes = []
+        return lote
 
     @property
     def id(self):
