@@ -17,3 +17,12 @@ class LoteDAO:
                 return lote
 
         return None
+
+    def adicionar(self, lote):
+        if self.buscar_por_id(lote.id) is not None:
+            raise ValueError("O lote já está cadastrado.")
+
+        self._repositorio.lotes.append(lote)
+        return lote
+
+    

@@ -165,3 +165,23 @@ Avaliação e cotação ainda serão migradas para o serviço.
 do repositório.
 - [x] Adicionados quatro testes de avaliação, cotação e acesso.
 - [x] Suíte, cenário e verificações no navegador aprovados.
+
+### Fase 4D — Consultas de lotes
+
+- [x] Criados LoteDAO e LoteService.
+- [x] Listagem e busca de lotes passam pelo serviço.
+- [x] Consulta de materiais disponíveis utiliza MaterialDAO.
+- [x] Preservadas as permissões de gerenciamento do criador.
+- [x] Adicionados quatro testes de consultas e permissões.
+- [x] Suíte e verificações no navegador aprovadas.
+
+Criação e alterações dos lotes ainda serão migradas.
+
+### Fase 4E — Criação e composição dos lotes
+
+- [x] Criação coordenada pelo LoteService.
+- [x] Armazenamento centralizado no LoteDAO.
+- [x] Inclusão e remoção de materiais passam pelo serviço.
+- [x] Preservadas as permissões e as regras de LoteMaterial.
+- [x] Adicionados cinco testes das operações.
+- [x] Suíte e verificações no navegador aprovadas.

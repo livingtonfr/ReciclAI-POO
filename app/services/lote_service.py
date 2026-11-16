@@ -67,3 +67,57 @@ class LoteService:
             if material.status == StatusMaterial.DISPONIVEL
             and material is not excluir
         ]
+
+    def _buscar_material_disponivel(self, material_id, usuario):
+        materiais = self.listar_materiais_disponiveis(usuario)
+
+        for material in materiais:
+            if str(material.id) == str(material_id):
+                return material
+
+        raise ValueError(
+            "Selecione um material disponível sob "
+            "sua responsabilidade."
+        )
+
+    def criar(self, usuario, material_id):
+        self._validar_perfil(usuario)
+
+        material = self._buscar_material_disponivel(
+            material_id,
+            usuario,
+        )
+
+        lote = usuario.criarLote(material)
+        return self._lote_dao.adicionar(lote)
+
+    def adicionar_material(self, lote_id, material_id, usuario):
+        lote = self.buscar_do_usuario(lote_id, usuario)
+
+        material = self._buscar_material_disponivel(
+            material_id,
+            usuario,
+        )
+
+        lote.adicionarMaterial(material)
+        return lote
+
+    def remover_material(self, lote_id, material_id, usuario):
+        lote = self.buscar_do_usuario(lote_id, usuario)
+
+        material = next(
+            (
+                item
+                for item in lote.materiais
+                if str(item.id) == str(material_id)
+            ),
+            None,
+        )
+
+        if material is None:
+            raise ValueError(
+                "Material não encontrado neste lote."
+            )
+
+        lote.removerMaterial(material)
+        return lote

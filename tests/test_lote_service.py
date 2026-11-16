@@ -6,6 +6,7 @@ from app.dao.material_dao import MaterialDAO
 from app.model.enums import CategoriaMaterial, CondicaoMaterial
 from app.model.material import TipoMaterial
 from app.model.usuario import Catador, IndustriaTransformadora
+from app.model.enums import StatusMaterial
 from app.services.lote_service import LoteService, LoteNaoEncontradoError, AcessoLoteNegadoError
 
 
@@ -143,6 +144,119 @@ class TestLoteService(unittest.TestCase):
                 industria
             )
 
+    def test_criacao_armazena_lote_e_vincula_material(self):
+        material = self.criar_material(
+            self.catador,
+            disponivel=True,
+        )
+
+        lote = self.servico.criar(
+            self.catador,
+            str(material.id),
+        )
+
+        self.assertEqual(
+            self.repositorio.lotes,
+            [self.lote, lote],
+        )
+        self.assertIs(lote.criador, self.catador)
+        self.assertEqual(lote.materiais, [material])
+        self.assertIs(material.loteAtual, lote)
+        self.assertEqual(
+            material.status,
+            StatusMaterial.EM_LOTE,
+        )
+
+    def test_criacao_recusa_material_de_outro_usuario(self):
+        material = self.criar_material(
+            self.outro_catador,
+            disponivel=True,
+        )
+
+        with self.assertRaises(ValueError):
+            self.servico.criar(
+                self.catador,
+                material.id,
+            )
+
+        self.assertEqual(
+            self.repositorio.lotes,
+            [self.lote],
+        )
+        self.assertIsNone(material.loteAtual)
+        self.assertEqual(
+            material.status,
+            StatusMaterial.DISPONIVEL,
+        )
+
+    def test_inclusao_e_remocao_pelo_servico(self):
+        material = self.criar_material(
+            self.catador,
+            disponivel=True,
+        )
+
+        self.servico.adicionar_material(
+            self.lote.id,
+            material.id,
+            self.catador,
+        )
+
+        self.assertIn(material, self.lote.materiais)
+        self.assertIs(material.loteAtual, self.lote)
+
+        self.servico.remover_material(
+            self.lote.id,
+            material.id,
+            self.catador,
+        )
+
+        self.assertNotIn(material, self.lote.materiais)
+        self.assertIsNone(material.loteAtual)
+        self.assertEqual(
+            material.status,
+            StatusMaterial.DISPONIVEL,
+        )
+
+    def test_outro_usuario_nao_altera_lote(self):
+        material = self.criar_material(
+            self.outro_catador,
+            disponivel=True,
+        )
+        material_original = self.lote.materiais[0]
+
+        with self.assertRaises(AcessoLoteNegadoError):
+            self.servico.adicionar_material(
+                self.lote.id,
+                material.id,
+                self.outro_catador,
+            )
+
+        with self.assertRaises(AcessoLoteNegadoError):
+            self.servico.remover_material(
+                self.lote.id,
+                material_original.id,
+                self.outro_catador,
+            )
+
+        self.assertEqual(
+            self.lote.materiais,
+            [material_original],
+        )
+        self.assertIs(material_original.loteAtual, self.lote)
+        self.assertIsNone(material.loteAtual)
+
+    def test_servico_preserva_regra_do_ultimo_material(self):
+        material = self.lote.materiais[0]
+
+        with self.assertRaises(ValueError):
+            self.servico.remover_material(
+                self.lote.id,
+                material.id,
+                self.catador,
+            )
+
+        self.assertEqual(self.lote.materiais, [material])
+        self.assertIs(material.loteAtual, self.lote)
 
 if __name__ == "__main__":
     unittest.main()

@@ -58,31 +58,35 @@ def lotes():
 @requer_perfil_material
 def lotes_novo():
     usuario = usuario_atual()
-    materiais_disponiveis = materiais_disponiveis_do_usuario(usuario)
+    servico = obter_lote_service()
 
     if request.method == 'POST':
-        material_id = request.form.get('material_id')
-        material = next(
-            (m for m in materiais_disponiveis if str(m.id) == material_id),
-            None,
-        )
-
-        if material is None:
-            flash('Selecione um material disponível para iniciar o lote.', 'error')
-            return render_template('lotes_novo.html', materiais=materiais_disponiveis)
-
         try:
-            lote = usuario.criarLote(material)
+            lote = servico.criar(
+                usuario,
+                request.form.get('material_id'),
+            )
+        except AcessoLoteNegadoError:
+            abort(403)
         except ValueError as erro:
             flash(str(erro), 'error')
-            return render_template('lotes_novo.html', materiais=materiais_disponiveis)
+        else:
+            flash('Lote criado com sucesso.', 'success')
+            return redirect(
+                url_for(
+                    'lotes_detalhe',
+                    lote_id=lote.id,
+                )
+            )
 
-        Repositorio().lotes.append(lote)
-        flash('Lote criado com sucesso.', 'success')
-        return redirect(url_for('lotes_detalhe', lote_id=lote.id))
+    materiais_disponiveis = materiais_disponiveis_do_usuario(
+        usuario
+    )
 
-    return render_template('lotes_novo.html', materiais=materiais_disponiveis)
-
+    return render_template(
+        'lotes_novo.html',
+        materiais=materiais_disponiveis,
+    )
 
 @app.route('/lotes/<lote_id>')
 @login_obrigatorio
@@ -103,48 +107,52 @@ def lotes_detalhe(lote_id):
 @login_obrigatorio
 @requer_perfil_material
 def lotes_adicionar(lote_id):
-    usuario = usuario_atual()
-    lote = buscar_lote_do_usuario(lote_id)
-    material_id = request.form.get('material_id')
-
-    material = next(
-        (m for m in materiais_disponiveis_do_usuario(usuario) if str(m.id) == material_id),
-        None,
-    )
-
-    if material is None:
-        flash('Selecione um material disponível.', 'error')
-        return redirect(url_for('lotes_detalhe', lote_id=lote.id))
-
     try:
-        lote.adicionarMaterial(material)
+        obter_lote_service().adicionar_material(
+            lote_id,
+            request.form.get('material_id'),
+            usuario_atual(),
+        )
         flash('Material adicionado ao lote.', 'success')
+    except LoteNaoEncontradoError:
+        abort(404)
+    except AcessoLoteNegadoError:
+        abort(403)
     except ValueError as erro:
         flash(str(erro), 'error')
 
-    return redirect(url_for('lotes_detalhe', lote_id=lote.id))
+    return redirect(
+        url_for(
+            'lotes_detalhe',
+            lote_id=lote_id,
+        )
+    )
 
 
 @app.route('/lotes/<lote_id>/remover', methods=['POST'])
 @login_obrigatorio
 @requer_perfil_material
 def lotes_remover(lote_id):
-    lote = buscar_lote_do_usuario(lote_id)
-    material_id = request.form.get('material_id')
-
-    material = next((m for m in lote.materiais if str(m.id) == material_id), None)
-
-    if material is None:
-        flash('Material não encontrado neste lote.', 'error')
-        return redirect(url_for('lotes_detalhe', lote_id=lote.id))
-
     try:
-        lote.removerMaterial(material)
+        obter_lote_service().remover_material(
+            lote_id,
+            request.form.get('material_id'),
+            usuario_atual(),
+        )
         flash('Material removido do lote.', 'success')
+    except LoteNaoEncontradoError:
+        abort(404)
+    except AcessoLoteNegadoError:
+        abort(403)
     except ValueError as erro:
         flash(str(erro), 'error')
 
-    return redirect(url_for('lotes_detalhe', lote_id=lote.id))
+    return redirect(
+        url_for(
+            'lotes_detalhe',
+            lote_id=lote_id,
+        )
+    )
 
 
 @app.route('/lotes/<lote_id>/pesagem', methods=['POST'])
