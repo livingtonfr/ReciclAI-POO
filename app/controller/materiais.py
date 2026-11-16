@@ -7,6 +7,8 @@ from app.controller.auth import usuario_atual, login_obrigatorio
 from app.dao.repositorio import Repositorio
 from app.model.enums import CondicaoMaterial
 from app.model.usuario import Catador, Cooperativa, EmpresaCompradora, IndustriaTransformadora
+from app.dao.material_dao import MaterialDAO
+from app.services.material_service import MaterialService, MaterialNaoEncontradoError, AcessoMaterialNegadoError
 
 # Quem opera materiais (registra, disponibiliza, avalia, cota): só quem tem
 # esses métodos no UML. A Indústria NÃO tem solicitarPrecificacaoMaterial,
@@ -17,6 +19,10 @@ PERFIS_MATERIAL = (Catador, Cooperativa, EmpresaCompradora)
 # Indústria (ela só visualiza o que comprou, sem nenhuma ação).
 PERFIS_TITULARES_MATERIAL = PERFIS_MATERIAL + (IndustriaTransformadora,)
 
+def obter_material_service():
+    return MaterialService(
+        MaterialDAO(Repositorio())
+    )
 
 def requer_perfil_material(view):
     @wraps(view)
@@ -26,7 +32,6 @@ def requer_perfil_material(view):
         return view(*args, **kwargs)
     return decorado
 
-
 def requer_titular_material(view):
     @wraps(view)
     def decorado(*args, **kwargs):
@@ -34,7 +39,6 @@ def requer_titular_material(view):
             abort(403)
         return view(*args, **kwargs)
     return decorado
-
 
 def requer_catador(view):
     @wraps(view)
@@ -44,18 +48,18 @@ def requer_catador(view):
         return view(*args, **kwargs)
     return decorado
 
-
 def buscar_material_do_usuario(material_id):
-    usuario = usuario_atual()
+    servico = obter_material_service()
 
-    for material in Repositorio().materiais:
-        if str(material.id) == str(material_id):
-            if material.responsavelAtual is not usuario:
-                abort(403)
-            return material
-
-    abort(404)
-
+    try:
+        return servico.buscar_do_usuario(
+            material_id,
+            usuario_atual(),
+        )
+    except MaterialNaoEncontradoError:
+        abort(404)
+    except AcessoMaterialNegadoError:
+        abort(403)
 
 def buscar_tipo(tipo_id):
     for tipo in Repositorio().tipos:
@@ -63,16 +67,18 @@ def buscar_tipo(tipo_id):
             return tipo
     return None
 
-
 @app.route('/materiais')
 @login_obrigatorio
 @requer_titular_material
 def materiais():
     usuario = usuario_atual()
-    meus_materiais = [
-        material for material in Repositorio().materiais
-        if material.responsavelAtual is usuario
-    ]
+    servico = obter_material_service()
+
+    try:
+        meus_materiais = servico.listar_do_usuario(usuario)
+    except AcessoMaterialNegadoError:
+        abort(403)
+        
     return render_template(
         'materiais_lista.html',
         materiais=meus_materiais,
