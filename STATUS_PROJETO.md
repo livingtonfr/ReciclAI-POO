@@ -156,3 +156,12 @@ migrados nas próximas etapas.
 
 Avaliação e cotação ainda serão migradas para o serviço.
 
+### Fase 4C — Avaliação e cotação de materiais
+
+- [x] Avaliação e cotação coordenadas pelo MaterialService.
+- [x] Permissões verificadas antes de acionar os serviços de IA.
+- [x] Serviços simulados recebidos pelo construtor.
+- [x] Controlador de materiais sem acesso direto às listas
+do repositório.
+- [x] Adicionados quatro testes de avaliação, cotação e acesso.
+- [x] Suíte, cenário e verificações no navegador aprovados.
