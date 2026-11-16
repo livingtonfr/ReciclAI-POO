@@ -58,4 +58,4 @@ Histórico Git original preservado.
 - [x] Documentada a estrutura em docs/ARQUITETURA.md.
 - [x] Cenário de classes executado após as alterações.
 - [x] Navegação básica conferida após as alterações.
-- [ ] Alterações registradas e enviadas ao GitHub.
+- [x] Alterações registradas e enviadas ao GitHub.
