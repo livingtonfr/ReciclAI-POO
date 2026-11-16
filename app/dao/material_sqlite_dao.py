@@ -157,3 +157,123 @@ class MaterialSQLiteDAO:
                 for item in avaliacoes
             ],
         )
+
+    def atualizar(self, material):
+        if (
+            material.status == StatusMaterial.EM_LOTE
+            or material.loteAtual is not None
+        ):
+            raise ValueError(
+                "A persistência de materiais em lote ainda não foi implementada."
+            )
+
+        self._conexao.execute("SAVEPOINT atualizar_material")
+
+        try:
+            anterior = self.buscar_por_id(material.id)
+
+            if anterior is None:
+                raise ValueError("Material não encontrado.")
+
+            if (
+                anterior.tipoMaterial.id != material.tipoMaterial.id
+                or anterior.pesoKg != material.pesoKg
+                or anterior.condicaoDeclarada != material.condicaoDeclarada
+                or anterior.observacoesDeclaradas != material.observacoesDeclaradas
+                or anterior.dataRegistro != material.dataRegistro
+            ):
+                raise ValueError(
+                    "Os dados originais do cadastro não podem ser alterados."
+                )
+
+            eventos = material.obterHistorico()
+            avaliacoes = material.obterAvaliacoes()
+            eventos_anteriores = anterior.obterHistorico()
+            avaliacoes_anteriores = anterior.obterAvaliacoes()
+
+            for antigos, atuais, atributos in (
+                (
+                    eventos_anteriores,
+                    eventos,
+                    ("id", "tipo", "descricao", "dataEvento"),
+                ),
+                (
+                    avaliacoes_anteriores,
+                    avaliacoes,
+                    (
+                        "id",
+                        "condicaoDetectada",
+                        "confianca",
+                        "observacoes",
+                        "dataAvaliacao",
+                    ),
+                ),
+            ):
+                if len(atuais) < len(antigos) or any(
+                    any(
+                        getattr(a, campo) != getattr(b, campo)
+                        for campo in atributos
+                    )
+                    for a, b in zip(antigos, atuais)
+                ):
+                    raise ValueError(
+                        "O histórico persistido não pode ser removido ou alterado."
+                    )
+
+            self._conexao.execute(
+                "UPDATE materiais "
+                "SET status = ?, responsavel_atual_id = ? "
+                "WHERE id = ?",
+                (
+                    material.status.value,
+                    str(material.responsavelAtual.id),
+                    str(material.id),
+                ),
+            )
+
+            for ordem in range(len(eventos_anteriores), len(eventos)):
+                evento = eventos[ordem]
+
+                self._conexao.execute(
+                    "INSERT INTO eventos_rastreio "
+                    "(id, material_id, ordem, tipo, descricao, data_evento) "
+                    "VALUES (?, ?, ?, ?, ?, ?)",
+                    (
+                        str(evento.id),
+                        str(material.id),
+                        ordem,
+                        evento.tipo.value,
+                        evento.descricao,
+                        evento.dataEvento.isoformat(),
+                    ),
+                )
+
+            for ordem in range(len(avaliacoes_anteriores), len(avaliacoes)):
+                avaliacao = avaliacoes[ordem]
+
+                self._conexao.execute(
+                    "INSERT INTO avaliacoes_qualidade "
+                    "(id, material_id, ordem, condicao_detectada, confianca, "
+                    "observacoes, data_avaliacao) VALUES (?, ?, ?, ?, ?, ?, ?)",
+                    (
+                        str(avaliacao.id),
+                        str(material.id),
+                        ordem,
+                        avaliacao.condicaoDetectada.value,
+                        avaliacao.confianca,
+                        avaliacao.observacoes,
+                        avaliacao.dataAvaliacao.isoformat(),
+                    ),
+                )
+
+        except Exception:
+            self._conexao.execute(
+                "ROLLBACK TO SAVEPOINT atualizar_material"
+            )
+            raise
+        finally:
+            self._conexao.execute(
+                "RELEASE SAVEPOINT atualizar_material"
+            )
+
+        return material

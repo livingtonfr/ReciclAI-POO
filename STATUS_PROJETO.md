@@ -434,7 +434,27 @@ Alterações posteriores ainda precisam de operações de atualização persiste
 
 O vínculo com lotes será implementado no bloco 5E.
 
-Próxima etapa: implementar a atualização persistente dos materiais.
+## Fase 5D.4 — Atualização persistente de materiais no DAO
+
+- [x] Implementado o método atualizar no MaterialSQLiteDAO.
+- [x] Persistidas alterações de estado e responsável.
+- [x] Acrescentados novos eventos e avaliações sem duplicar registros existentes.
+- [x] Protegidos os dados originais do cadastro contra alteração por esse método.
+- [x] Preservados os dados e a ordem do histórico já persistido.
+- [x] Testada a recusa de objeto com histórico desatualizado.
+- [x] Testada a persistência da transferência e de seu evento.
+- [x] Testada a reversão conjunta do estado e das avaliações em caso de falha.
+- [x] Testada a reversão por falha posterior na transação externa.
+- [x] Executados os 141 testes com sucesso.
+
+A atualização está disponível no DAO SQLite.
+O MaterialService ainda precisa encaminhar suas alterações ao DAO.
+
+Os controladores continuam utilizando o repositório em memória.
+A persistência dos vínculos com lotes permanece pendente.
+
+Próxima etapa: adaptar o MaterialService e o DAO em memória
+para o fluxo de atualização persistente.
 
 
 
