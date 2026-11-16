@@ -256,3 +256,25 @@ Cadastro e atualização de perfil serão migrados na 4H.2.
 - [x] Preservada a geração e verificação de hash de senha.
 - [x] Adicionados seis testes de cadastro e perfil.
 - [x] Suíte e verificações no navegador aprovadas.
+
+### Fase 4I.1 — Consultas dos pontos de coleta
+
+- [x] Criados PontoColetaDAO e PontoColetaService.
+- [x] Listagem e filtro por material passam pelo serviço.
+- [x] Consulta de tipos reutiliza TipoMaterialDAO.
+- [x] Preservados template, horários e links existentes.
+- [x] Preservada a exigência de login.
+- [x] Adicionados cinco testes das consultas.
+- [x] Suíte e verificações no navegador aprovadas.
+
+### Fase 4I.2 — Identificação, API e demonstração
+
+- [x] Identificação coordenada pelo IdentificacaoService.
+- [x] API de pontos reutiliza PontoColetaService.
+- [x] Histórico consultado pelo RastreabilidadeService.
+- [x] Preservado acesso do responsável atual e dos participantes
+      de transações concluídas.
+- [x] Reset coordenado pelo DemoService.
+- [x] Reset testado sem apagar dados reais da demonstração.
+- [x] Adicionados quatro testes dos serviços complementares.
+- [x] Suíte, cenário e consultas pelo navegador aprovados.

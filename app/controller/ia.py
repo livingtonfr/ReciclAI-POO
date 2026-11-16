@@ -6,6 +6,7 @@ from app import app
 from app.controller.auth import usuario_atual, login_obrigatorio
 from app.dao.repositorio import Repositorio
 from app.model.usuario import UsuarioComum
+from app.services.identificacao_service import IdentificacaoService, AcessoIdentificacaoNegadoError
 
 CATEGORIA_LABEL = {
     'PLASTICO': 'Plástico',
@@ -36,6 +37,11 @@ def requer_usuario_comum(view):
         return view(*args, **kwargs)
     return decorado
 
+def obter_identificacao_service():
+    return IdentificacaoService(
+        Repositorio().servico_visao
+    )
+
 
 @app.route('/ia/identificar', methods=['GET', 'POST'])
 @login_obrigatorio
@@ -44,7 +50,14 @@ def ia_identificar():
     if request.method == 'POST':
         usuario = usuario_atual()
         foto = request.form.get('foto', 'foto_garrafa_pet.jpg')
-        resultado = usuario.identificarResiduo(foto, Repositorio().servico_visao)
+        try:
+            resultado = obter_identificacao_service().identificar(
+                usuario,
+                foto,
+            )
+        except AcessoIdentificacaoNegadoError:
+            abort(403)
+            
         categoria = resultado.tipoMaterial.categoria.name
 
         return render_template(

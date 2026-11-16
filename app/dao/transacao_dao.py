@@ -1,3 +1,5 @@
+from app.model.enums import StatusTransacao
+
 class TransacaoDAO:
     """Consulta transações no repositório em memória."""
 
@@ -38,3 +40,11 @@ class TransacaoDAO:
                 return transacao
 
         return None
+
+    def listar_concluidas_por_material(self, material):
+        return [
+            transacao
+            for transacao in self._repositorio.transacoes
+            if transacao.status == StatusTransacao.CONCLUIDA
+            and material in transacao.lote.materiais
+        ]
