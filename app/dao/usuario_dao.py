@@ -31,3 +31,27 @@ class UsuarioDAO:
 
         self._repositorio.usuarios.append(usuario)
         return usuario
+
+    def atualizar_perfil(
+        self, usuario_id, nome, email, telefone, endereco
+    ):
+        usuario = self.buscar_por_id(usuario_id)
+
+        if usuario is None:
+            raise ValueError("Usuário não encontrado.")
+
+        outro = self.buscar_por_email(email)
+
+        if outro is not None and outro.id != usuario.id:
+            raise ValueError(
+                "Este e-mail já está em uso por outra conta."
+            )
+
+        usuario.atualizarPerfil(
+            nome=nome,
+            email=email,
+            telefone=telefone,
+            endereco=endereco,
+        )
+
+        return usuario

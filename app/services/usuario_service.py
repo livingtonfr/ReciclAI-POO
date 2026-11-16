@@ -115,8 +115,7 @@ class UsuarioService:
     ):
         if (
             usuario is None
-            or self._usuario_dao.buscar_por_id(usuario.id)
-            is not usuario
+            or self._usuario_dao.buscar_por_id(usuario.id) is None
         ):
             raise ValueError("Usuário não encontrado.")
 
@@ -137,17 +136,16 @@ class UsuarioService:
 
         if (
             usuario_com_email is not None
-            and usuario_com_email is not usuario
+            and usuario_com_email.id != usuario.id
         ):
             raise ValueError(
                 "Este e-mail já está em uso por outra conta."
             )
 
-        usuario.atualizarPerfil(
+        return self._usuario_dao.atualizar_perfil(
+            usuario.id,
             nome=nome,
             email=email,
             telefone=telefone,
             endereco=endereco,
         )
-
-        return usuario

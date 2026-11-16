@@ -371,3 +371,19 @@ O DAO SQLite ainda não está conectado aos controladores.
 A atualização persistente de perfil e o tratamento de identidade
 dos objetos serão implementados antes da integração.
 
+## Fase 5C.3 — Atualização persistente de perfil
+
+- [x] Adaptado o serviço para reconhecer usuários pelo UUID.
+- [x] Encaminhada a atualização de perfil aos DAOs.
+- [x] Preservado o funcionamento do repositório em memória.
+- [x] Implementada atualização de perfil no SQLite.
+- [x] Preservados hash, UUID, data, documento e situação de validação.
+- [x] Testada a autenticação com o novo e-mail após reabrir o banco.
+- [x] Testada a recusa de e-mail duplicado sem alteração dos dados.
+- [x] Testada a reversão diante de erro posterior na transação.
+- [x] Executados os 118 testes e o cenário de integração.
+
+Os controladores ainda utilizam o repositório em memória.
+A integração com SQLite e a identidade dos demais objetos
+relacionados continuam pendentes.
+
