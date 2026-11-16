@@ -301,3 +301,15 @@ Cadastro e atualização de perfil serão migrados na 4H.2.
 
 A fase 5 de persistência SQLite ainda não foi iniciada.
 
+## Fase 5A — Infraestrutura de conexão SQLite
+
+- [x] Confirmado o funcionamento do SQLite no ambiente Python.
+- [x] Configurado o caminho instance/reciclai.sqlite3.
+- [x] Implementado gerenciamento de conexões e transações.
+- [x] Ativada a verificação de chaves estrangeiras.
+- [x] Testadas persistência, reversão e fechamento das conexões.
+- [x] Executados os 97 testes com sucesso.
+
+A fase 5 está em andamento. Este bloco prepara a infraestrutura.
+As tabelas do domínio e a migração dos DAOs ainda estão pendentes.
+A aplicação continua utilizando o repositório em memória.
