@@ -325,3 +325,18 @@ A aplicação continua utilizando o repositório em memória.
 
 A tabela ainda não está conectada ao TipoMaterialDAO.
 A interface continua utilizando o repositório em memória.
+
+## Fase 5B.2 — DAO SQLite de tipos de material
+
+- [x] Implementada reconstrução de TipoMaterial com UUID original.
+- [x] Preservados categoria e estado ativo na reconstrução.
+- [x] Criado TipoMaterialSQLiteDAO com inclusão, listagem e busca.
+- [x] Utilizadas consultas parametrizadas.
+- [x] Mantido o controle da transação fora do DAO.
+- [x] Testadas persistência e reversão diante de duplicidade.
+- [x] Executados os 104 testes com sucesso.
+- [x] Reexecutado o cenário de integração.
+
+O DAO SQLite ainda não está conectado aos controladores.
+A aplicação continua utilizando o repositório em memória.
+A integração deverá preservar a identidade dos objetos relacionados.

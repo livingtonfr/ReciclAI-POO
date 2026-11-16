@@ -1,9 +1,9 @@
-from uuid import uuid4
+from uuid import UUID, uuid4
 from datetime import datetime
 
 from app.model.validacoes import validar_positivo, validar_confianca
 from app.model.validacoes import validar_peso_material
-from app.model.enums import StatusMaterial, TipoEventoRastreio
+from app.model.enums import CategoriaMaterial, StatusMaterial, TipoEventoRastreio
 
 
 class TipoMaterial:
@@ -14,6 +14,22 @@ class TipoMaterial:
         self.__descricao = descricao
         self.__categoria = categoria
         self.__ativo = True
+
+    @classmethod
+    def reconstituir(
+        cls, identificador, nome, descricao, categoria, ativo
+    ):
+        """Reconstrói um tipo persistido, preservando seu identificador."""
+        identificador = UUID(str(identificador))
+        categoria = CategoriaMaterial(categoria)
+
+        if not isinstance(ativo, bool):
+            raise ValueError("O estado ativo deve ser booleano.")
+
+        tipo = cls(nome, descricao, categoria)
+        tipo.__id = identificador
+        tipo.__ativo = ativo
+        return tipo
 
     @property
     def id(self):
