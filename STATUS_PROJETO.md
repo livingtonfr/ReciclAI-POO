@@ -661,8 +661,27 @@ no bloco dedicado às transações.
 
 A aplicação continua utilizando o repositório em memória.
 
-Próxima etapa: preparar as consultas de listagem e adaptar
-o LoteService para utilizar as operações persistentes.
+## Fase 5E.10 — Listagens e consultas de lotes pelo serviço
+
+- [x] Implementada listagem SQLite por criador.
+- [x] Implementada listagem SQLite de lotes DISPONIVEL.
+- [x] Incluídos lotes encerrados na listagem do criador.
+- [x] Adaptada a listagem em memória para comparar UUIDs.
+- [x] Adaptada a autorização de consulta no LoteService para comparar UUIDs.
+- [x] Preservado o bloqueio de consulta por outro criador.
+- [x] Testadas consultas com usuário reconstruído do banco.
+- [x] Verificado que as consultas não realizam gravações.
+- [x] Executados os 195 testes com sucesso.
+
+As consultas de lotes pelo serviço estão preparadas para SQLite.
+As operações de alteração ainda precisam ser encaminhadas
+aos métodos persistentes dos DAOs.
+
+A aplicação continua utilizando o repositório em memória.
+A recuperação das transações associadas permanece pendente.
+
+Próxima etapa: adaptar as operações do LoteService
+e os métodos correspondentes do DAO em memória.
 
 
 

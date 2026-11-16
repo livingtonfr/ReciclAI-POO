@@ -10,7 +10,7 @@ class LoteDAO:
         return [
             lote
             for lote in self._repositorio.lotes
-            if lote.criador is usuario
+            if lote.criador.id == usuario.id
         ]
 
     def buscar_por_id(self, lote_id):

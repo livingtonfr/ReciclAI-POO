@@ -48,7 +48,7 @@ class LoteService:
                 "Lote não encontrado."
             )
 
-        if lote.criador is not usuario:
+        if lote.criador.id != usuario.id:
             raise AcessoLoteNegadoError(
                 "O lote pertence a outro criador."
             )

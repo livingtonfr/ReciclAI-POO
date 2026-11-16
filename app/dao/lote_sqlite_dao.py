@@ -661,3 +661,26 @@ class LoteSQLiteDAO:
             materiais=materiais,
             pesoRegistrado=registro["peso_registrado"],
         )
+
+    def listar_por_criador(self, usuario):
+        registros = self._conexao.execute(
+            "SELECT id FROM lotes "
+            "WHERE criador_id = ? ORDER BY rowid",
+            (str(usuario.id),),
+        ).fetchall()
+
+        return [
+            self.buscar_por_id(registro["id"])
+            for registro in registros
+        ]
+
+    def listar_disponiveis(self):
+        registros = self._conexao.execute(
+            "SELECT id FROM lotes "
+            "WHERE status = 'DISPONIVEL' ORDER BY rowid"
+        ).fetchall()
+
+        return [
+            self.buscar_por_id(registro["id"])
+            for registro in registros
+        ]
