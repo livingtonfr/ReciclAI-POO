@@ -3,8 +3,9 @@ from flask import jsonify, request, abort
 from app import app
 from app.controller.auth import login_obrigatorio, usuario_atual
 from app.dao.repositorio import Repositorio
-from app.dao.material_dao import MaterialDAO
-from app.dao.transacao_dao import TransacaoDAO
+from app.database.contexto import obter_conexao
+from app.dao.material_sqlite_dao import MaterialSQLiteDAO
+from app.dao.transacao_sqlite_dao import TransacaoSQLiteDAO
 from app.dao.ponto_coleta_dao import PontoColetaDAO
 from app.dao.tipo_material_dao import TipoMaterialDAO
 from app.services.ponto_coleta_service import PontoColetaService
@@ -27,11 +28,11 @@ def obter_ponto_coleta_service_api():
 
 
 def obter_rastreabilidade_service():
-    repositorio = Repositorio()
+    conexao = obter_conexao()
 
     return RastreabilidadeService(
-        MaterialDAO(repositorio),
-        TransacaoDAO(repositorio),
+        MaterialSQLiteDAO(conexao),
+        TransacaoSQLiteDAO(conexao),
     )
 
 

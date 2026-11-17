@@ -11,7 +11,7 @@
 
     {% for proposta in propostas %}
     <div class="bloco-detalhe">
-        <p><strong>{{ proposta.lote.materiais[0].tipoMaterial.nome }}</strong> - {{ proposta.lote.calcularPesoTotal() }} kg</p>
+        <p><strong>{{ proposta.lote.materiais[0].tipoMaterial.nome }}</strong> - {{ proposta.pesoNegociado if proposta.pesoNegociado is not none else proposta.lote.calcularPesoTotal() }} kg</p>
         <p>Vendedor: {{ proposta.vendedor.nome }}</p>
         <p>Valor proposto: R$ {{ '%.2f'|format(proposta.valorTotal) }}</p>
         <p>Status: <span class="selo-perfil">{{ proposta.status.value }}</span></p>

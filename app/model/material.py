@@ -1,9 +1,9 @@
-from uuid import uuid4
+from uuid import UUID, uuid4
 from datetime import datetime
 
 from app.model.validacoes import validar_positivo, validar_confianca
 from app.model.validacoes import validar_peso_material
-from app.model.enums import StatusMaterial, TipoEventoRastreio
+from app.model.enums import CategoriaMaterial, CondicaoMaterial, StatusMaterial, TipoEventoRastreio
 
 
 class TipoMaterial:
@@ -14,6 +14,22 @@ class TipoMaterial:
         self.__descricao = descricao
         self.__categoria = categoria
         self.__ativo = True
+
+    @classmethod
+    def reconstituir(
+        cls, identificador, nome, descricao, categoria, ativo
+    ):
+        """Reconstrói um tipo persistido, preservando seu identificador."""
+        identificador = UUID(str(identificador))
+        categoria = CategoriaMaterial(categoria)
+
+        if not isinstance(ativo, bool):
+            raise ValueError("O estado ativo deve ser booleano.")
+
+        tipo = cls(nome, descricao, categoria)
+        tipo.__id = identificador
+        tipo.__ativo = ativo
+        return tipo
 
     @property
     def id(self):
@@ -44,6 +60,19 @@ class EventoRastreio:
         self.__dataEvento = datetime.now()
         self.__descricao = descricao
 
+    @classmethod
+    def reconstituir(cls, identificador, tipo, descricao, dataEvento):
+        identificador = UUID(str(identificador))
+        tipo = TipoEventoRastreio(tipo)
+        data = datetime.fromisoformat(dataEvento)
+
+        evento = cls.__new__(cls)
+        evento.__id = identificador
+        evento.__tipo = tipo
+        evento.__descricao = descricao
+        evento.__dataEvento = data
+        return evento
+
     @property
     def id(self):
         return self.__id
@@ -71,6 +100,28 @@ class AvaliacaoQualidade:
         self.__confianca = confianca
         self.__observacoes = observacoes
         self.__dataAvaliacao = datetime.now()
+
+    @classmethod
+    def reconstituir(
+        cls,
+        identificador,
+        condicaoDetectada,
+        confianca,
+        dataAvaliacao,
+        observacoes=None,
+    ):
+        validar_confianca(confianca)
+        identificador = UUID(str(identificador))
+        condicao = CondicaoMaterial(condicaoDetectada)
+        data = datetime.fromisoformat(dataAvaliacao)
+
+        avaliacao = cls.__new__(cls)
+        avaliacao.__id = identificador
+        avaliacao.__condicaoDetectada = condicao
+        avaliacao.__confianca = confianca
+        avaliacao.__dataAvaliacao = data
+        avaliacao.__observacoes = observacoes
+        return avaliacao
 
     @property
     def id(self):
@@ -116,6 +167,96 @@ class Material:
         )
 
         self.adicionarEvento(evento_registro)
+
+    @classmethod
+    def reconstituir(
+        cls,
+        identificador,
+        tipoMaterial,
+        pesoKg,
+        condicaoDeclarada,
+        responsavelAtual,
+        status,
+        dataRegistro,
+        eventos,
+        avaliacoes,
+        observacoesDeclaradas=None,
+    ):
+        """Restaura um material sem executar operações de negócio."""
+        from app.model.usuario import Usuario
+
+        validar_peso_material(pesoKg)
+        identificador = UUID(str(identificador))
+        condicao = CondicaoMaterial(condicaoDeclarada)
+        estado = StatusMaterial(status)
+        data = datetime.fromisoformat(dataRegistro)
+
+        if estado == StatusMaterial.EM_LOTE:
+            raise ValueError(
+                "A reconstrução de material EM_LOTE depende "
+                "da persistência de lotes, ainda não implementada."
+            )
+
+        if not isinstance(tipoMaterial, TipoMaterial):
+            raise TypeError("Tipo de material inválido.")
+
+        if not isinstance(responsavelAtual, Usuario):
+            raise TypeError("Responsável inválido.")
+
+        eventos = list(eventos)
+        avaliacoes = list(avaliacoes)
+
+        if not all(isinstance(item, EventoRastreio) for item in eventos):
+            raise TypeError("Histórico contém elemento inválido.")
+
+        if not all(
+            isinstance(item, AvaliacaoQualidade)
+            for item in avaliacoes
+        ):
+            raise TypeError("Avaliações contêm elemento inválido.")
+
+        material = cls.__new__(cls)
+        material.__id = identificador
+        material.__tipoMaterial = tipoMaterial
+        material.__pesoKg = pesoKg
+        material.__condicaoDeclarada = condicao
+        material.__observacoesDeclaradas = observacoesDeclaradas
+        material.__status = estado
+        material.__dataRegistro = data
+        material.__responsavelAtual = responsavelAtual
+        material.__loteAtual = None
+        material.__eventos = eventos
+        material.__avaliacoes = avaliacoes
+        return material
+
+    @classmethod
+    def _reconstituir_em_lote(cls, lote, **dados):
+        """Uso interno da reconstrução de lotes ativos."""
+        from app.model.lote import LoteMaterial
+        from app.model.enums import StatusLote
+
+        if not isinstance(lote, LoteMaterial) or lote.status not in (
+            StatusLote.EM_FORMACAO,
+            StatusLote.DISPONIVEL,
+        ):
+            raise ValueError("O vínculo exige um lote ativo.")
+
+        if StatusMaterial(dados["status"]) != StatusMaterial.EM_LOTE:
+            raise ValueError(
+                "O material vinculado deve estar EM_LOTE."
+            )
+
+        if dados["responsavelAtual"] is not lote.criador:
+            raise ValueError(
+                "O responsável deve ser a instância do criador do lote."
+            )
+
+        material = cls.reconstituir(
+            **(dados | {"status": "DISPONIVEL"})
+        )
+        material.__status = StatusMaterial.EM_LOTE
+        material.__loteAtual = lote
+        return material
 
     @property
     def id(self):

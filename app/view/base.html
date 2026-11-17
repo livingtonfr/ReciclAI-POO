@@ -25,10 +25,12 @@
 
         {% block content %}{% endblock %}
 
+        {% if reset_demo_habilitado %}
         <form class="rodape-admin" method="POST" action="{{ url_for('admin_reset') }}"
-              onsubmit="return confirm('Resetar a demo? Todos os dados voltam ao estado inicial.');">
-            <button type="submit">Resetar demo</button>
+              onsubmit="return confirm('ATENÇÃO: isto APAGA todos os dados do banco e recarrega a demo. Continuar?');">
+            <button type="submit">Resetar demo (apaga o banco)</button>
         </form>
+        {% endif %}
     </div>
 </body>
 </html>

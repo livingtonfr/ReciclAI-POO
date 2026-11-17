@@ -48,3 +48,11 @@ class TransacaoDAO:
             if transacao.status == StatusTransacao.CONCLUIDA
             and material in transacao.lote.materiais
         ]
+
+    def registrar_conclusao(self, transacao):
+        """Em memória, o próprio modelo já guarda o resultado."""
+        return transacao
+
+    def registrar_cancelamento(self, transacao):
+        """Em memória, o próprio modelo já guarda o resultado."""
+        return transacao

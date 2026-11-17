@@ -19,19 +19,21 @@ Histórico Git original preservado.
 - [x] Projeto enviado para repositório privado no GitHub.
 
 ## Limitações atuais
-- Armazenamento em memória, sem banco de dados.
+- O fluxo principal (usuários, materiais, lotes, propostas, vendas e
+  certificados) é gravado em SQLite e permanece após reiniciar o servidor.
+- Pontos de coleta continuam fixos em memória e as cotações não são
+  gravadas.
 - Identificação, avaliação e precificação simuladas.
-- Certificado apresentado em página imprimível.
-- Testes existentes baseados principalmente em mensagens no terminal.
+- Certificado apresentado em página imprimível, como recurso acadêmico de
+  rastreabilidade, sem validade jurídica.
+- Testes existentes baseados principalmente em mensagens no terminal
+  foram substituídos por uma suíte automatizada (ver fase 5I).
 
 ## Próximas etapas
-- Reorganizar pastas e responsabilidades.
-- Corrigir validações e regras do domínio.
-- Separar controllers, serviços e DAOs.
-- Implementar persistência com SQLite.
 - Completar desativação de contas e controles de acesso.
 - Integrar os padrões escolhidos.
-- Revisar interface, automatizar testes e atualizar documentação.
+- Persistir pontos de coleta e cotações (blocos 5G.1 e 5G.2).
+- Revisar interface e ajustes de funcionalidades planejados.
 
 ## Ajustes de funcionalidades planejados
 - Adicionar acesso ao mapa em todas as telas.
@@ -301,3 +303,670 @@ Cadastro e atualização de perfil serão migrados na 4H.2.
 
 A fase 5 de persistência SQLite ainda não foi iniciada.
 
+## Fase 5A — Infraestrutura de conexão SQLite
+
+- [x] Confirmado o funcionamento do SQLite no ambiente Python.
+- [x] Configurado o caminho instance/reciclai.sqlite3.
+- [x] Implementado gerenciamento de conexões e transações.
+- [x] Ativada a verificação de chaves estrangeiras.
+- [x] Testadas persistência, reversão e fechamento das conexões.
+- [x] Executados os 97 testes com sucesso.
+
+A fase 5 está em andamento. Este bloco prepara a infraestrutura.
+As tabelas do domínio e a migração dos DAOs ainda estão pendentes.
+A aplicação continua utilizando o repositório em memória.
+
+## Fase 5B.1 — Tabela de tipos de material
+
+- [x] Criada a tabela tipos_material.
+- [x] Representados UUID como texto e booleano como 0 ou 1.
+- [x] Restringidas as categorias aos valores do enum atual.
+- [x] Implementada inicialização sem apagar registros existentes.
+- [x] Testada a preservação dos dados após reinicialização.
+- [x] Executados os 100 testes com sucesso.
+
+A tabela ainda não está conectada ao TipoMaterialDAO.
+A interface continua utilizando o repositório em memória.
+
+## Fase 5B.2 — DAO SQLite de tipos de material
+
+- [x] Implementada reconstrução de TipoMaterial com UUID original.
+- [x] Preservados categoria e estado ativo na reconstrução.
+- [x] Criado TipoMaterialSQLiteDAO com inclusão, listagem e busca.
+- [x] Utilizadas consultas parametrizadas.
+- [x] Mantido o controle da transação fora do DAO.
+- [x] Testadas persistência e reversão diante de duplicidade.
+- [x] Executados os 104 testes com sucesso.
+- [x] Reexecutado o cenário de integração.
+
+O DAO SQLite ainda não está conectado aos controladores.
+A aplicação continua utilizando o repositório em memória.
+A integração deverá preservar a identidade dos objetos relacionados.
+
+## Fase 5C.1 — Estrutura de usuários
+
+- [x] Criada a tabela usuarios para os cinco perfis existentes.
+- [x] Preparados campos de hash de senha, data e localização.
+- [x] Definidas restrições de documentos conforme o perfil.
+- [x] Definidos os valores permitidos de situação de validação.
+- [x] Testada a rejeição de e-mail duplicado com variação de caixa ASCII.
+- [x] Adaptada a inicialização para executar os dois arquivos SQL.
+- [x] Testada a preservação dos registros após reinicialização.
+- [x] Executados os 108 testes com sucesso.
+
+O DAO SQLite de usuários e sua integração ainda estão pendentes.
+A autenticação da aplicação continua utilizando dados em memória.
+
+## Fase 5C.2 — Reconstrução e DAO SQLite de usuários
+
+- [x] Implementada reconstrução dos cinco perfis.
+- [x] Preservados UUID, data, localização e documentos.
+- [x] Preservada a situação de validação dos perfis empresariais.
+- [x] Disponibilizado o hash existente para persistência.
+- [x] Criado UsuarioSQLiteDAO com inclusão e consultas.
+- [x] Testados cadastro e autenticação após reabrir o banco.
+- [x] Testadas duplicidades e reversão da transação.
+- [x] Executados os 113 testes com sucesso.
+- [x] Reexecutado o cenário de integração.
+
+O DAO SQLite ainda não está conectado aos controladores.
+A atualização persistente de perfil e o tratamento de identidade
+dos objetos serão implementados antes da integração.
+
+## Fase 5C.3 — Atualização persistente de perfil
+
+- [x] Adaptado o serviço para reconhecer usuários pelo UUID.
+- [x] Encaminhada a atualização de perfil aos DAOs.
+- [x] Preservado o funcionamento do repositório em memória.
+- [x] Implementada atualização de perfil no SQLite.
+- [x] Preservados hash, UUID, data, documento e situação de validação.
+- [x] Testada a autenticação com o novo e-mail após reabrir o banco.
+- [x] Testada a recusa de e-mail duplicado sem alteração dos dados.
+- [x] Testada a reversão diante de erro posterior na transação.
+- [x] Executados os 118 testes e o cenário de integração.
+
+Os controladores ainda utilizam o repositório em memória.
+A integração com SQLite e a identidade dos demais objetos
+relacionados continuam pendentes.
+
+## Fase 5D.1 — Estrutura de materiais e rastreabilidade
+
+- [x] Criadas as tabelas materiais, eventos_rastreio e avaliacoes_qualidade.
+- [x] Definidos vínculos com tipos de material e usuários.
+- [x] Definidas posições para preservar a ordem de eventos e avaliações.
+- [x] Preservada a separação entre condição declarada e detectada.
+- [x] Testados limites numéricos e referências inexistentes.
+- [x] Testada a preservação dos registros após reinicialização.
+- [x] Testada a reversão conjunta de material e evento.
+- [x] Executados os 123 testes com sucesso.
+
+A reconstrução dos objetos e o DAO SQLite de materiais ainda
+estão pendentes. O vínculo com lotes será implementado no bloco 5E.
+A interface continua utilizando o repositório em memória.
+
+## 5D.2 — Reconstrução de materiais e rastreabilidade
+
+- [x] Implementada a reconstrução de Material, EventoRastreio e AvaliacaoQualidade.
+- [x] Preservados os identificadores, as datas, os estados e os dados originais.
+- [x] A reconstrução de Material não executa seu construtor nem gera novo evento de registro.
+- [x] Preservada a ordem dos eventos e das avaliações, com cópia das listas recebidas.
+- [x] Incluídas validações dos dados utilizados na reconstrução.
+- [x] A reconstrução de materiais EM_LOTE permanece bloqueada até a implementação da persistência dos vínculos com lotes.
+- [x] Suíte completa validada com 128 testes.
+- [x] Cenário validado com duas transações concluídas, seis eventos e destinação à indústria.
+
+## Fase 5D.3 — DAO SQLite de materiais
+
+- [x] Implementado MaterialSQLiteDAO com inclusão, busca por ID e listagem por responsável.
+- [x] Implementada inclusão conjunta do material, dos eventos e das avaliações.
+- [x] Utilizado SAVEPOINT para desfazer inclusões parciais em caso de falha.
+- [x] Mantido o controle da transação externa pelo gerenciador de conexão.
+- [x] Recuperados IDs, datas, estados e vínculos com tipo de material e responsável.
+- [x] Preservada a ordem dos eventos e das avaliações.
+- [x] Testada a recuperação dos dados após reabrir o banco.
+- [x] Testadas duplicidade, referências inexistentes e reversão de transações.
+- [x] Testada a recusa de materiais em lote.
+- [x] Executados os 135 testes com sucesso.
+
+O DAO SQLite de materiais ainda não está conectado aos controladores.
+A aplicação continua utilizando o repositório em memória.
+
+A inclusão persiste o estado atual do material, seus eventos e avaliações.
+Alterações posteriores ainda precisam de operações de atualização persistente.
+
+O vínculo com lotes será implementado no bloco 5E.
+
+## Fase 5D.4 — Atualização persistente de materiais no DAO
+
+- [x] Implementado o método atualizar no MaterialSQLiteDAO.
+- [x] Persistidas alterações de estado e responsável.
+- [x] Acrescentados novos eventos e avaliações sem duplicar registros existentes.
+- [x] Protegidos os dados originais do cadastro contra alteração por esse método.
+- [x] Preservados os dados e a ordem do histórico já persistido.
+- [x] Testada a recusa de objeto com histórico desatualizado.
+- [x] Testada a persistência da transferência e de seu evento.
+- [x] Testada a reversão conjunta do estado e das avaliações em caso de falha.
+- [x] Testada a reversão por falha posterior na transação externa.
+- [x] Executados os 141 testes com sucesso.
+
+A atualização está disponível no DAO SQLite.
+O MaterialService ainda precisa encaminhar suas alterações ao DAO.
+
+Os controladores continuam utilizando o repositório em memória.
+A persistência dos vínculos com lotes permanece pendente.
+
+## Fase 5D.5 — Atualização de materiais pelo serviço
+
+- [x] Adaptada a verificação do responsável no MaterialService para comparar UUIDs.
+- [x] Adaptada a listagem do DAO em memória para comparar UUIDs.
+- [x] Disponibilização encaminhada ao método atualizar do DAO.
+- [x] Avaliação encaminhada ao método atualizar do DAO.
+- [x] Preservado o retorno da avaliação utilizado pelos controladores.
+- [x] Implementado atualizar no DAO em memória, preservando a instância compartilhada.
+- [x] Testadas disponibilização e avaliação persistentes pelo serviço.
+- [x] Testado o bloqueio de operações por outro responsável.
+- [x] Testada a reversão das operações diante de falha posterior.
+- [x] Executados os 147 testes com sucesso.
+- [x] Reexecutado o cenário completo de rastreabilidade.
+
+O MaterialService pode utilizar o DAO SQLite nos fluxos testados
+de consulta, disponibilização e avaliação de materiais fora de lotes.
+
+Os controladores continuam utilizando o repositório em memória.
+A persistência dos vínculos com lotes e a integração geral
+da aplicação com SQLite permanecem pendentes.
+
+## Fase 5E.1 — Estrutura SQLite de lotes e composição
+
+- [x] Criada a tabela lotes com criador, data, estado e pesagem.
+- [x] Permitida pesagem ausente e restringidos os valores ao limite do domínio.
+- [x] Criada a tabela lotes_materiais com ordem da composição.
+- [x] Criada a tabela vinculos_lotes_atuais.
+- [x] Impedido mais de um vínculo atual para o mesmo material.
+- [x] Exigida correspondência entre vínculo atual e composição do lote.
+- [x] Preservada a possibilidade de o material aparecer na composição de lotes anteriores.
+- [x] Testadas restrições, reinicialização e reversão de transações.
+- [x] Executados os 153 testes com sucesso.
+- [x] Inicializadas e conferidas as novas tabelas no banco do projeto.
+
+Este bloco prepara somente a estrutura de armazenamento.
+A reconstrução dos lotes e as operações de persistência
+de sua composição ainda serão implementadas.
+
+A aplicação continua utilizando o repositório em memória.
+
+## Fase 5E.2 — Reconstrução da composição de lotes encerrados
+
+- [x] Implementado LoteMaterial.reconstituir_encerrado.
+- [x] Preservados UUID, criador, data, estado e pesagem.
+- [x] Preservada a ordem da composição com cópia da lista recebida.
+- [x] Validados perfil do criador, materiais, tipos e limites de peso.
+- [x] Impedidos materiais repetidos na composição.
+- [x] Reconstrução realizada sem executar o construtor.
+- [x] Preservados o histórico e o vínculo atual dos materiais com outros lotes.
+- [x] Mantidas as restrições de alteração de lotes encerrados.
+- [x] Executados os 158 testes com sucesso.
+
+Este método reconstrói os dados e a composição de lotes encerrados.
+A lista de transações ainda não é recuperada nesta etapa;
+sua reconstrução será implementada no bloco de transações.
+
+O carregamento de lotes ativos e a restauração dos vínculos
+entre materiais e lotes continuam pendentes.
+
+A aplicação continua utilizando o repositório em memória.
+
+## Fase 5E.3 — Reconstrução de lotes ativos e vínculos
+
+- [x] Implementado LoteMaterial.reconstituir_ativo.
+- [x] Implementado método interno de reconstrução de materiais vinculados.
+- [x] Restaurados lote e materiais como um conjunto de objetos relacionados.
+- [x] Preservados UUID, data, estado e pesagem do lote.
+- [x] Restaurado material.loteAtual sem gerar eventos de agrupamento.
+- [x] Exigido compartilhamento das instâncias de responsável e tipo.
+- [x] Validados composição não vazia, materiais distintos e peso total.
+- [x] Testada a remoção de material com invalidação da pesagem.
+- [x] Testada a preservação da pesagem quando a remoção é recusada.
+- [x] Testadas as restrições e a liberação de vínculos pelo cancelamento.
+- [x] Executados os 163 testes com sucesso.
+
+A reconstrução dos lotes ativos está preparada no modelo.
+O DAO SQLite ainda precisa carregar os dados e coordenar
+o compartilhamento das instâncias relacionadas.
+
+A recuperação das transações será implementada no bloco
+dedicado às transações. As listas de transações reconstruídas
+permanecem vazias nesta etapa.
+
+A aplicação continua utilizando o repositório em memória.
+
+## Fase 5E.4 — Inclusão de lotes ativos no SQLite
+
+- [x] Criado LoteSQLiteDAO com método adicionar.
+- [x] Validados estado, criador, composição, pesos e vínculos do lote.
+- [x] Exigidos materiais previamente persistidos como DISPONIVEL.
+- [x] Conferido o responsável persistido antes do agrupamento.
+- [x] Gravados lote, composição, ordem e vínculos atuais.
+- [x] Persistidos os eventos de agrupamento existentes nos objetos.
+- [x] Atualizados os materiais para EM_LOTE na mesma transação.
+- [x] Testada a recusa de duplicidade e material não persistido.
+- [x] Testada a reversão completa diante de falha no segundo material.
+- [x] Testada a reversão por falha posterior na transação externa.
+- [x] Executados os 169 testes com sucesso.
+
+Este bloco implementa somente a inclusão de lotes ativos
+sem transações associadas.
+
+A consulta e a atualização dos lotes ainda serão implementadas.
+O DAO de materiais ainda não carrega materiais EM_LOTE isoladamente.
+
+A aplicação continua utilizando o repositório em memória.
+
+## Fase 5E.5 — Consulta SQLite de lotes ativos
+
+- [x] Implementada busca de lote ativo por ID.
+- [x] Recuperadas composição, ordem, pesagem, estado e data.
+- [x] Recuperados eventos e avaliações dos materiais.
+- [x] Restaurados os vínculos entre o lote e seus materiais.
+- [x] Compartilhadas as instâncias de criador e tipo dentro do lote carregado.
+- [x] Conferida a correspondência entre composição e vínculos atuais.
+- [x] Testada a recuperação após fechar e reabrir o banco.
+- [x] Testado que a consulta não realiza gravações.
+- [x] Testada a recusa de vínculos e estados inconsistentes.
+- [x] Executados os 174 testes com sucesso.
+
+A consulta implementada atende lotes EM_FORMACAO e DISPONIVEL.
+Lotes encerrados ainda são recusados explicitamente pelo DAO.
+
+A recuperação das transações permanece pendente.
+Consultas independentes ainda produzem instâncias diferentes.
+
+Alterações feitas nos objetos recuperados não são gravadas automaticamente.
+A aplicação continua utilizando o repositório em memória.
+
+## Fase 5E.6 — Pesagem e disponibilização persistentes
+
+- [x] Implementado atualizar_pesagem_e_estado no LoteSQLiteDAO.
+- [x] Persistidas a pesagem e a disponibilização dos lotes ativos.
+- [x] Preservados criador, data, composição e vínculos.
+- [x] Recusadas alterações de composição por essa operação.
+- [x] Impedido retorno de DISPONIVEL para EM_FORMACAO.
+- [x] Recusado cancelamento por essa operação específica.
+- [x] Testada a preservação da pesagem após tentativa inválida.
+- [x] Testada a reversão da pesagem e do estado por falha posterior.
+- [x] Executados os 179 testes com sucesso.
+
+A atualização implementada grava somente pesagem e estado ativo.
+Alterações de composição e cancelamento exigem operações próprias.
+
+O LoteService ainda não encaminha essas operações ao DAO SQLite.
+A aplicação continua utilizando o repositório em memória.
+
+## Fase 5E.7 — Alteração persistente da composição
+
+- [x] Implementadas inclusão e remoção de materiais por IDs.
+- [x] Carregado o estado persistido antes de alterar a composição.
+- [x] Reutilizadas as regras de inclusão e remoção do modelo.
+- [x] Atualizados composição, vínculos e estado do material.
+- [x] Persistido o evento de agrupamento na inclusão.
+- [x] Preservado o histórico do material removido.
+- [x] Invalidada a pesagem na mesma transação da alteração.
+- [x] Testada a preservação dos dados em operações recusadas.
+- [x] Testada a reversão diante de falha SQL após alterações parciais.
+- [x] Testada a reversão por falha posterior na transação externa.
+- [x] Executados os 184 testes com sucesso.
+
+As alterações de composição estão disponíveis no DAO SQLite.
+O LoteService ainda precisa encaminhar essas operações ao DAO.
+
+O cancelamento persistente e a consulta de lotes encerrados
+continuam pendentes. A aplicação permanece em memória.
+
+## Fase 5E.8 — Cancelamento persistente dos lotes
+
+- [x] Implementado cancelar no LoteSQLiteDAO.
+- [x] Reutilizada a operação de cancelamento do modelo.
+- [x] Liberados os materiais para DISPONIVEL.
+- [x] Removidos os vínculos atuais com o lote cancelado.
+- [x] Preservados composição, pesagem e eventos anteriores.
+- [x] Testado cancelamento de lotes EM_FORMACAO e DISPONIVEL.
+- [x] Testadas recusa de repetição e busca de lote inexistente.
+- [x] Testada reversão diante de falha SQL após a liberação dos materiais.
+- [x] Testada reversão por falha posterior na transação externa.
+- [x] Executados os 188 testes com sucesso.
+
+O cancelamento atende lotes sem transações persistidas.
+O cancelamento conjunto das propostas será implementado
+no bloco de persistência das transações.
+
+A consulta de lotes encerrados permanece pendente no DAO.
+A aplicação continua utilizando o repositório em memória.
+
+## Fase 5E.9 — Consulta de lotes encerrados
+
+- [x] Acrescentada consulta de lotes encerrados ao LoteSQLiteDAO.
+- [x] Recuperados criador, data, estado, pesagem e composição.
+- [x] Preservados os vínculos atuais dos materiais com outros lotes.
+- [x] Reutilizadas as instâncias dos lotes ativos durante a consulta.
+- [x] Recusados vínculos atuais apontando para lotes encerrados.
+- [x] Testada a recuperação de lote cancelado após reabrir o banco.
+- [x] Testada a consulta da composição antiga após novo agrupamento.
+- [x] Verificado que a consulta não realiza gravações.
+- [x] Executados os 191 testes com sucesso.
+
+A composição dos lotes encerrados referencia os materiais
+com seus estados e responsáveis atuais.
+
+As transações associadas ainda não são recuperadas.
+A validação do fluxo de negociação persistente ocorrerá
+no bloco dedicado às transações.
+
+A aplicação continua utilizando o repositório em memória.
+
+## Fase 5E.10 — Listagens e consultas de lotes pelo serviço
+
+- [x] Implementada listagem SQLite por criador.
+- [x] Implementada listagem SQLite de lotes DISPONIVEL.
+- [x] Incluídos lotes encerrados na listagem do criador.
+- [x] Adaptada a listagem em memória para comparar UUIDs.
+- [x] Adaptada a autorização de consulta no LoteService para comparar UUIDs.
+- [x] Preservado o bloqueio de consulta por outro criador.
+- [x] Testadas consultas com usuário reconstruído do banco.
+- [x] Verificado que as consultas não realizam gravações.
+- [x] Executados os 195 testes com sucesso.
+
+As consultas de lotes pelo serviço estão preparadas para SQLite.
+As operações de alteração ainda precisam ser encaminhadas
+aos métodos persistentes dos DAOs.
+
+A aplicação continua utilizando o repositório em memória.
+A recuperação das transações associadas permanece pendente.
+
+## Fase 5E.11 — Criação e composição pelo serviço
+
+- [x] Adaptada a criação para reutilizar o responsável do material.
+- [x] Encaminhadas inclusão e remoção de materiais aos DAOs.
+- [x] Implementadas as operações correspondentes no DAO em memória.
+- [x] Criada consulta específica de materiais disponíveis nos dois DAOs.
+- [x] Adaptada a exclusão da seleção de materiais para comparar UUIDs.
+- [x] Testadas criação e composição persistentes pelo serviço.
+- [x] Verificadas autorização e recusa de operações inválidas.
+- [x] Testadas reversões diante de falha SQL e falha externa.
+- [x] Preservadas as instâncias do repositório em memória.
+- [x] Executados os 201 testes com sucesso.
+
+A criação e a composição pelo LoteService estão preparadas
+para os DAOs SQLite e em memória.
+
+Pesagem, disponibilização e cancelamento pelo serviço ainda
+precisam ser encaminhados às operações persistentes.
+
+A aplicação Flask continua utilizando o repositório em memória.
+
+## Fase 5E.12 — Pesagem, disponibilização e cancelamento pelo serviço
+
+- [x] Encaminhada a pesagem do LoteService ao DAO.
+- [x] Encaminhada a disponibilização do LoteService ao DAO.
+- [x] Encaminhado o cancelamento do LoteService ao DAO.
+- [x] Implementadas as operações correspondentes no DAO em memória.
+- [x] Reutilizadas as regras do modelo e a atualização SQLite existente.
+- [x] Mantida a autorização antes das operações de alteração.
+- [x] Testada a persistência após reabrir a conexão.
+- [x] Testada a preservação dos dados em operações recusadas.
+- [x] Testadas falhas SQL e reversão pela transação externa.
+- [x] Executados os 206 testes com sucesso.
+
+As operações de estado do LoteService estão integradas
+aos DAOs em memória e SQLite.
+
+O cancelamento persistente continua limitado aos lotes
+sem transações persistidas. A integração das propostas
+permanece prevista para o bloco 5F.
+
+A aplicação Flask continua utilizando o repositório em memória.
+
+## Fase 5E.13 — Cotação e integração dos lotes
+
+- [x] Adaptada a cotação para utilizar o criador do lote recuperado.
+- [x] Mantida a autorização por UUID antes de solicitar cotação.
+- [x] Testada a cotação com objetos reconstruídos do SQLite.
+- [x] Verificado que a cotação não realiza gravações no banco.
+- [x] Testados acesso negado, prazo inválido e ausência de precificação.
+- [x] Testado o fluxo integrado de criação e composição pelo serviço.
+- [x] Testadas pesagem, disponibilização e cancelamento no mesmo fluxo.
+- [x] Testado reagrupamento dos materiais após cancelamento.
+- [x] Preservado o vínculo atual ao consultar a composição antiga.
+- [x] Executados os 210 testes com sucesso.
+
+O bloco 5E está concluído dentro do escopo de persistência
+e integração dos lotes sem transações comerciais persistidas.
+
+As cotações são calculadas, mas sua persistência permanece
+prevista para o bloco 5G.2.
+
+A recuperação das transações associadas e o cancelamento
+conjunto das propostas permanecem previstos para o bloco 5F.
+
+A aplicação Flask continua utilizando o repositório em memória.
+A integração da aplicação com SQLite permanece prevista para 5H.1.
+
+## Fase 5F.1 — Estrutura SQLite comercial
+
+- [x] Incluído schema_usuarios.sql na inicialização do banco.
+- [x] Criada tabela de transações com referências a lote e participantes.
+- [x] Impedidos vendedor e comprador com o mesmo ID.
+- [x] Validados valor positivo finito e estados permitidos.
+- [x] Exigido peso negociado válido somente na conclusão.
+- [x] Criado índice que permite apenas uma conclusão por lote.
+- [x] Criada tabela de certificados vinculados às transações.
+- [x] Garantidos código único e um certificado por transação.
+- [x] Testada reinicialização sem perda dos registros.
+- [x] Testadas restrições e reversão pela transação externa.
+- [x] Executados os 217 testes com sucesso.
+
+A estrutura comercial foi criada. Os DAOs comerciais e
+a integração das operações de negócio ainda estão pendentes.
+
+Regras de perfil, correspondência entre vendedor e criador,
+estado do lote e emissão após conclusão serão verificadas
+na integração dos DAOs e serviços.
+
+A aplicação Flask continua utilizando o repositório em memória.
+
+## Fase 5F.2.1 — Reconstrução comercial no modelo
+
+- [x] Implementada reconstrução de certificados com ID e data originais.
+- [x] Implementada reconstrução de transações sem executar o construtor.
+- [x] Reutilizadas as validações numéricas existentes.
+- [x] Validados participantes, estados, peso e associação de certificado.
+- [x] Implementada restauração validada da lista de transações do lote.
+- [x] Preservadas as mesmas instâncias nos vínculos entre lote e transações.
+- [x] Testada ausência de novos eventos durante a reconstrução.
+- [x] Testado material de negociação antiga já agrupado em novo lote.
+- [x] Executados os 223 testes com sucesso.
+
+Esta entrega prepara a reconstrução no modelo.
+As consultas SQLite ainda não utilizam esses métodos.
+
+A fase 5F.2 permanece em andamento.
+A aplicação Flask continua utilizando o repositório em memória.
+
+Próxima etapa: 5F.2.2 — integrar as consultas SQLite
+à reconstrução de transações, certificados e lotes.
+
+## Fase 5F.2.2 — Reconstrução comercial no SQLite
+
+- [x] Criada a função carregar_transacoes_do_lote, que reconstrói as
+      transações e os certificados de um lote já reconstruído.
+- [x] Reutilizados Transacao.reconstituir, Certificado.reconstituir e
+      LoteMaterial.restaurar_transacoes, sem repetir efeitos de negócio.
+- [x] Evitada a recursão entre lote e transações: o lote é montado
+      primeiro e as transações passam a apontar para a mesma instância.
+- [x] Reconstruído o vendedor como a instância do criador do lote, com
+      conferência de que o vendedor gravado é o criador.
+- [x] Lotes ativos e encerrados passam a recuperar suas transações.
+- [x] Lotes sem registros comerciais continuam sendo lidos sem
+      transações, preservando o comportamento dos testes anteriores.
+- [x] Criado TransacaoSQLiteDAO com consultas por ID, comprador,
+      vendedor, certificado e transações concluídas de um material.
+- [x] Material EM_LOTE passou a ser recuperado junto com o lote ativo
+      ao qual está vinculado, sem carregá-lo isoladamente.
+
+As propostas ainda não eram gravadas nesta etapa.
+
+## Fase 5F.3 — Propostas persistidas
+
+- [x] Implementado adicionar no TransacaoSQLiteDAO, com SAVEPOINT.
+- [x] Exigidos lote DISPONIVEL e vendedor igual ao criador do lote.
+- [x] Recusada segunda proposta pendente do mesmo comprador no mesmo lote.
+- [x] Implementado o cancelamento persistente de propostas, aceito
+      somente para propostas ainda pendentes.
+- [x] Adaptado o TransacaoService para comparar usuários por UUID
+      (mercado, proposta, busca do vendedor e consulta de certificado).
+- [x] Adaptado o modelo Transacao para recusar vendedor e comprador com
+      o mesmo UUID, e não apenas com a mesma instância.
+- [x] Encaminhados conclusão e cancelamento do serviço aos DAOs, por
+      meio de registrar_conclusao e registrar_cancelamento.
+- [x] Implementadas as mesmas operações no DAO em memória, que apenas
+      devolve a transação, pois o modelo já guarda o resultado.
+
+## Fase 5F.4 — Conclusão atômica da negociação
+
+- [x] Mantida a execução das regras em Transacao.concluir(), no modelo.
+- [x] Implementado registrar_conclusao, que grava o resultado em um
+      único SAVEPOINT.
+- [x] Gravados o novo responsável e o novo estado dos materiais.
+- [x] Gravados os eventos de transferência e de destinação.
+- [x] Removidos os vínculos atuais do lote e marcado o lote como NEGOCIADO.
+- [x] Gravados o peso negociado e o cancelamento das propostas concorrentes.
+- [x] Conferidos o estado persistido do lote, da transação e dos vínculos
+      antes de gravar.
+- [x] Respeitado o comprador: empresa ou cooperativa recebem o material
+      como DISPONIVEL; indústria o recebe como DESTINADO.
+- [x] Testada a falha SQL provocada no último passo: nenhum material,
+      evento, vínculo, lote ou transação permaneceu alterado.
+- [x] Testado que o peso negociado não muda quando os materiais mudam
+      depois da conclusão.
+
+## Fase 5F.5 — Certificados e cancelamento de lotes com propostas
+
+- [x] Criado CertificadoSQLiteDAO com busca por ID e inclusão.
+- [x] Inclusão recebe a transação associada; o DAO em memória aceita o
+      parâmetro como opcional.
+- [x] Exigida transação CONCLUIDA no modelo e no banco.
+- [x] Mantido um certificado por transação, com código único; a violação
+      da restrição vira ValueError.
+- [x] Cancelar um lote passou a cancelar, no banco, as propostas pendentes.
+- [x] LoteSQLiteDAO.atualizar_pesagem_e_estado deixou de recusar lotes
+      com transações, pois elas são gravadas por operações próprias.
+- [x] MaterialSQLiteDAO.atualizar passou a aceitar material EM_LOTE desde
+      que o vínculo atual não mude (por exemplo, nova avaliação).
+- [x] Adicionados dez testes em tests/test_transacao_service_sqlite.py.
+
+Os testes anteriores não foram alterados.
+
+## Fase 5G — Pontos de coleta e cotações
+
+- [x] Decidido manter os pontos de coleta como dados fixos de demonstração
+      no Repositorio.
+- [x] Decidido manter a visão computacional e a precificação simuladas,
+      com cotações calculadas sem gravação.
+
+Os blocos 5G.1 (pontos de coleta) e 5G.2 (cotações) permanecem pendentes.
+
+## Fase 5H.1 — Integração do Flask com o SQLite
+
+- [x] Criado app/database/contexto.py com uma conexão por requisição.
+- [x] Definida a política de transação: commit se a resposta tiver status
+      menor que 400; rollback nos demais casos ou diante de exceção;
+      fechamento sempre.
+- [x] Criada preparar_banco, que cria as tabelas e a carga inicial uma
+      vez por processo e por caminho, com trava contra concorrência.
+- [x] Criada abrir_conexao em conexao.py; conectar passou a reutilizá-la.
+- [x] Carregado o usuário da sessão do banco uma vez por requisição.
+- [x] Conectados os controladores de autenticação, materiais, lotes,
+      transações e API aos DAOs SQLite.
+- [x] Mantidos no Repositorio apenas os pontos de coleta e as simulações
+      de IA.
+- [x] Substituída a comparação de identidade do template do certificado
+      por comparação de UUID.
+- [x] Telas de transações e propostas passaram a exibir o peso negociado
+      quando existe.
+- [x] Configurado DATABASE_PATH, com opção de outro caminho pela variável
+      RECICLAI_DB.
+- [x] mainFlask.py passou a preparar o banco e informar seu caminho.
+- [x] Adicionados dezesseis testes em tests/test_flask_sqlite_fluxo.py,
+      com banco temporário e simulação de reinício.
+
+Falhas de negócio tratadas pelos controladores não deixam gravação parcial,
+porque as operações compostas dos DAOs usam SAVEPOINT.
+
+## Fase 5H.2 — Carga de demonstração e reset
+
+- [x] Criado app/database/seed.py com a carga inicial repetível.
+- [x] A carga não duplica usuários nem tipos, não apaga dados e não
+      reaplica senha em conta existente.
+- [x] Reset da demonstração desabilitado por padrão, porque passou a
+      apagar todo o banco.
+- [x] Reset habilitado somente com RECICLAI_PERMITIR_RESET=1 e modo debug;
+      nesse caso apaga todos os dados e recarrega a demonstração.
+- [x] O botão de reset só aparece quando o reset está habilitado.
+- [x] Testados o reset desabilitado, que não apaga nada, e o habilitado.
+
+## Fase 5I — Validação e encerramento da entrega
+
+- [x] Executados os 249 testes com sucesso: 223 anteriores, sem
+      alteração, e 26 novos.
+- [x] Conferido pelo navegador o fluxo completo, com edição de perfil,
+      cotações e persistência após reiniciar o servidor.
+- [x] Conferido o roteiro de duas vendas consecutivas (revenda pela
+      empresa e compra pela indústria), com seis eventos de
+      rastreabilidade e material DESTINADO.
+- [x] Verificado com o servidor real, iniciado e encerrado duas vezes,
+      que usuários, lote, proposta, conclusão, certificado e histórico
+      permanecem.
+- [x] Atualizados README.md, ARQUITETURA.md e este arquivo.
+
+A fase 5 está concluída para o fluxo principal. Permanecem pendentes
+os blocos 5G.1 e 5G.2.
+
+## Pendências e limitações
+
+- Pontos de coleta continuam fixos em memória.
+- Visão computacional e precificação continuam simuladas; as cotações
+  não são gravadas.
+- O certificado é um recurso acadêmico de rastreabilidade, sem validade
+  jurídica.
+- Requer Python 3.12 ou superior, pelo parâmetro autocommit do sqlite3.
+- As tabelas usam IF NOT EXISTS e não há migração de estrutura. Se houver
+  um banco antigo em instance/, deve ser apagado antes de iniciar.
+- Um lote NEGOCIADO sem nenhuma transação gravada (dado legado) é lido
+  sem transações, para não alterar o comportamento dos testes anteriores.
+- Não há controle de concorrência além do bloqueio do próprio SQLite.
+- Não há proteção CSRF, a SECRET_KEY padrão é fixa e GET /logout altera
+  a sessão. São aceitáveis no escopo acadêmico.
+- O Repositorio em memória ainda guarda listas de usuários, materiais e
+  lotes usadas apenas pelos testes e pelos DAOs em memória.
+
+## Orientação para quem for ler o código
+
+Para entender o processo, a leitura em ordem de camadas ajuda mais do que
+a ordem dos arquivos:
+
+1. app/model/: regras do domínio, incluindo os métodos reconstituir, que
+   restauram objetos sem repetir efeitos de negócio.
+2. app/services/: permissões e coordenação, sem dependência do Flask.
+3. app/dao/: cada contrato tem uma versão em memória e uma em SQLite.
+   Os serviços funcionam com as duas, e é por isso que os testes
+   anteriores continuam válidos.
+4. app/database/: esquemas SQL, conexão, carga inicial e integração
+   com o Flask.
+5. app/controller/: rotas, que apenas montam os serviços com a conexão
+   da requisição.
+
+Duas decisões merecem atenção. A primeira é a identidade dos objetos:
+o SQLite devolve uma instância nova a cada consulta, então permissões
+comparam UUID, enquanto as regras do modelo continuam exigindo instâncias
+compartilhadas dentro de um mesmo grafo carregado. A segunda é a
+atomicidade: a conclusão da negociação executa as regras no modelo e
+grava todo o resultado em um único SAVEPOINT.

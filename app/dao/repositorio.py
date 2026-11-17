@@ -140,7 +140,7 @@ class Repositorio:
                 "Av. República do Líbano, Setor Marista, Goiânia",
                 -16.7074,
                 -49.2642,
-                TipoPontoColeta.PONTO_ENTREGA_VOLUNTARIA,
+                TipoPontoColeta.OUTRO,
                 tiposAceitos=[tipo_vidro, tipo_metal],
                 horarios=[horario_comercial],
             ),

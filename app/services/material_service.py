@@ -50,11 +50,10 @@ class MaterialService:
                 "Material não encontrado."
             )
 
-        if material.responsavelAtual is not usuario:
+        if material.responsavelAtual.id != usuario.id:
             raise AcessoMaterialNegadoError(
                 "O material pertence a outro responsável."
             )
-
         return material
 
     def registrar(self, usuario, tipo, peso_kg, condicao, observacoes=None):
@@ -86,7 +85,7 @@ class MaterialService:
             usuario,
         )
         material.disponibilizar()
-        return material
+        return self._material_dao.atualizar(material)
 
     def _obter_tipo_material_dao(self):
         if self._tipo_material_dao is None:
@@ -120,10 +119,13 @@ class MaterialService:
                 "O serviço de visão não foi configurado."
             )
 
-        return self._servico_visao.avaliarMaterial(
+        avaliacao = self._servico_visao.avaliarMaterial(
             material,
             foto,
         )
+
+        self._material_dao.atualizar(material)
+        return avaliacao
 
     def cotar(self, material_id, usuario, horizonte_dias):
         self._validar_operador(usuario)

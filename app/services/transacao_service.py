@@ -63,7 +63,7 @@ class TransacaoService:
         ofertas = []
 
         for lote in self._lote_dao.listar_disponiveis():
-            if lote.criador is usuario:
+            if lote.criador.id == usuario.id:
                 continue
 
             peso = (
@@ -108,7 +108,7 @@ class TransacaoService:
                 "Transação não encontrada."
             )
 
-        if transacao.vendedor is not usuario:
+        if transacao.vendedor.id != usuario.id:
             raise AcessoTransacaoNegadoError(
                 "A transação pertence a outro vendedor."
             )
@@ -126,7 +126,7 @@ class TransacaoService:
             )
 
         ja_tem_proposta = any(
-            transacao.comprador is usuario
+            transacao.comprador.id == usuario.id
             and transacao.status == StatusTransacao.PENDENTE
             for transacao in lote.transacoes
         )
@@ -151,7 +151,7 @@ class TransacaoService:
             usuario,
         )
         transacao.concluir()
-        return transacao
+        return self._transacao_dao.registrar_conclusao(transacao)
 
     def cancelar(self, transacao_id, usuario):
         transacao = self.buscar_do_vendedor(
@@ -159,7 +159,7 @@ class TransacaoService:
             usuario,
         )
         transacao.cancelar()
-        return transacao
+        return self._transacao_dao.registrar_cancelamento(transacao)
 
     def _obter_certificado_dao(self):
         if self._certificado_dao is None:
@@ -180,7 +180,7 @@ class TransacaoService:
         certificado = Certificado(codigo)
 
         transacao.associarCertificado(certificado)
-        return dao.adicionar(certificado)
+        return dao.adicionar(certificado, transacao)
 
     def consultar_certificado(self, certificado_id, usuario):
         certificado = (
@@ -203,8 +203,8 @@ class TransacaoService:
             )
 
         if (
-            usuario is not transacao.vendedor
-            and usuario is not transacao.comprador
+            usuario.id != transacao.vendedor.id
+            and usuario.id != transacao.comprador.id
         ):
             raise AcessoTransacaoNegadoError(
                 "Somente os participantes podem consultar "

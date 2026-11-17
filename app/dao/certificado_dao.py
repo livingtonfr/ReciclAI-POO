@@ -11,7 +11,7 @@ class CertificadoDAO:
 
         return None
 
-    def adicionar(self, certificado):
+    def adicionar(self, certificado, transacao=None):
         if self.buscar_por_id(certificado.id) is not None:
             raise ValueError("O certificado já está cadastrado.")
 
